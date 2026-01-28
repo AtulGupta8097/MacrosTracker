@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ResponsiveApp</string>
+    <string name="sign_in_title">Sign In To Ulplift</string>
+    <string name="sign_in_top_subTitle">Let s personalize your fitness with AI</string>
+</resources>
