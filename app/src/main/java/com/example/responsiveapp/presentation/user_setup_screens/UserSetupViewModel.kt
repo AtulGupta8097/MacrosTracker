@@ -19,35 +19,35 @@ class UserSetupViewModel @Inject constructor(): ViewModel() {
     private val screenFlow = listOf(
         UserSetupScreen.Gender,
         UserSetupScreen.Age,
-        UserSetupScreen.Weight,
         UserSetupScreen.Height,
+        UserSetupScreen.Weight,
         UserSetupScreen.Activity,
         UserSetupScreen.Goal,
         UserSetupScreen.Complete
     )
 
     fun updateGender(gender: Gender) {
-        _state.update { it.copy(userData = it.userData.copy(gender = gender)) }
+        _state.update { it.copy(userInput = it.userInput.copy(gender = gender)) }
     }
 
     fun updateAge(age: Int?) {
-        _state.update { it.copy(userData = it.userData.copy(age = age)) }
+        _state.update { it.copy(userInput = it.userInput.copy(age = age)) }
     }
 
     fun updateWeight(weight: Float?) {
-        _state.update { it.copy(userData = it.userData.copy(weight = weight)) }
+        _state.update { it.copy(userInput = it.userInput.copy(weight = weight)) }
     }
 
     fun updateHeight(height: Float?) {
-        _state.update { it.copy(userData = it.userData.copy(height = height)) }
+        _state.update { it.copy(userInput = it.userInput.copy(height = height)) }
     }
 
     fun updateActivityLevel(level: ActivityLevel) {
-        _state.update { it.copy(userData = it.userData.copy(activityLevel = level)) }
+        _state.update { it.copy(userInput = it.userInput.copy(activityLevel = level)) }
     }
 
     fun updateGoal(goal: Goal) {
-        _state.update { it.copy(userData = it.userData.copy(goal = goal)) }
+        _state.update { it.copy(userInput = it.userInput.copy(goal = goal)) }
     }
 
     fun nextScreen() {
@@ -68,12 +68,12 @@ class UserSetupViewModel @Inject constructor(): ViewModel() {
 
     fun canProceed(): Boolean {
         return when (_state.value.currentScreen) {
-            is UserSetupScreen.Gender -> _state.value.userData.gender != null
-            is UserSetupScreen.Age -> _state.value.userData.age != null
-            is UserSetupScreen.Weight -> _state.value.userData.weight != null
-            is UserSetupScreen.Height -> _state.value.userData.height != null
-            is UserSetupScreen.Activity -> _state.value.userData.activityLevel != null
-            is UserSetupScreen.Goal -> _state.value.userData.goal != null
+            is UserSetupScreen.Gender -> _state.value.userInput.gender != null
+            is UserSetupScreen.Age -> _state.value.userInput.age != null
+            is UserSetupScreen.Height -> _state.value.userInput.height != null
+            is UserSetupScreen.Weight -> _state.value.userInput.weight != null
+            is UserSetupScreen.Activity -> _state.value.userInput.activityLevel != null
+            is UserSetupScreen.Goal -> _state.value.userInput.goal != null
             else -> false
         }
     }

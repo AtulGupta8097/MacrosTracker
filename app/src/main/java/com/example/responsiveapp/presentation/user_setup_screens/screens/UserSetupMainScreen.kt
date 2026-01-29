@@ -20,8 +20,8 @@ import com.example.responsiveapp.presentation.user_setup_screens.component.TopBa
 private val SCREEN_FLOW = listOf(
     UserSetupScreen.Gender,
     UserSetupScreen.Age,
-    UserSetupScreen.Weight,
     UserSetupScreen.Height,
+    UserSetupScreen.Weight,
     UserSetupScreen.Activity,
     UserSetupScreen.Goal
 )
@@ -89,13 +89,37 @@ fun UserSetupMainScreen(
         ) {
             when (state.currentScreen) {
                 is UserSetupScreen.Gender -> GenderScreen(
-                    selectedGender = state.userData.gender,
+                    selectedGender = state.userInput.gender,
                     onGenderSelected = viewModel::updateGender
                 )
                 is UserSetupScreen.Age -> {
                     AgeScreen(
-                        age = state.userData.age,
+                        age = state.userInput.age,
                         onAgeChanged = viewModel::updateAge
+                    )
+                }
+                is UserSetupScreen.Height -> {
+                    HeightScreen(
+                        height = state.userInput.height,
+                        onHeightChanged = viewModel::updateHeight
+                    )
+                }
+                is UserSetupScreen.Weight -> {
+                    WeightScreen(
+                        weight = state.userInput.weight,
+                        onWeightChanged = viewModel::updateWeight
+                    )
+                }
+                is UserSetupScreen.Activity -> {
+                    ActivityLevelScreen(
+                        selectedActivityLevel = state.userInput.activityLevel,
+                        onActivityLevelSelected = viewModel::updateActivityLevel
+                    )
+                }
+                is UserSetupScreen.Goal -> {
+                    GoalScreen(
+                        selectedGoal = state.userInput.goal,
+                        onGoalSelected = viewModel::updateGoal
                     )
                 }
 

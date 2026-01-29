@@ -6,7 +6,9 @@ import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.responsiveapp.presentation.ui.theme.spacing
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 enum class HeightUnit {
@@ -28,7 +33,7 @@ enum class HeightUnit {
 
 @Composable
 fun HeightScreen(
-    height: Float?, // Always stored in CM
+    height: Float?,
     onHeightChanged: (Float) -> Unit
 ) {
     var selectedUnit by remember { mutableStateOf(HeightUnit.CM) }
@@ -36,6 +41,7 @@ fun HeightScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.background)
             .padding(MaterialTheme.spacing.md)
     ) {
@@ -56,7 +62,6 @@ fun HeightScreen(
             )
         )
 
-        // Unit Selector (Tabs)
         UnitSelector(
             selectedUnit = selectedUnit,
             onUnitChanged = { selectedUnit = it }
@@ -64,7 +69,6 @@ fun HeightScreen(
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
-        // Show appropriate picker based on selected unit
         when (selectedUnit) {
             HeightUnit.CM -> CmPicker(
                 heightCm = height,
@@ -88,9 +92,9 @@ private fun UnitSelector(
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(12.dp)
+                shape = MaterialTheme.shapes.medium
             )
-            .padding(4.dp),
+            .padding(MaterialTheme.spacing.xs),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         UnitTab(
@@ -144,6 +148,19 @@ private fun UnitTab(
     }
 }
 
+// Helper function to calculate centered item index
+private fun getCenteredItemIndex(
+    listState: androidx.compose.foundation.lazy.LazyListState
+): Int {
+    val layoutInfo = listState.layoutInfo
+    val viewportCenter = layoutInfo.viewportStartOffset + (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) / 2
+
+    return layoutInfo.visibleItemsInfo.minByOrNull { itemInfo ->
+        abs((itemInfo.offset + itemInfo.size / 2) - viewportCenter)
+    }?.index ?: listState.firstVisibleItemIndex
+}
+
+@OptIn(FlowPreview::class)
 @Composable
 private fun CmPicker(
     heightCm: Float?,
@@ -164,13 +181,23 @@ private fun CmPicker(
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val wheelHeight = screenHeight * 0.35f
+    val wheelHeight = remember(screenHeight) { screenHeight * 0.35f }
 
-    LaunchedEffect(listState.isScrollInProgress) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .collect { index ->
-                if (!listState.isScrollInProgress && index in heights.indices) {
-                    onHeightChanged(heights[index].toFloat())
+    // Get the centered item index
+    val centeredIndex by remember {
+        derivedStateOf { getCenteredItemIndex(listState) }
+    }
+
+    // Update height when scrolling stops
+    LaunchedEffect(Unit) {
+        snapshotFlow { listState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { isScrolling ->
+                if (!isScrolling) {
+                    val index = getCenteredItemIndex(listState)
+                    if (index in heights.indices) {
+                        onHeightChanged(heights[index].toFloat())
+                    }
                 }
             }
     }
@@ -188,52 +215,10 @@ private fun CmPicker(
             contentAlignment = Alignment.Center
         ) {
             // Selection lines
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                )
-                Spacer(modifier = Modifier.height(60.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                )
-            }
+            SelectionIndicator()
 
             // Fade gradients
-            Box(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(wheelHeight / 3)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.background,
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                        .align(Alignment.TopCenter)
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(wheelHeight / 3)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(
-                                    Color.Transparent,
-                                    MaterialTheme.colorScheme.background
-                                )
-                            )
-                        )
-                        .align(Alignment.BottomCenter)
-                )
-            }
+            FadeGradients(wheelHeight = wheelHeight)
 
             LazyColumn(
                 state = listState,
@@ -244,11 +229,13 @@ private fun CmPicker(
             ) {
                 items(
                     count = heights.size,
-                    key = { heights[it] }
+                    key = { index -> heights[index] }
                 ) { index ->
+                    val isSelected = centeredIndex == index
+
                     HeightItem(
                         value = "${heights[index]} cm",
-                        isSelected = listState.firstVisibleItemIndex == index,
+                        isSelected = isSelected,
                         onClick = {
                             coroutineScope.launch {
                                 listState.animateScrollToItem(index)
@@ -261,8 +248,12 @@ private fun CmPicker(
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
+        val displayHeight = remember(centeredIndex) {
+            heights.getOrNull(centeredIndex) ?: heightCm?.roundToInt() ?: 170
+        }
+
         Text(
-            text = "${heightCm?.roundToInt() ?: 170} cm",
+            text = "$displayHeight cm",
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -273,6 +264,7 @@ private fun CmPicker(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun FeetInchesPicker(
     heightCm: Float?,
@@ -282,9 +274,12 @@ private fun FeetInchesPicker(
     val inches = remember { (0..11).toList() }
 
     // Convert CM to Feet/Inches
-    val totalInches = (heightCm ?: 170f) / 2.54f
-    val initialFeet = (totalInches / 12).toInt().coerceIn(3, 8)
-    val initialInches = (totalInches % 12).toInt().coerceIn(0, 11)
+    val (initialFeet, initialInches) = remember(heightCm) {
+        val totalInches = (heightCm ?: 170f) / 2.54f
+        val ft = (totalInches / 12).toInt().coerceIn(3, 8)
+        val inch = (totalInches % 12).toInt().coerceIn(0, 11)
+        ft to inch
+    }
 
     val feetListState = rememberLazyListState(initialFirstVisibleItemIndex = initialFeet - 3)
     val inchesListState = rememberLazyListState(initialFirstVisibleItemIndex = initialInches)
@@ -296,23 +291,36 @@ private fun FeetInchesPicker(
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val wheelHeight = screenHeight * 0.35f
+    val wheelHeight = remember(screenHeight) { screenHeight * 0.35f }
 
-    // Update height when either wheel changes
-    LaunchedEffect(feetListState.isScrollInProgress, inchesListState.isScrollInProgress) {
+    // Get centered item indices
+    val centeredFeetIndex by remember {
+        derivedStateOf { getCenteredItemIndex(feetListState) }
+    }
+    val centeredInchesIndex by remember {
+        derivedStateOf { getCenteredItemIndex(inchesListState) }
+    }
+
+    // Update height when either picker stops scrolling
+    LaunchedEffect(Unit) {
         snapshotFlow {
-            feetListState.firstVisibleItemIndex to inchesListState.firstVisibleItemIndex
-        }.collect { (feetIndex, inchesIndex) ->
-            if (!feetListState.isScrollInProgress && !inchesListState.isScrollInProgress) {
-                if (feetIndex in feet.indices && inchesIndex in inches.indices) {
-                    val selectedFeet = feet[feetIndex]
-                    val selectedInches = inches[inchesIndex]
-                    val totalInchesValue = (selectedFeet * 12 + selectedInches).toFloat()
-                    val cm = totalInchesValue * 2.54f
-                    onHeightChanged(cm)
+            feetListState.isScrollInProgress || inchesListState.isScrollInProgress
+        }
+            .distinctUntilChanged()
+            .collect { isScrolling ->
+                if (!isScrolling) {
+                    val feetIndex = getCenteredItemIndex(feetListState)
+                    val inchesIndex = getCenteredItemIndex(inchesListState)
+
+                    if (feetIndex in feet.indices && inchesIndex in inches.indices) {
+                        val selectedFeet = feet[feetIndex]
+                        val selectedInches = inches[inchesIndex]
+                        val totalInchesValue = (selectedFeet * 12 + selectedInches).toFloat()
+                        val cm = totalInchesValue * 2.54f
+                        onHeightChanged(cm)
+                    }
                 }
             }
-        }
     }
 
     Column(
@@ -325,13 +333,13 @@ private fun FeetInchesPicker(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Feet Picker
             WheelPicker(
                 items = feet,
                 listState = feetListState,
                 flingBehavior = feetFlingBehavior,
                 wheelHeight = wheelHeight,
                 suffix = "ft",
+                centeredIndex = centeredFeetIndex,
                 modifier = Modifier.weight(1f),
                 onItemClick = { index ->
                     coroutineScope.launch {
@@ -340,13 +348,13 @@ private fun FeetInchesPicker(
                 }
             )
 
-            // Inches Picker
             WheelPicker(
                 items = inches,
                 listState = inchesListState,
                 flingBehavior = inchesFlingBehavior,
                 wheelHeight = wheelHeight,
                 suffix = "in",
+                centeredIndex = centeredInchesIndex,
                 modifier = Modifier.weight(1f),
                 onItemClick = { index ->
                     coroutineScope.launch {
@@ -358,11 +366,19 @@ private fun FeetInchesPicker(
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
-        val displayFeet = feet.getOrNull(feetListState.firstVisibleItemIndex) ?: initialFeet
-        val displayInches = inches.getOrNull(inchesListState.firstVisibleItemIndex) ?: initialInches
+        val displayFeet = remember(centeredFeetIndex) {
+            feet.getOrNull(centeredFeetIndex) ?: initialFeet
+        }
+        val displayInches = remember(centeredInchesIndex) {
+            inches.getOrNull(centeredInchesIndex) ?: initialInches
+        }
+
+        val displayCm = remember(displayFeet, displayInches) {
+            ((displayFeet * 12 + displayInches) * 2.54f).roundToInt()
+        }
 
         Text(
-            text = "$displayFeet' $displayInches\" (${heightCm?.roundToInt() ?: 170} cm)",
+            text = "$displayFeet' $displayInches\" ($displayCm cm)",
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -380,6 +396,7 @@ private fun WheelPicker(
     flingBehavior: androidx.compose.foundation.gestures.FlingBehavior,
     wheelHeight: androidx.compose.ui.unit.Dp,
     suffix: String,
+    centeredIndex: Int,
     modifier: Modifier = Modifier,
     onItemClick: (Int) -> Unit
 ) {
@@ -387,53 +404,8 @@ private fun WheelPicker(
         modifier = modifier.height(wheelHeight),
         contentAlignment = Alignment.Center
     ) {
-        // Selection lines
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center
-        ) {
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            )
-            Spacer(modifier = Modifier.height(60.dp))
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            )
-        }
-
-        // Fade gradients
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(wheelHeight / 3)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.background,
-                                Color.Transparent
-                            )
-                        )
-                    )
-                    .align(Alignment.TopCenter)
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(wheelHeight / 3)
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.background
-                            )
-                        )
-                    )
-                    .align(Alignment.BottomCenter)
-            )
-        }
+        SelectionIndicator()
+        FadeGradients(wheelHeight = wheelHeight)
 
         LazyColumn(
             state = listState,
@@ -444,15 +416,65 @@ private fun WheelPicker(
         ) {
             items(
                 count = items.size,
-                key = { items[it] }
+                key = { index -> items[index] }
             ) { index ->
+                val isSelected = centeredIndex == index
+
                 HeightItem(
                     value = "${items[index]} $suffix",
-                    isSelected = listState.firstVisibleItemIndex == index,
+                    isSelected = isSelected,
                     onClick = { onItemClick(index) }
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SelectionIndicator() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        HorizontalDivider(
+            thickness = 2.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+        Spacer(modifier = Modifier.height(60.dp))
+        HorizontalDivider(
+            thickness = 2.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+    }
+}
+
+@Composable
+private fun FadeGradients(wheelHeight: androidx.compose.ui.unit.Dp) {
+    val backgroundColor = MaterialTheme.colorScheme.background
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(wheelHeight / 3)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(backgroundColor, Color.Transparent)
+                    )
+                )
+                .align(Alignment.TopCenter)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(wheelHeight / 3)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, backgroundColor)
+                    )
+                )
+                .align(Alignment.BottomCenter)
+        )
     }
 }
 

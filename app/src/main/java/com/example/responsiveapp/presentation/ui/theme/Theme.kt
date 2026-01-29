@@ -14,8 +14,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = FitnessOrangeDark,
-    onPrimary = CardBackground,
+
+    // 🟧 PRIMARY (CTA)
+    primary = FitnessOrangeDarkMode,
+    onPrimary = DarkBackground,
+    primaryContainer = FitnessOrangeContainerDark,
+    onPrimaryContainer = OnDarkPrimary,
+
+    // ⚫ SECONDARY
+    secondary = DarkSurfaceVariant,
+    onSecondary = OnDarkPrimary,
+
+    // 🟩 TERTIARY
+    tertiary = FitnessGreenDarkMode,
+    onTertiary = DarkBackground,
+
+    // 🔵 INFO / AUTH
+    secondaryContainer = FitnessBlueDarkMode,
+    onSecondaryContainer = DarkBackground,
+
+    // 🌑 BACKGROUND
+    background = DarkBackground,
+    onBackground = OnDarkPrimary,
+
+    // 🧱 SURFACE
+    surface = DarkSurface,
+    onSurface = OnDarkPrimary,
+
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = OnDarkSecondary,
+
+    // ❌ ERROR
+    error = ErrorRedDark,
+    onError = DarkBackground
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -45,6 +76,7 @@ private val LightColorScheme = lightColorScheme(
     // 🧱 SURFACE (Cards, Inputs)
     surface = CardBackground,
     onSurface = DarkNavy,
+    surfaceVariant = Surfacevarient,
 
     // ❌ ERROR
     error = ErrorRed,

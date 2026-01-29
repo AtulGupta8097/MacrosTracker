@@ -1,5 +1,4 @@
 package com.example.responsiveapp.domain.model
-
 enum class ActivityLevel(
     val label: String,
     val description: String
