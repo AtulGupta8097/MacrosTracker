@@ -16,6 +16,7 @@ import com.example.responsiveapp.presentation.user_setup_screens.UserSetupScreen
 import com.example.responsiveapp.presentation.user_setup_screens.UserSetupViewModel
 import com.example.responsiveapp.presentation.user_setup_screens.component.NavigationButtons
 import com.example.responsiveapp.presentation.user_setup_screens.component.TopBar
+import com.example.responsiveapp.presentation.user_setup_screens.toDomain
 
 private val SCREEN_FLOW = listOf(
     UserSetupScreen.Gender,
@@ -66,7 +67,7 @@ fun UserSetupMainScreen(
                 ) {
                     NavigationButtons(
                         canProceed = viewModel.canProceed(),
-                        onNextClick = viewModel::nextScreen,
+                        onNextClick = viewModel::onNextClicked,
                         modifier = Modifier.padding(
                             horizontal = 16.dp,
                             vertical = 16.dp
@@ -121,6 +122,9 @@ fun UserSetupMainScreen(
                         selectedGoal = state.userInput.goal,
                         onGoalSelected = viewModel::updateGoal
                     )
+                }
+                is UserSetupScreen.Complete -> {
+                    UserSetupCompleteScreen()
                 }
 
                 else -> Unit

@@ -1,4 +1,4 @@
-package com.example.responsiveapp.data.local
+package com.example.responsiveapp.data.datastore
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey

@@ -1,11 +1,10 @@
 package com.example.responsiveapp.data.model
 
-// data/remote/model/UserRemoteDto.kt
-data class UserRemoteDto(
+data class UserProfileDto(
     val gender: String? = null,
     val age: Int? = null,
-    val weight: Double? = null,
-    val height: Double? = null,
+    val weight: Float? = null,
+    val height: Float? = null,
     val activityLevel: String? = null,
     val goal: String? = null,
     val createdAt: Long? = null,

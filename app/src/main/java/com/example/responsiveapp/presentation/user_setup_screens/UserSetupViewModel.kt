@@ -1,21 +1,27 @@
 package com.example.responsiveapp.presentation.user_setup_screens
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal
+import com.example.responsiveapp.domain.use_case.CalculateMacrosUseCase
+import com.example.responsiveapp.domain.use_case.profile_usecase.SaveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
-class UserSetupViewModel @Inject constructor(): ViewModel() {
+class UserSetupViewModel @Inject constructor(
+    private val saveUserProfileUseCase: SaveUserProfileUseCase,
+    private val calculateMacrosUseCase: CalculateMacrosUseCase
+): ViewModel() {
     private val _state = MutableStateFlow(UserSetupState())
     val state: StateFlow<UserSetupState> = _state.asStateFlow()
-
     private val screenFlow = listOf(
         UserSetupScreen.Gender,
         UserSetupScreen.Age,
@@ -49,12 +55,24 @@ class UserSetupViewModel @Inject constructor(): ViewModel() {
     fun updateGoal(goal: Goal) {
         _state.update { it.copy(userInput = it.userInput.copy(goal = goal)) }
     }
+    fun onNextClicked() {
+        if (!(_state.value.currentScreen == UserSetupScreen.Goal)) {
+            nextScreen()
+        } else {
+            onCompleteUserSetup()
+        }
+    }
+
 
     fun nextScreen() {
         val currentIndex = screenFlow.indexOf(_state.value.currentScreen)
         if (currentIndex < screenFlow.size - 1) {
             val nextScreen = screenFlow[currentIndex + 1]
             _state.update { it.copy(currentScreen = nextScreen) }
+
+            if(nextScreen == UserSetupScreen.Complete){
+                onCompleteUserSetup()
+            }
         }
     }
 
@@ -77,9 +95,39 @@ class UserSetupViewModel @Inject constructor(): ViewModel() {
             else -> false
         }
     }
+    fun onCompleteUserSetup() {
+        val profile = _state.value.userInput.toDomain()
 
-    fun completeOnboarding() {
-        // TODO: Save userData to DataStore/Room database
-        // TODO: Navigate to main app
+        viewModelScope.launch {
+            _state.update { it.copy(isSaving = true, error = null) }
+
+            val result = saveUserProfileUseCase(profile)
+
+            result.fold(
+                onSuccess = {
+                    val macros = calculateMacrosUseCase(profile)
+
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            onboardingCompleted = true,
+                            currentScreen = UserSetupScreen.Complete,
+                            macros = macros
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            error = throwable.message,
+                            onboardingCompleted = true,
+                            currentScreen = UserSetupScreen.Complete
+                        )
+                    }
+                }
+            )
+        }
     }
+
 }

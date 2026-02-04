@@ -3,7 +3,7 @@ package com.example.responsiveapp.presentation.signup_screen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.responsiveapp.data.local.AppPrefManager
+import com.example.responsiveapp.data.datastore.AppPrefManager
 import com.example.responsiveapp.domain.use_case.SignUpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject

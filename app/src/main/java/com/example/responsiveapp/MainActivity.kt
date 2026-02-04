@@ -15,7 +15,6 @@ import com.example.responsiveapp.presentation.signin_screen.SignInScreen
 import com.example.responsiveapp.presentation.signup_screen.SignUpScreen
 import com.example.responsiveapp.presentation.splash_screen.SplashScreen
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
-import com.example.responsiveapp.presentation.user_setup_screens.UserSetupScreen
 import com.example.responsiveapp.presentation.user_setup_screens.screens.UserSetupMainScreen
 import dagger.hilt.android.AndroidEntryPoint
 

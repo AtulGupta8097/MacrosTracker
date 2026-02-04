@@ -3,7 +3,7 @@ package com.example.responsiveapp.presentation.signin_screen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.responsiveapp.data.local.AppPrefManager
+import com.example.responsiveapp.data.datastore.AppPrefManager
 import com.example.responsiveapp.domain.use_case.SignInUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
