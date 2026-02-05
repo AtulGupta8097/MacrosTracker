@@ -10,6 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,24 +64,28 @@ fun ActivityLevelScreen(
                 OptionButton(
                     text = ActivityLevel.LIGHT.label,
                     description = ActivityLevel.LIGHT.description,
+                    icon = Icons.AutoMirrored.Filled.DirectionsWalk,
                     selected = selectedActivityLevel == ActivityLevel.LIGHT,
                     onClick = { onActivityLevelSelected(ActivityLevel.LIGHT) }
                 )
                 OptionButton(
                     text = ActivityLevel.MODERATE.label,
                     description = ActivityLevel.MODERATE.description,
+                    icon = Icons.Filled.FitnessCenter,
                     selected = selectedActivityLevel == ActivityLevel.MODERATE,
                     onClick = { onActivityLevelSelected(ActivityLevel.MODERATE) }
                 )
                 OptionButton(
                     text = ActivityLevel.ACTIVE.label,
                     description = ActivityLevel.ACTIVE.description,
+                    icon = Icons.AutoMirrored.Filled.DirectionsRun,
                     selected = selectedActivityLevel == ActivityLevel.ACTIVE,
                     onClick = { onActivityLevelSelected(ActivityLevel.ACTIVE) }
                 )
                 OptionButton(
                     text = ActivityLevel.VERY_ACTIVE.label,
                     description = ActivityLevel.VERY_ACTIVE.description,
+                    icon = Icons.Filled.Whatshot,
                     selected = selectedActivityLevel == ActivityLevel.VERY_ACTIVE,
                     onClick = { onActivityLevelSelected(ActivityLevel.VERY_ACTIVE) }
                 )

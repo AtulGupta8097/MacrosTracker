@@ -6,6 +6,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.InsertPhoto
 import androidx.compose.material.icons.filled.Male
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,7 +24,7 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun OptionButton(
-    icon: ImageVector? = Icons.Filled.Male,
+    icon: ImageVector? = Icons.Filled.InsertPhoto,
     text: String,
     description: String? = null,
     selected: Boolean,
@@ -57,7 +59,7 @@ fun OptionButton(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onBackground,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .padding(MaterialTheme.spacing.sm)

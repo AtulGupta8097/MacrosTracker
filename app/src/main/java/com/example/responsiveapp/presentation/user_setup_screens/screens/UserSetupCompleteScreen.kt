@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -58,16 +59,16 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.responsiveapp.domain.model.MacroNutrients
+import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
+import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.spacing
 import kotlinx.coroutines.delay
-import kotlin.math.min
 
 @Composable
 fun UserSetupCompleteScreen(
@@ -76,16 +77,23 @@ fun UserSetupCompleteScreen(
     onNavigateToMain: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Get screen configuration for responsive design
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val isTablet = screenWidth > 600.dp
-    val maxContentWidth = if (isTablet) 500.dp else screenWidth
+    val deviceConfig = MaterialTheme.deviceConfiguration
+
+    val maxContentWidth = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 600.dp
+        DeviceConfiguration.TABLET -> 520.dp
+        DeviceConfiguration.MOBILE -> 9999.dp
+    }
+
+    val horizontalPadding = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> MaterialTheme.spacing.xl
+        DeviceConfiguration.TABLET -> MaterialTheme.spacing.lg
+        DeviceConfiguration.MOBILE -> MaterialTheme.spacing.md
+    }
 
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        // Background gradient
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -100,28 +108,25 @@ fun UserSetupCompleteScreen(
                 )
         )
 
-        // Scrollable content
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 88.dp), // Space for button
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.TopCenter
         ) {
             when {
                 isSaving -> {
-                    CompleteLoadingContent()
+                    CompleteLoadingContent(deviceConfig)
                 }
                 macros != null -> {
                     CompleteSuccessContent(
                         macros = macros,
                         maxWidth = maxContentWidth,
-                        isTablet = isTablet
+                        horizontalPadding = horizontalPadding,
+                        deviceConfig = deviceConfig
                     )
                 }
             }
         }
 
-        // Fixed bottom button - always visible
         AnimatedVisibility(
             visible = !isSaving && macros != null,
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -133,6 +138,7 @@ fun UserSetupCompleteScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
                     .navigationBarsPadding(),
                 color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 16.dp,
@@ -145,7 +151,7 @@ fun UserSetupCompleteScreen(
                     Button(
                         onClick = onNavigateToMain,
                         modifier = Modifier
-                            .padding(MaterialTheme.spacing.md)
+                            .padding(horizontalPadding, MaterialTheme.spacing.md)
                             .widthIn(max = maxContentWidth)
                             .fillMaxWidth()
                             .height(56.dp),
@@ -178,7 +184,7 @@ fun UserSetupCompleteScreen(
 }
 
 @Composable
-private fun CompleteLoadingContent() {
+private fun CompleteLoadingContent(deviceConfig: DeviceConfiguration) {
     val rotation = remember { Animatable(0f) }
     val scale = remember { Animatable(1f) }
 
@@ -202,6 +208,18 @@ private fun CompleteLoadingContent() {
         )
     }
 
+    val loadingSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 160.dp
+        DeviceConfiguration.TABLET -> 150.dp
+        DeviceConfiguration.MOBILE -> 140.dp
+    }
+
+    val progressSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 80.dp
+        DeviceConfiguration.TABLET -> 75.dp
+        DeviceConfiguration.MOBILE -> 70.dp
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -211,7 +229,7 @@ private fun CompleteLoadingContent() {
     ) {
         Box(
             modifier = Modifier
-                .size(140.dp)
+                .size(loadingSize)
                 .scale(scale.value)
                 .clip(CircleShape)
                 .background(
@@ -226,7 +244,7 @@ private fun CompleteLoadingContent() {
         ) {
             CircularProgressIndicator(
                 modifier = Modifier
-                    .size(70.dp)
+                    .size(progressSize)
                     .rotate(rotation.value),
                 strokeWidth = 5.dp,
                 color = MaterialTheme.colorScheme.primary,
@@ -259,7 +277,8 @@ private fun CompleteLoadingContent() {
 private fun CompleteSuccessContent(
     macros: MacroNutrients,
     maxWidth: Dp,
-    isTablet: Boolean
+    horizontalPadding: Dp,
+    deviceConfig: DeviceConfiguration
 ) {
     val scrollState = rememberScrollState()
     var visible by remember { mutableStateOf(false) }
@@ -273,9 +292,10 @@ private fun CompleteSuccessContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = MaterialTheme.spacing.md)
+            .statusBarsPadding()
+            .padding(horizontal = horizontalPadding)
             .widthIn(max = maxWidth)
-            .padding(top = MaterialTheme.spacing.lg, bottom = MaterialTheme.spacing.md),
+            .padding(top = MaterialTheme.spacing.lg, bottom = 90.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AnimatedVisibility(
@@ -289,8 +309,7 @@ private fun CompleteSuccessContent(
             )
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Success Icon with rotation animation
-                SuccessIcon()
+                SuccessIcon(deviceConfig)
 
                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
@@ -298,7 +317,11 @@ private fun CompleteSuccessContent(
                     text = "You're All Set! 🎉",
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = if (isTablet) 38.sp else 32.sp
+                        fontSize = when (deviceConfig) {
+                            DeviceConfiguration.DESKTOP -> 42.sp
+                            DeviceConfiguration.TABLET -> 38.sp
+                            DeviceConfiguration.MOBILE -> 32.sp
+                        }
                     ),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
@@ -317,33 +340,26 @@ private fun CompleteSuccessContent(
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.xxl))
 
-        // Calories Card - Zoom in from center
-        CaloriesCard(calories = macros.calories, isTablet = isTablet)
+        CaloriesCard(calories = macros.calories, deviceConfig = deviceConfig)
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.xl))
 
-        // Macro Cards - Each with unique animation
-        MacroCardsGrid(macros = macros, isTablet = isTablet)
+        MacroCardsGrid(macros = macros, deviceConfig = deviceConfig)
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
-        // BMR Card - Fade and rise
-        BmrCard(bmr = macros.bmr)
-
-        // Extra space for scrolling comfort
-        Spacer(modifier = Modifier.height(MaterialTheme.spacing.md))
+        BmrCard(bmr = macros.bmr, deviceConfig = deviceConfig)
     }
 }
 
 @Composable
-private fun SuccessIcon() {
+private fun SuccessIcon(deviceConfig: DeviceConfiguration) {
     var visible by remember { mutableStateOf(false) }
     val rotation = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
         delay(150)
         visible = true
-        // Spin the checkmark on appearance
         rotation.animateTo(
             targetValue = 360f,
             animationSpec = spring(
@@ -362,9 +378,21 @@ private fun SuccessIcon() {
         label = "success_icon_scale"
     )
 
+    val iconSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 120.dp
+        DeviceConfiguration.TABLET -> 110.dp
+        DeviceConfiguration.MOBILE -> 100.dp
+    }
+
+    val checkSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 64.dp
+        DeviceConfiguration.TABLET -> 60.dp
+        DeviceConfiguration.MOBILE -> 56.dp
+    }
+
     Box(
         modifier = Modifier
-            .size(100.dp)
+            .size(iconSize)
             .scale(scale)
             .clip(CircleShape)
             .background(
@@ -381,7 +409,7 @@ private fun SuccessIcon() {
             imageVector = Icons.Default.CheckCircle,
             contentDescription = "Success",
             modifier = Modifier
-                .size(56.dp)
+                .size(checkSize)
                 .rotate(rotation.value),
             tint = MaterialTheme.colorScheme.primary
         )
@@ -389,7 +417,7 @@ private fun SuccessIcon() {
 }
 
 @Composable
-private fun CaloriesCard(calories: Int, isTablet: Boolean) {
+private fun CaloriesCard(calories: Int, deviceConfig: DeviceConfiguration) {
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -397,7 +425,6 @@ private fun CaloriesCard(calories: Int, isTablet: Boolean) {
         visible = true
     }
 
-    // Zoom in from center animation
     val scale by animateFloatAsState(
         targetValue = if (visible) 1f else 0.5f,
         animationSpec = spring(
@@ -406,6 +433,24 @@ private fun CaloriesCard(calories: Int, isTablet: Boolean) {
         ),
         label = "calories_scale"
     )
+
+    val iconSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 34.dp
+        DeviceConfiguration.TABLET -> 32.dp
+        DeviceConfiguration.MOBILE -> 28.dp
+    }
+
+    val titleSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 22.sp
+        DeviceConfiguration.TABLET -> 20.sp
+        DeviceConfiguration.MOBILE -> 16.sp
+    }
+
+    val calorieSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 76.sp
+        DeviceConfiguration.TABLET -> 72.sp
+        DeviceConfiguration.MOBILE -> 64.sp
+    }
 
     AnimatedVisibility(
         visible = visible,
@@ -435,14 +480,14 @@ private fun CaloriesCard(calories: Int, isTablet: Boolean) {
                         imageVector = Icons.Outlined.LocalFireDepartment,
                         contentDescription = "Calories",
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
+                        modifier = Modifier.size(iconSize)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Daily Calorie Target",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = if (isTablet) 20.sp else 16.sp
+                            fontSize = titleSize
                         ),
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -454,7 +499,7 @@ private fun CaloriesCard(calories: Int, isTablet: Boolean) {
                     text = "$calories",
                     style = MaterialTheme.typography.displayLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = if (isTablet) 72.sp else 64.sp
+                        fontSize = calorieSize
                     ),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -462,7 +507,11 @@ private fun CaloriesCard(calories: Int, isTablet: Boolean) {
                 Text(
                     text = "calories per day",
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = if (isTablet) 16.sp else 14.sp
+                        fontSize = when (deviceConfig) {
+                            DeviceConfiguration.DESKTOP -> 17.sp
+                            DeviceConfiguration.TABLET -> 16.sp
+                            DeviceConfiguration.MOBILE -> 14.sp
+                        }
                     ),
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
@@ -472,7 +521,7 @@ private fun CaloriesCard(calories: Int, isTablet: Boolean) {
 }
 
 @Composable
-private fun MacroCardsGrid(macros: MacroNutrients, isTablet: Boolean) {
+private fun MacroCardsGrid(macros: MacroNutrients, deviceConfig: DeviceConfiguration) {
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -488,7 +537,6 @@ private fun MacroCardsGrid(macros: MacroNutrients, isTablet: Boolean) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Protein Card - Slide from LEFT
             MacroCard(
                 name = "Protein",
                 value = macros.protein,
@@ -502,10 +550,9 @@ private fun MacroCardsGrid(macros: MacroNutrients, isTablet: Boolean) {
                 modifier = Modifier.weight(1f),
                 delay = 0,
                 animationType = MacroAnimationType.SLIDE_LEFT,
-                isTablet = isTablet
+                deviceConfig = deviceConfig
             )
 
-            // Carbs Card - Zoom from CENTER
             MacroCard(
                 name = "Carbs",
                 value = macros.carbs,
@@ -519,10 +566,9 @@ private fun MacroCardsGrid(macros: MacroNutrients, isTablet: Boolean) {
                 modifier = Modifier.weight(1f),
                 delay = 150,
                 animationType = MacroAnimationType.ZOOM_CENTER,
-                isTablet = isTablet
+                deviceConfig = deviceConfig
             )
 
-            // Fats Card - Slide from RIGHT
             MacroCard(
                 name = "Fats",
                 value = macros.fats,
@@ -536,7 +582,7 @@ private fun MacroCardsGrid(macros: MacroNutrients, isTablet: Boolean) {
                 modifier = Modifier.weight(1f),
                 delay = 300,
                 animationType = MacroAnimationType.SLIDE_RIGHT,
-                isTablet = isTablet
+                deviceConfig = deviceConfig
             )
         }
     }
@@ -557,7 +603,7 @@ private fun MacroCard(
     modifier: Modifier = Modifier,
     delay: Long = 0,
     animationType: MacroAnimationType,
-    isTablet: Boolean
+    deviceConfig: DeviceConfiguration
 ) {
     var visible by remember { mutableStateOf(false) }
 
@@ -592,6 +638,36 @@ private fun MacroCard(
         ) + fadeIn(animationSpec = tween(500))
     }
 
+    val verticalPadding = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 28.dp
+        DeviceConfiguration.TABLET -> 24.dp
+        DeviceConfiguration.MOBILE -> 20.dp
+    }
+
+    val horizontalPadding = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 18.dp
+        DeviceConfiguration.TABLET -> 16.dp
+        DeviceConfiguration.MOBILE -> 12.dp
+    }
+
+    val labelSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 15.sp
+        DeviceConfiguration.TABLET -> 14.sp
+        DeviceConfiguration.MOBILE -> 13.sp
+    }
+
+    val valueSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 44.sp
+        DeviceConfiguration.TABLET -> 42.sp
+        DeviceConfiguration.MOBILE -> 36.sp
+    }
+
+    val unitSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 17.sp
+        DeviceConfiguration.TABLET -> 16.sp
+        DeviceConfiguration.MOBILE -> 14.sp
+    }
+
     AnimatedVisibility(
         visible = visible,
         enter = enterAnimation,
@@ -608,8 +684,8 @@ private fun MacroCard(
                 modifier = Modifier
                     .background(gradient)
                     .padding(
-                        vertical = if (isTablet) 24.dp else 20.dp,
-                        horizontal = if (isTablet) 16.dp else 12.dp
+                        vertical = verticalPadding,
+                        horizontal = horizontalPadding
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -621,7 +697,7 @@ private fun MacroCard(
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.5.sp,
-                            fontSize = if (isTablet) 15.sp else 13.sp
+                            fontSize = labelSize
                         ),
                         color = Color.White.copy(alpha = 0.9f)
                     )
@@ -632,7 +708,7 @@ private fun MacroCard(
                         text = "$value",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = if (isTablet) 42.sp else 36.sp
+                            fontSize = valueSize
                         ),
                         color = Color.White
                     )
@@ -641,7 +717,7 @@ private fun MacroCard(
                         text = unit,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Medium,
-                            fontSize = if (isTablet) 16.sp else 14.sp
+                            fontSize = unitSize
                         ),
                         color = Color.White.copy(alpha = 0.8f)
                     )
@@ -652,7 +728,7 @@ private fun MacroCard(
 }
 
 @Composable
-private fun BmrCard(bmr: Int) {
+private fun BmrCard(bmr: Int, deviceConfig: DeviceConfiguration) {
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -660,7 +736,18 @@ private fun BmrCard(bmr: Int) {
         visible = true
     }
 
-    // Rise from bottom animation
+    val titleSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 17.sp
+        DeviceConfiguration.TABLET -> 16.sp
+        DeviceConfiguration.MOBILE -> 14.sp
+    }
+
+    val valueSize = when (deviceConfig) {
+        DeviceConfiguration.DESKTOP -> 26.sp
+        DeviceConfiguration.TABLET -> 24.sp
+        DeviceConfiguration.MOBILE -> 20.sp
+    }
+
     AnimatedVisibility(
         visible = visible,
         enter = slideInVertically(
@@ -677,7 +764,7 @@ private fun BmrCard(bmr: Int) {
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -685,14 +772,15 @@ private fun BmrCard(bmr: Int) {
                     .padding(MaterialTheme.spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ) {
+            )  {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Basal Metabolic Rate",
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = titleSize
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -705,7 +793,8 @@ private fun BmrCard(bmr: Int) {
                 Text(
                     text = "$bmr cal",
                     style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = valueSize
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

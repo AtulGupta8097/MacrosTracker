@@ -28,7 +28,8 @@ private val SCREEN_FLOW = listOf(
 
 @Composable
 fun UserSetupMainScreen(
-    viewModel: UserSetupViewModel = hiltViewModel()
+    viewModel: UserSetupViewModel = hiltViewModel(),
+    navigateToMainScreen: ()-> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -126,7 +127,7 @@ fun UserSetupMainScreen(
                     UserSetupCompleteScreen(
                         isSaving = state.isSaving,
                         macros = state.macros,
-                        onNavigateToMain = {}
+                        onNavigateToMain = navigateToMainScreen
                     )
                 }
 

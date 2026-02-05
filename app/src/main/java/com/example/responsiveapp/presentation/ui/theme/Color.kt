@@ -16,12 +16,12 @@ val CardBackground = Color(0xFFF5F3F3)
 
 val ErrorRed = Color(0xFFEF4444)
 val primaryVarient = Color(0xFFEED0C4)
-val Surfacevarient = Color(0xFFD7D5D4)
+val Surfacevarient = Color(0xFFEFEEEE)
 
 
 // 🌑 Dark Backgrounds
-val DarkBackground = Color(0xFF0F0F0F)   // Deep navy
-val DarkSurface = Color(0xFF222223)      // Card surface
+val DarkBackground = Color(0xFF0F0F0F)
+val DarkSurface = Color(0xFF222223)
 val DarkSurfaceVariant = Color(0xFF313438)
 
 // 🌕 Text

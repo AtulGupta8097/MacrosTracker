@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Female
+import androidx.compose.material.icons.filled.Male
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,11 +57,13 @@ fun GenderScreen(
                     OptionButton(
                         text = "Male",
                         selected = selectedGender == Gender.MALE,
+                        icon = Icons.Filled.Male,
                         onClick = { onGenderSelected(Gender.MALE) }
                     )
                     OptionButton(
                         text = "Female",
                         selected = selectedGender == Gender.FEMALE,
+                        icon = Icons.Filled.Female,
                         onClick = { onGenderSelected(Gender.FEMALE) }
                     )
 

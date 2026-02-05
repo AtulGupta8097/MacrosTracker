@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Balance
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,20 +63,23 @@ fun GoalScreen(
                 OptionButton(
                     text = Goal.MAINTAIN.label,
                     description = Goal.MAINTAIN.description,
+                    icon = Icons.Filled.Balance,
                     selected = selectedGoal == Goal.MAINTAIN,
-                    onClick = { onGoalSelected(Goal.MAINTAIN) }
+                    onClick = { onGoalSelected(Goal.MAINTAIN) },
                 )
                 OptionButton(
                     text = Goal.GAIN.label,
                     description = Goal.GAIN.description,
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
                     selected = selectedGoal == Goal.GAIN,
-                    onClick = { onGoalSelected(Goal.GAIN) }
+                    onClick = { onGoalSelected(Goal.GAIN) },
                 )
                 OptionButton(
                     text = Goal.LOSE.label,
                     description = Goal.LOSE.description,
+                    icon = Icons.Filled.LocalFireDepartment,
                     selected = selectedGoal == Goal.LOSE,
-                    onClick = { onGoalSelected(Goal.LOSE) }
+                    onClick = { onGoalSelected(Goal.LOSE) },
                 )
 
             }
