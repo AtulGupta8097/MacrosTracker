@@ -3,6 +3,7 @@ package com.example.responsiveapp.presentation.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -101,8 +102,14 @@ fun ResponsiveAppTheme(
         else -> LightColorScheme
     }
 
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+
+    val deviceConfiguration =
+        DeviceConfiguration.fromAdaptiveInfo(adaptiveInfo)
+
     CompositionLocalProvider(
-        LocalSpacing provides Spacing()
+        LocalSpacing provides Spacing(),
+        LocalDeviceConfiguration provides deviceConfiguration
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

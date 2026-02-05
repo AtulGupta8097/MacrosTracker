@@ -95,4 +95,9 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    //WindowSize Class
+    implementation(libs.androidx.material3.adaptive)
+
+
 }

@@ -2,6 +2,7 @@ package com.example.responsiveapp.presentation.user_setup_screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.responsiveapp.data.datastore.AppPrefManager
 import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class UserSetupViewModel @Inject constructor(
     private val saveUserProfileUseCase: SaveUserProfileUseCase,
-    private val calculateMacrosUseCase: CalculateMacrosUseCase
+    private val calculateMacrosUseCase: CalculateMacrosUseCase,
+    private val appPrefManager: AppPrefManager
 ): ViewModel() {
     private val _state = MutableStateFlow(UserSetupState())
     val state: StateFlow<UserSetupState> = _state.asStateFlow()
@@ -70,9 +72,6 @@ class UserSetupViewModel @Inject constructor(
             val nextScreen = screenFlow[currentIndex + 1]
             _state.update { it.copy(currentScreen = nextScreen) }
 
-            if(nextScreen == UserSetupScreen.Complete){
-                onCompleteUserSetup()
-            }
         }
     }
 
@@ -96,22 +95,25 @@ class UserSetupViewModel @Inject constructor(
         }
     }
     fun onCompleteUserSetup() {
+        _state.update {
+            it.copy(
+                currentScreen = UserSetupScreen.Complete,
+                isSaving = true,
+                error = null)
+        }
         val profile = _state.value.userInput.toDomain()
 
         viewModelScope.launch {
-            _state.update { it.copy(isSaving = true, error = null) }
 
             val result = saveUserProfileUseCase(profile)
 
             result.fold(
                 onSuccess = {
+                    appPrefManager.setUserSetup(true)
                     val macros = calculateMacrosUseCase(profile)
-
                     _state.update {
                         it.copy(
                             isSaving = false,
-                            onboardingCompleted = true,
-                            currentScreen = UserSetupScreen.Complete,
                             macros = macros
                         )
                     }
@@ -121,8 +123,6 @@ class UserSetupViewModel @Inject constructor(
                         it.copy(
                             isSaving = false,
                             error = throwable.message,
-                            onboardingCompleted = true,
-                            currentScreen = UserSetupScreen.Complete
                         )
                     }
                 }

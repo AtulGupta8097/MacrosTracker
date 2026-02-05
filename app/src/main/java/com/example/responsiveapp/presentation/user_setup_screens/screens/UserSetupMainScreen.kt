@@ -16,7 +16,6 @@ import com.example.responsiveapp.presentation.user_setup_screens.UserSetupScreen
 import com.example.responsiveapp.presentation.user_setup_screens.UserSetupViewModel
 import com.example.responsiveapp.presentation.user_setup_screens.component.NavigationButtons
 import com.example.responsiveapp.presentation.user_setup_screens.component.TopBar
-import com.example.responsiveapp.presentation.user_setup_screens.toDomain
 
 private val SCREEN_FLOW = listOf(
     UserSetupScreen.Gender,
@@ -124,7 +123,11 @@ fun UserSetupMainScreen(
                     )
                 }
                 is UserSetupScreen.Complete -> {
-                    UserSetupCompleteScreen()
+                    UserSetupCompleteScreen(
+                        isSaving = state.isSaving,
+                        macros = state.macros,
+                        onNavigateToMain = {}
+                    )
                 }
 
                 else -> Unit

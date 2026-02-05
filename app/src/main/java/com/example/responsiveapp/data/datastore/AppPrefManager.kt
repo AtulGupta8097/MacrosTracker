@@ -17,11 +17,19 @@ class AppPrefManager @Inject constructor(@param:ApplicationContext private val c
 
     companion object {
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val IS_USER_SETUP = booleanPreferencesKey("is_user_setup")
     }
 
     val isLoggedIn = context.dataStore.data.map { it[IS_LOGGED_IN] ?: false }
+    val isUserSetup = context.dataStore.data.map { it[IS_USER_SETUP] ?: false }
+
 
     suspend fun setLoggedIn(value: Boolean) {
         context.dataStore.edit { it[IS_LOGGED_IN] = value }
+    }
+    suspend fun setUserSetup(value: Boolean) {
+        context.dataStore.edit {
+            it[IS_USER_SETUP] = value
+        }
     }
 }

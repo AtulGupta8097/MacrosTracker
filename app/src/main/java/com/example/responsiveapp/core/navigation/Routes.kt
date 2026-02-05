@@ -14,11 +14,6 @@ sealed interface Routes : NavKey {
     object MainScreen : Routes, NavKey
 
     @Serializable
-    object UserSetupScreen : Routes, NavKey {
-        @Serializable
-        object GenderScreen : Routes, NavKey
-        @Serializable
-        object AgeScreen : Routes, NavKey
-    }
+    object UserSetupScreen : Routes, NavKey
 
 }
