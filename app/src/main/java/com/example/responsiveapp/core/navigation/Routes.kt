@@ -11,9 +11,16 @@ sealed interface Routes : NavKey {
     @Serializable
     object SignUpScreen : Routes, NavKey
     @Serializable
-    object MainScreen : Routes, NavKey
-
-    @Serializable
     object UserSetupScreen : Routes, NavKey
+    @Serializable
+    object MainScreen : Routes, NavKey
+    @Serializable
+    object HomeScreen: Routes, NavKey
+    @Serializable
+    object ProgressScreen: Routes, NavKey
+    @Serializable
+    object GoalsScreen: Routes, NavKey
+    @Serializable
+    object SettingsScreen: Routes, NavKey
 
 }

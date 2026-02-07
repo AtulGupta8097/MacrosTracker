@@ -130,8 +130,6 @@ fun UserSetupMainScreen(
                         onNavigateToMain = navigateToMainScreen
                     )
                 }
-
-                else -> Unit
             }
         }
     }
