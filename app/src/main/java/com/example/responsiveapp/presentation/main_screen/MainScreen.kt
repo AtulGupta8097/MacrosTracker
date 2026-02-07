@@ -16,10 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -38,7 +34,6 @@ import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
 @Composable
 fun MainScreen() {
-    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     val deviceConfig = MaterialTheme.deviceConfiguration
     val navBackStack = rememberNavBackStack(Routes.HomeScreen)
 
@@ -49,16 +44,22 @@ fun MainScreen() {
         Navbar.Settings
     )
 
+    // Selected tab derived from backstack
+    val currentRoute = navBackStack.last()
+    val selectedTabIndex = navItems.indexOfFirst {
+        it.route == currentRoute
+    }.coerceAtLeast(0)
+
     when (deviceConfig) {
+
         DeviceConfiguration.MOBILE -> {
             Scaffold(
                 bottomBar = {
                     BottomNav(
                         items = navItems,
-                        selectedTab = selectedTab,
-                        onTabSelected = {
-                            selectedTab = it
-                            navBackStack.add(navItems[it].route)
+                        selectedTab = selectedTabIndex,
+                        onTabSelected = { index ->
+                            navBackStack.navigateSingleTop(navItems[index].route)
                         },
                         onAddClick = { }
                     )
@@ -79,11 +80,14 @@ fun MainScreen() {
                         .fillMaxSize()
                         .padding(padding)
                 ) {
+
                     SideNav(
                         items = navItems,
-                        selectedIndex = selectedTab,
-                        onItemSelected = { selectedTab = it },
-                        onAddClick = { /* Add action */ }
+                        selectedIndex = selectedTabIndex,
+                        onItemSelected = { index ->
+                            navBackStack.navigateSingleTop(navItems[index].route)
+                        },
+                        onAddClick = { }
                     )
 
                     MainContent(
@@ -119,7 +123,6 @@ private fun MainContent(
         ) { targetEntry ->
 
             androidx.compose.runtime.key(targetEntry) {
-
                 NavDisplay(
                     entryDecorators = listOf(
                         rememberSaveableStateHolderNavEntryDecorator(),
@@ -137,8 +140,6 @@ private fun MainContent(
         }
     }
 }
-
-
 
 @Composable
 fun HomeScreen() {

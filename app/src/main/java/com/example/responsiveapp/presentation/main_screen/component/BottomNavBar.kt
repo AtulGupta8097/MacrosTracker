@@ -61,7 +61,7 @@ fun BottomNav(
             onClick = onAddClick,
             shape = CircleShape,
             modifier = Modifier
-                .align(Alignment.TopCenter)
+                .align(Alignment.Center)
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
