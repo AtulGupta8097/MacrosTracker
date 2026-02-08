@@ -1,15 +1,13 @@
 package com.example.responsiveapp.presentation.main_screen.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -17,57 +15,51 @@ fun BottomNav(
     items: List<Navbar>,
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
-    onAddClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onHeightMeasured: (Dp) -> Unit
 ) {
-    Box(
-        modifier
-            .shadow(8.dp)
-            .background(MaterialTheme.colorScheme.surface)
-            .height(68.dp)
+    val density = LocalDensity.current
+
+    val fabRadius = with(density) { 28.dp.toPx() }
+
+    Surface(
+        modifier = Modifier
             .fillMaxWidth()
+            .height(64.dp)
+            .onSizeChanged {
+                onHeightMeasured(with(density) { it.height.toDp() })
+            },
+        shape = BottomBarCutoutShape(
+            fabRadius = fabRadius,
+            cutoutMargin = fabRadius * 0.25f
+        ),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 8.dp
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             // LEFT items (before Add)
             items.take(items.size / 2).forEachIndexed { index, item ->
                 BottomNavItem(
-                    modifier = Modifier.weight(1f),
                     item = item,
                     selected = selectedTab == index,
                     onClick = { onTabSelected(index) }
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
+            Spacer(modifier = Modifier.width(48.dp))
             // RIGHT items (after Add)
             items.drop(items.size / 2).forEachIndexed { index, item ->
                 val actualIndex = index + items.size / 2
                 BottomNavItem(
-                    modifier = Modifier.weight(1f),
                     item = item,
                     selected = selectedTab == actualIndex,
                     onClick = { onTabSelected(actualIndex) }
                 )
             }
         }
-
-        // CENTER ADD BUTTON
-        FloatingActionButton(
-            onClick = onAddClick,
-            shape = CircleShape,
-            modifier = Modifier
-                .align(Alignment.Center)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add"
-            )
-        }
     }
 }
-
