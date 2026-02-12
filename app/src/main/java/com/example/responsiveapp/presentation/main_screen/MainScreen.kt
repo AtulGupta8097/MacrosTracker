@@ -1,18 +1,41 @@
 package com.example.responsiveapp.presentation.main_screen
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.*
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
 import com.example.responsiveapp.presentation.main_screen.component.*
@@ -27,19 +50,21 @@ fun MainScreen() {
     var showBottomSheet by remember { mutableStateOf(false) }
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
 
-    val navItems = listOf(
-        Navbar.Home,
-        Navbar.Progress,
-        Navbar.Goal,
-        Navbar.Settings
-    )
+    val navItems =
+        listOf(
+            Navbar.Home,
+            Navbar.Progress,
+            Navbar.Goal,
+            Navbar.Settings,
+        )
 
-    val selectedTabIndex = navItems.indexOfFirst {
-        it.route == navBackStack.last()
-    }.coerceAtLeast(0)
+    val selectedTabIndex =
+        navItems
+            .indexOfFirst {
+                it.route == navBackStack.last()
+            }.coerceAtLeast(0)
 
     when (deviceConfig) {
-
         DeviceConfiguration.MOBILE -> {
             Scaffold(
                 bottomBar = {
@@ -51,36 +76,39 @@ fun MainScreen() {
                         },
                         onHeightMeasured = { height ->
                             bottomBarHeight = height
-                        }
+                        },
                     )
                 },
                 floatingActionButton = {
                     FloatingActionButton(
                         onClick = { showBottomSheet = true },
-                        modifier = Modifier.offset(
-                            y = (bottomBarHeight / 2) + 12.dp
-                        ),
-                        shape = CircleShape
+                        modifier =
+                            Modifier.offset(
+                                y = (bottomBarHeight / 2) + 12.dp,
+                            ),
+                        shape = CircleShape,
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
                 },
-                floatingActionButtonPosition = FabPosition.Center
+                floatingActionButtonPosition = FabPosition.Center,
             ) { padding ->
                 MainContent(
                     modifier = Modifier.padding(padding),
-                    navBackStack = navBackStack
+                    navBackStack = navBackStack,
                 )
             }
         }
 
         DeviceConfiguration.TABLET,
-        DeviceConfiguration.DESKTOP -> {
+        DeviceConfiguration.DESKTOP,
+        -> {
             Scaffold { padding ->
                 Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(padding),
                 ) {
                     SideNav(
                         items = navItems,
@@ -88,12 +116,12 @@ fun MainScreen() {
                         onItemSelected = { index ->
                             navBackStack.navigateSingleTop(navItems[index].route)
                         },
-                        onAddClick = { showBottomSheet = true }
+                        onAddClick = { showBottomSheet = true },
                     )
 
                     MainContent(
                         modifier = Modifier.weight(1f),
-                        navBackStack = navBackStack
+                        navBackStack = navBackStack,
                     )
                 }
             }
@@ -103,7 +131,7 @@ fun MainScreen() {
     if (showBottomSheet) {
         AddFoodBottomSheet(
             onDismiss = { showBottomSheet = false },
-            onOptionSelected = {}
+            onOptionSelected = {},
         )
     }
 }
@@ -117,32 +145,35 @@ private fun MainContent(
     val currentEntry = navBackStack.last()
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
     ) {
         AnimatedContent(
             targetState = currentEntry,
             transitionSpec = {
                 slideInHorizontally { it } + fadeIn() togetherWith
-                        slideOutHorizontally { -it } + fadeOut()
+                    slideOutHorizontally { -it } + fadeOut()
             },
-            label = "NavTransition"
+            label = "NavTransition",
         ) { targetEntry ->
 
             androidx.compose.runtime.key(targetEntry) {
                 NavDisplay(
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
+                    entryDecorators =
+                        listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator(),
+                        ),
                     backStack = navBackStack,
-                    entryProvider = entryProvider {
-                        entry<Routes.HomeScreen> { HomeScreen() }
-                        entry<Routes.ProgressScreen> { ProgressScreen() }
-                        entry<Routes.GoalsScreen> { GoalScreen() }
-                        entry<Routes.SettingsScreen> { SettingsScreen() }
-                    }
+                    entryProvider =
+                        entryProvider {
+                            entry<Routes.HomeScreen> { HomeScreen() }
+                            entry<Routes.ProgressScreen> { ProgressScreen() }
+                            entry<Routes.GoalsScreen> { GoalScreen() }
+                            entry<Routes.SettingsScreen> { SettingsScreen() }
+                        },
                 )
             }
         }

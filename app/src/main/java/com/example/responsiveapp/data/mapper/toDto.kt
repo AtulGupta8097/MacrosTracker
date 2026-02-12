@@ -1,6 +1,6 @@
 package com.example.responsiveapp.data.mapper
 
-import com.example.responsiveapp.data.model.UserProfileDto
+import com.example.responsiveapp.data.remote.dto.UserProfileDto
 import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal

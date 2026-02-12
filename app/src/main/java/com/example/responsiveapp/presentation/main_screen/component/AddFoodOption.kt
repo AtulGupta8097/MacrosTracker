@@ -18,8 +18,6 @@ import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,74 +29,62 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.responsiveapp.presentation.ui.theme.spacing
 
 data class AddFoodOption(
     val title: String,
     val subtitle: String,
     val icon: ImageVector,
     val iconColor: Color,
-    val gradientColors: List<Color>
+    val backgroundColor: Color,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFoodBottomSheet(
     onDismiss: () -> Unit,
-    onOptionSelected: (AddFoodOption) -> Unit
+    onOptionSelected: (AddFoodOption) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false
-    )
-
-    val options = listOf(
-        AddFoodOption(
-            title = "Food Database",
-            subtitle = "Search thousands of foods",
-            icon = Icons.Outlined.Book,
-            iconColor = Color(0xFF10B981),
-            gradientColors = listOf(
-                Color(0xFF10B981).copy(alpha = 0.15f),
-                Color(0xFF10B981).copy(alpha = 0.05f)
-            )
-        ),
-        AddFoodOption(
-            title = "Scan Barcode",
-            subtitle = "Scan packaged food instantly",
-            icon = Icons.Outlined.QrCodeScanner,
-            iconColor = Color(0xFF0891B2),
-            gradientColors = listOf(
-                Color(0xFF0891B2).copy(alpha = 0.15f),
-                Color(0xFF0891B2).copy(alpha = 0.05f)
-            )
-        ),
-        AddFoodOption(
-            title = "Scan Food",
-            subtitle = "Identify food using camera",
-            icon = Icons.Outlined.CameraAlt,
-            iconColor = Color(0xFF6366F1),
-            gradientColors = listOf(
-                Color(0xFF6366F1).copy(alpha = 0.15f),
-                Color(0xFF6366F1).copy(alpha = 0.05f)
-            )
-        ),
-        AddFoodOption(
-            title = "Saved Foods",
-            subtitle = "Quickly add your favorites",
-            icon = Icons.Outlined.Star,
-            iconColor = Color(0xFFF59E0B),
-            gradientColors = listOf(
-                Color(0xFFF59E0B).copy(alpha = 0.15f),
-                Color(0xFFF59E0B).copy(alpha = 0.05f)
-            )
+    val sheetState =
+        rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
         )
-    )
+
+    val options =
+        listOf(
+            AddFoodOption(
+                title = "Food Database",
+                subtitle = "Search thousands of foods",
+                icon = Icons.Outlined.Book,
+                iconColor = Color(0xFF10B981),
+                backgroundColor = Color(0xFF10B981).copy(alpha = 0.1f),
+            ),
+            AddFoodOption(
+                title = "Scan Barcode",
+                subtitle = "Scan packaged food instantly",
+                icon = Icons.Outlined.QrCodeScanner,
+                iconColor = Color(0xFF0EA5E9),
+                backgroundColor = Color(0xFF0EA5E9).copy(alpha = 0.1f),
+            ),
+            AddFoodOption(
+                title = "Scan Food",
+                subtitle = "Identify food using camera",
+                icon = Icons.Outlined.CameraAlt,
+                iconColor = Color(0xFF8B5CF6),
+                backgroundColor = Color(0xFF8B5CF6).copy(alpha = 0.1f),
+            ),
+            AddFoodOption(
+                title = "Saved Foods",
+                subtitle = "Quickly add your favorites",
+                icon = Icons.Outlined.Star,
+                iconColor = Color(0xFFF59E0B),
+                backgroundColor = Color(0xFFF59E0B).copy(alpha = 0.1f),
+            ),
+        )
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -107,129 +93,130 @@ fun AddFoodBottomSheet(
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                    modifier =
+                        Modifier
+                            .width(40.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)),
                 )
             }
-        }
+        },
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = MaterialTheme.spacing.lg)
-                .padding(bottom = MaterialTheme.spacing.xl)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 40.dp),
         ) {
             Text(
                 text = "Add Food",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp
-                ),
+                style =
+                    MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp,
+                    ),
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = MaterialTheme.spacing.md)
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Choose how you'd like to log your meal",
-                style = MaterialTheme.typography.bodyMedium,
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 15.sp,
+                    ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = MaterialTheme.spacing.lg)
             )
 
+            Spacer(modifier = Modifier.height(28.dp))
+
             options.forEach { option ->
-                AddFoodOptionCard(
+                AddFoodOptionItem(
                     option = option,
                     onClick = {
                         onOptionSelected(option)
                         onDismiss()
-                    }
+                    },
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-private fun AddFoodOptionCard(
+private fun AddFoodOptionItem(
     option: AddFoodOption,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 2.dp
-        )
+    Surface(
+        onClick = onClick,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(72.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
     ) {
-        Surface(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            color = Color.Transparent
-        ) {
-            Row(
-                modifier = Modifier
+        Row(
+            modifier =
+                Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(48.dp)
                         .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(option.gradientColors)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = option.icon,
-                        contentDescription = option.title,
-                        tint = option.iconColor,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                        .background(option.backgroundColor),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = option.icon,
+                    contentDescription = option.title,
+                    tint = option.iconColor,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
 
-                Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = option.title,
-                        style = MaterialTheme.typography.titleMedium.copy(
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = option.title,
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            fontSize = 17.sp
+                            fontSize = 16.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
-                        text = option.subtitle,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 13.sp
+                Text(
+                    text = option.subtitle,
+                    style =
+                        MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 13.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                )
             }
         }
     }

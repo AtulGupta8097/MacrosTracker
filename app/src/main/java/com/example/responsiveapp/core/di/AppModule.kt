@@ -1,7 +1,7 @@
 package com.example.responsiveapp.core.di
 
-import com.example.responsiveapp.data.datasource.local.UserProfileLocalDataSource
-import com.example.responsiveapp.data.datasource.remote.UserProfileRemoteDataSource
+import com.example.responsiveapp.data.datasource.UserProfileLocalDataSource
+import com.example.responsiveapp.data.datasource.UserProfileRemoteDataSource
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
 import com.example.responsiveapp.data.repository.UserProfileRepositoryImpl
 import com.example.responsiveapp.domain.repository.AuthRepository

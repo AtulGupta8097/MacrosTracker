@@ -1,11 +1,10 @@
-package com.example.responsiveapp.data.datasource.local
+package com.example.responsiveapp.data.datasource
 
 import androidx.datastore.preferences.core.edit
-import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
+import com.example.responsiveapp.data.remote.dto.UserProfileDto
 import com.example.responsiveapp.data.datastore.UserPreferencesKeys
-import com.example.responsiveapp.data.model.UserProfileDto
-import kotlinx.coroutines.flow.first
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.first
 
 class UserProfileLocalDataSource @Inject constructor(
     private val preferences: UserPreferencesDataStore
@@ -37,4 +36,3 @@ class UserProfileLocalDataSource @Inject constructor(
         )
     }
 }
-

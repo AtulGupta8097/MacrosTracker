@@ -1,6 +1,6 @@
-package com.example.responsiveapp.data.datasource.remote
+package com.example.responsiveapp.data.datasource
 
-import com.example.responsiveapp.data.model.UserProfileDto
+import com.example.responsiveapp.data.remote.dto.UserProfileDto
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await

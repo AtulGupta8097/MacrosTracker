@@ -1,7 +1,7 @@
 package com.example.responsiveapp.core.di
 
 import com.example.responsiveapp.data.datasource.MacroCalculatorDataSource
-import com.example.responsiveapp.data.datasource.local.MacroCalculatorDataSourceImpl
+import com.example.responsiveapp.data.datasource.MacroCalculatorDataSourceImpl
 import com.example.responsiveapp.data.repository.MacroRepositoryImpl
 import com.example.responsiveapp.domain.repository.MacroRepository
 import com.example.responsiveapp.domain.use_case.CalculateMacrosUseCase

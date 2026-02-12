@@ -1,9 +1,9 @@
 package com.example.responsiveapp.data.repository
 
-import com.example.responsiveapp.data.datasource.local.UserProfileLocalDataSource
+import com.example.responsiveapp.data.datasource.UserProfileLocalDataSource
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toDto
-import com.example.responsiveapp.data.datasource.remote.UserProfileRemoteDataSource
+import com.example.responsiveapp.data.datasource.UserProfileRemoteDataSource
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 

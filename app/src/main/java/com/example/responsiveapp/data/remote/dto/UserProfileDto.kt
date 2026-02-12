@@ -1,4 +1,4 @@
-package com.example.responsiveapp.data.model
+package com.example.responsiveapp.data.remote.dto
 
 data class UserProfileDto(
     val gender: String? = null,
