@@ -2,23 +2,7 @@ package com.example.responsiveapp.data.remote.dto.fatsecret.search
 
 import com.google.gson.annotations.SerializedName
 
-data class FoodSearchResponse(
-    @SerializedName("foods")
-    val foods: FoodsContainer?
-)
-
-data class FoodsContainer(
-    @SerializedName("food")
-    val food: List<FoodDto>?,
-    @SerializedName("max_results")
-    val maxResults: String?,
-    @SerializedName("page_number")
-    val pageNumber: String?,
-    @SerializedName("total_results")
-    val totalResults: String?
-)
-
-data class FoodDto(
+data class FoodItemDto(
     @SerializedName("food_id")
     val foodId: String,
     @SerializedName("food_name")

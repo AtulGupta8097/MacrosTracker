@@ -2,7 +2,7 @@ package com.example.responsiveapp.data.remote.dto.fatsecret.auth
 
 import com.google.gson.annotations.SerializedName
 
-data class OAuthTokenResponse(
+data class OAuthTokenResponseDto(
     @SerializedName("access_token")
     val accessToken: String,
     @SerializedName("token_type")
