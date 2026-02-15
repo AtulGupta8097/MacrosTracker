@@ -1,5 +1,7 @@
 package com.example.responsiveapp.presentation.main_screen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -38,10 +40,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
+import com.example.responsiveapp.presentation.food_searach.FoodSearchScreen
 import com.example.responsiveapp.presentation.main_screen.component.*
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun MainScreen() {
     val deviceConfig = MaterialTheme.deviceConfiguration
@@ -136,6 +140,7 @@ fun MainScreen() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun MainContent(
@@ -169,7 +174,11 @@ private fun MainContent(
                     backStack = navBackStack,
                     entryProvider =
                         entryProvider {
-                            entry<Routes.HomeScreen> { HomeScreen() }
+                            entry<Routes.HomeScreen> { FoodSearchScreen(
+                                onBackClick = { navBackStack.removeLast() },
+                                onFoodClick = {
+                                }
+                            ) }
                             entry<Routes.ProgressScreen> { ProgressScreen() }
                             entry<Routes.GoalsScreen> { GoalScreen() }
                             entry<Routes.SettingsScreen> { SettingsScreen() }

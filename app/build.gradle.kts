@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +10,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val localProperties = Properties()
+localProperties.load(rootProject.file("local.properties").inputStream())
 android {
     namespace = "com.example.responsiveapp"
     compileSdk = 36
@@ -20,6 +24,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+            buildConfigField("String", "FATSECRET_CLIENT_ID", "\"${localProperties["FATSECRET_CLIENT_ID"]}\"")
+            buildConfigField("String", "FATSECRET_CLIENT_SECRET", "\"${localProperties["FATSECRET_CLIENT_SECRET"]}\"")
     }
 
     buildTypes {
@@ -43,6 +50,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
