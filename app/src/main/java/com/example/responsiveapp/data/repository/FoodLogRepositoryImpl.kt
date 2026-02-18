@@ -3,12 +3,10 @@ package com.example.responsiveapp.data.repository
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
-import com.example.responsiveapp.data.mapper.toFirebaseDto
 import com.example.responsiveapp.domain.model.FoodLog
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 import javax.inject.Singleton
 
 @Singleton
@@ -76,13 +74,13 @@ class FoodLogRepositoryImpl (
     }
 
     private suspend fun syncLogToFirestore(foodLog: FoodLog) {
-        val firebaseDto = foodLog.toFirebaseDto()
-        
-        getFoodLogsCollection()
-            .document(foodLog.id)
-            .set(firebaseDto)
-            .await()
-
-        foodLogDao.updateSyncStatus(foodLog.id, "SYNCED")
+//        val firebaseDto = foodLog.toFirebaseDto()
+//
+//        getFoodLogsCollection()
+//            .document(foodLog.id)
+//            .set(firebaseDto)
+//            .await()
+//
+//        foodLogDao.updateSyncStatus(foodLog.id, "SYNCED")
     }
 }

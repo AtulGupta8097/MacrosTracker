@@ -1,23 +1,32 @@
 package com.example.responsiveapp.domain.use_case.food_usecase
 
+import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.domain.model.Food
 import com.example.responsiveapp.domain.repository.FoodRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class SearchFoodsUseCase @Inject constructor(
-    private val foodRepository: FoodRepository
+    private val repository: FoodRepository
 ) {
-    suspend operator fun invoke(query: String,limit: Int): Result<List<Food>> {
 
-        if (query.isBlank() || query.length < 2) {
-            return Result.failure(
-                IllegalArgumentException("Search query must be at least 2 characters")
-            )
-        }
-        
-        return foodRepository.searchFoods(
-            query = query.trim(),
-            limit = limit
+    operator fun invoke(
+        query: String,
+        limit: Int
+    ): Flow<Resource<List<Food>>> = flow {
+
+        emit(Resource.Loading())
+
+        val result = repository.searchFoods(query, limit)
+
+        result.fold(
+            onSuccess = { foods ->
+                emit(Resource.Success(foods))
+            },
+            onFailure = { e ->
+                emit(Resource.Error(e.message ?: "Unknown error"))
+            }
         )
     }
 }

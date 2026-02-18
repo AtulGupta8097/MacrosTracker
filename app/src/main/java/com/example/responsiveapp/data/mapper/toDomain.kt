@@ -6,27 +6,32 @@ import com.example.responsiveapp.data.local.entity.ServingEntity
 import com.example.responsiveapp.data.remote.dto.fatsecret.detail.FoodDetailDto
 import com.example.responsiveapp.data.remote.dto.fatsecret.detail.ServingDto
 import com.example.responsiveapp.data.remote.dto.fatsecret.search.FoodItemDto
-import com.example.responsiveapp.data.remote.dto.firebase.FirebaseFoodLogDto
 import com.example.responsiveapp.domain.model.Food
 import com.example.responsiveapp.domain.model.FoodLog
-import com.example.responsiveapp.domain.model.LogMethod
+import com.example.responsiveapp.domain.model.MealIngredient
 import com.example.responsiveapp.domain.model.NutritionInfo
 import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.domain.model.ServingUnit
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 fun FoodItemDto.toDomain(): Food {
+
+    val parsedServing = parseServingFromDescription(foodDescription)
+
     return Food(
         id = foodId,
         name = foodName,
         brand = brandName,
-        servings = emptyList(),
+        servings = parsedServing?.let { listOf(it) } ?: emptyList(),
         imageUrl = null,
         barcode = null,
-        isVerified = true,  // FatSecret data is verified
+        isVerified = true,
         createdAt = System.currentTimeMillis(),
         searchableName = foodName.lowercase()
     )
 }
+
 
 fun FoodDetailDto.toDomain(): Food {
     return Food(
@@ -61,76 +66,6 @@ fun ServingDto.toDomain(): Serving {
             transFat = 0f  // FatSecret doesn't provide trans fat
         ),
         isDefault = false
-    )
-}
-
-/**
- * ========== FIREBASE DTO → DOMAIN ==========
- */
-
-fun FirebaseFoodLogDto.toDomain(): FoodLog {
-    return FoodLog(
-        id = id,
-        userId = userId,
-        foodId = foodId,
-        foodName = foodName,
-        brand = brand,
-        servingId = servingId,
-        servingDescription = servingDescription,
-        quantity = quantity,
-        nutrition = NutritionInfo(
-            calories = calories,
-            protein = protein,
-            carbs = carbs,
-            fat = fat,
-            fiber = fiber,
-            sugar = sugar,
-            sodium = sodium,
-            cholesterol = cholesterol,
-            saturatedFat = saturatedFat,
-            transFat = transFat
-        ),
-        date = date,
-        logMethod = LogMethod.valueOf(logMethod),
-        notes = notes,
-        imageUrl = imageUrl,
-        createdAt = System.currentTimeMillis(),
-        isSynced = syncStatus == "SYNCED"
-    )
-}
-
-/**
- * ========== DOMAIN → FIREBASE DTO ==========
- */
-
-fun FoodLog.toFirebaseDto(): FirebaseFoodLogDto {
-    return FirebaseFoodLogDto(
-        id = id,
-        userId = userId,
-        foodId = foodId,
-        foodName = foodName,
-        brand = brand,
-        servingId = servingId,
-        servingDescription = servingDescription,
-        quantity = quantity,
-        calories = nutrition.calories,
-        protein = nutrition.protein,
-        carbs = nutrition.carbs,
-        fat = nutrition.fat,
-        fiber = nutrition.fiber,
-        sugar = nutrition.sugar,
-        sodium = nutrition.sodium,
-        cholesterol = nutrition.cholesterol,
-        saturatedFat = nutrition.saturatedFat,
-        transFat = nutrition.transFat,
-        date = date,
-        logMethod = logMethod.name,
-        notes = notes,
-        imageUrl = imageUrl,
-        // createdAt and updatedAt will be set by @ServerTimestamp in Firebase
-        createdAt = null,
-        updatedAt = null,
-        syncStatus = if (isSynced) "SYNCED" else "PENDING"
     )
 }
 
@@ -174,14 +109,62 @@ fun ServingEntity.toDomain(): Serving {
     )
 }
 
+
+fun FoodLog.toEntity(): FoodLogEntity {
+    val gson = Gson()
+    val ingredientsJson = if (ingredients.isNotEmpty()) {
+        gson.toJson(ingredients)
+    } else null
+
+    return FoodLogEntity(
+        id = id,
+        userId = userId,
+        date = date,
+        logSource = logSource.name,
+        foodId = foodId,
+        brand = brand,
+        servingId = servingId,
+        foodName = foodName,
+        servingDescription = servingDescription,
+        quantity = quantity,
+        calories = nutrition.calories,
+        protein = nutrition.protein,
+        carbs = nutrition.carbs,
+        fat = nutrition.fat,
+        fiber = nutrition.fiber,
+        sugar = nutrition.sugar,
+        sodium = nutrition.sodium,
+        cholesterol = nutrition.cholesterol,
+        saturatedFat = nutrition.saturatedFat,
+        transFat = nutrition.transFat,
+        ingredientsJson = ingredientsJson,
+        notes = notes,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        syncStatus = if (isSynced) "SYNCED" else "PENDING"
+    )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Entity → Domain
+// ═══════════════════════════════════════════════════════════════════════════
+
 fun FoodLogEntity.toDomain(): FoodLog {
+    val gson = Gson()
+    val ingredients = if (ingredientsJson != null) {
+        val type = object : TypeToken<List<MealIngredient>>() {}.type
+        gson.fromJson<List<MealIngredient>>(ingredientsJson, type)
+    } else emptyList()
+
     return FoodLog(
         id = id,
         userId = userId,
+        date = date,
+        logSource = enumValueOf(logSource),
         foodId = foodId,
-        foodName = foodName,
         brand = brand,
         servingId = servingId,
+        foodName = foodName,
         servingDescription = servingDescription,
         quantity = quantity,
         nutrition = NutritionInfo(
@@ -196,11 +179,10 @@ fun FoodLogEntity.toDomain(): FoodLog {
             saturatedFat = saturatedFat,
             transFat = transFat
         ),
-        date = date,
-        logMethod = LogMethod.valueOf(logMethod),
+        ingredients = ingredients,
         notes = notes,
-        imageUrl = imageUrl,
         createdAt = createdAt,
+        updatedAt = updatedAt,
         isSynced = syncStatus == "SYNCED"
     )
 }
@@ -244,36 +226,6 @@ fun Serving.toEntity(): ServingEntity {
     )
 }
 
-fun FoodLog.toEntity(): FoodLogEntity {
-    return FoodLogEntity(
-        id = id,
-        userId = userId,
-        foodId = foodId,
-        foodName = foodName,
-        brand = brand,
-        servingId = servingId,
-        servingDescription = servingDescription,
-        quantity = quantity,
-        calories = nutrition.calories,
-        protein = nutrition.protein,
-        carbs = nutrition.carbs,
-        fat = nutrition.fat,
-        fiber = nutrition.fiber,
-        sugar = nutrition.sugar,
-        sodium = nutrition.sodium,
-        cholesterol = nutrition.cholesterol,
-        saturatedFat = nutrition.saturatedFat,
-        transFat = nutrition.transFat,
-        date = date,
-        logMethod = logMethod.name,
-        notes = notes,
-        imageUrl = imageUrl,
-        createdAt = createdAt,
-        updatedAt = createdAt,
-        syncStatus = if (isSynced) "SYNCED" else "PENDING"
-    )
-}
-
 /**
  * ========== HELPER FUNCTIONS ==========
  */
@@ -296,3 +248,29 @@ private fun parseServingUnit(unitString: String): ServingUnit {
         else -> ServingUnit.SERVING
     }
 }
+
+private fun parseServingFromDescription(description: String?): Serving? {
+    if (description.isNullOrBlank()) return null
+
+    val regex =
+        Regex("""Per\s+([\d.]+)\s*([a-zA-Z]+)\s+-\s+Calories:\s*([\d.]+)kcal\s*\|\s*Fat:\s*([\d.]+)g\s*\|\s*Carbs:\s*([\d.]+)g\s*\|\s*Protein:\s*([\d.]+)g""")
+
+    val match = regex.find(description) ?: return null
+
+    val (amount, unit, calories, fat, carbs, protein) = match.destructured
+
+    return Serving(
+        id = "default",
+        description = "Per $amount $unit",
+        amount = amount.toFloatOrNull() ?: 100f,
+        unit = parseServingUnit(unit),
+        nutrition = NutritionInfo(
+            calories = calories.toFloatOrNull() ?: 0f,
+            protein = protein.toFloatOrNull() ?: 0f,
+            carbs = carbs.toFloatOrNull() ?: 0f,
+            fat = fat.toFloatOrNull() ?: 0f
+        ),
+        isDefault = true
+    )
+}
+

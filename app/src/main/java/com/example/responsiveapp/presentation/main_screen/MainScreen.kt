@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,88 +41,105 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
-import com.example.responsiveapp.presentation.food_searach.FoodSearchScreen
-import com.example.responsiveapp.presentation.main_screen.component.*
+import com.example.responsiveapp.presentation.food_database_screen.FoodDatabaseScreen
+import com.example.responsiveapp.presentation.main_screen.component.AddFoodBottomSheet
+import com.example.responsiveapp.presentation.main_screen.component.BottomNav
+import com.example.responsiveapp.presentation.main_screen.component.Navbar
+import com.example.responsiveapp.presentation.main_screen.component.SideNav
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun MainScreen() {
+
     val deviceConfig = MaterialTheme.deviceConfiguration
     val navBackStack = rememberNavBackStack(Routes.HomeScreen)
 
     var showBottomSheet by remember { mutableStateOf(false) }
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
 
-    val navItems =
-        listOf(
-            Navbar.Home,
-            Navbar.Progress,
-            Navbar.Goal,
-            Navbar.Settings,
-        )
+    val currentRoute = navBackStack.lastOrNull()
+
+    val routesWithBottomBar = listOf(
+        Routes.HomeScreen,
+        Routes.ProgressScreen,
+        Routes.GoalsScreen,
+        Routes.SettingsScreen
+    )
+
+    val showBottomBar = currentRoute in routesWithBottomBar
+
+    val navItems = listOf(
+        Navbar.Home,
+        Navbar.Progress,
+        Navbar.Goal,
+        Navbar.Settings,
+    )
 
     val selectedTabIndex =
-        navItems
-            .indexOfFirst {
-                it.route == navBackStack.last()
-            }.coerceAtLeast(0)
+        navItems.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
 
     when (deviceConfig) {
+
         DeviceConfiguration.MOBILE -> {
-            Scaffold(
-                bottomBar = {
-                    BottomNav(
-                        items = navItems,
-                        selectedTab = selectedTabIndex,
-                        onTabSelected = { index ->
-                            navBackStack.navigateSingleTop(navItems[index].route)
-                        },
-                        onHeightMeasured = { height ->
-                            bottomBarHeight = height
-                        },
+
+            if (showBottomBar) {
+                Scaffold(
+                    bottomBar = {
+                        BottomNav(
+                            items = navItems,
+                            selectedTab = selectedTabIndex,
+                            onTabSelected = { index ->
+                                navBackStack.navigateSingleTop(navItems[index].route)
+                            },
+                            onHeightMeasured = { bottomBarHeight = it },
+                        )
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = { showBottomSheet = true },
+                            modifier = Modifier.offset(y = (bottomBarHeight / 2) + 12.dp),
+                            shape = CircleShape,
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                        }
+                    },
+                    floatingActionButtonPosition = FabPosition.Center,
+                ) { padding ->
+                    MainContent(
+                        modifier = Modifier.padding(padding),
+                        navBackStack = navBackStack,
                     )
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { showBottomSheet = true },
-                        modifier =
-                            Modifier.offset(
-                                y = (bottomBarHeight / 2) + 12.dp,
-                            ),
-                        shape = CircleShape,
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                    }
-                },
-                floatingActionButtonPosition = FabPosition.Center,
-            ) { padding ->
+                }
+            } else {
                 MainContent(
-                    modifier = Modifier.padding(padding),
+                    modifier = Modifier.fillMaxSize(),
                     navBackStack = navBackStack,
                 )
             }
         }
 
         DeviceConfiguration.TABLET,
-        DeviceConfiguration.DESKTOP,
-        -> {
+        DeviceConfiguration.DESKTOP -> {
+
             Scaffold { padding ->
                 Row(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(padding),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
                 ) {
-                    SideNav(
-                        items = navItems,
-                        selectedIndex = selectedTabIndex,
-                        onItemSelected = { index ->
-                            navBackStack.navigateSingleTop(navItems[index].route)
-                        },
-                        onAddClick = { showBottomSheet = true },
-                    )
+
+                    if (showBottomBar) {
+                        SideNav(
+                            items = navItems,
+                            selectedIndex = selectedTabIndex,
+                            onItemSelected = { index ->
+                                navBackStack.navigateSingleTop(navItems[index].route)
+                            },
+                            onAddClick = { showBottomSheet = true },
+                        )
+                    }
 
                     MainContent(
                         modifier = Modifier.weight(1f),
@@ -135,7 +153,11 @@ fun MainScreen() {
     if (showBottomSheet) {
         AddFoodBottomSheet(
             onDismiss = { showBottomSheet = false },
-            onOptionSelected = {},
+            onOptionSelected = { option ->
+                if (option == "Food Database") {
+                    navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
+                }
+            },
         )
     }
 }
@@ -147,42 +169,47 @@ private fun MainContent(
     modifier: Modifier = Modifier,
     navBackStack: NavBackStack<NavKey>,
 ) {
-    val currentEntry = navBackStack.last()
+
+    val currentEntry = navBackStack.lastOrNull() ?: return
 
     Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
     ) {
+
         AnimatedContent(
             targetState = currentEntry,
             transitionSpec = {
                 slideInHorizontally { it } + fadeIn() togetherWith
-                    slideOutHorizontally { -it } + fadeOut()
+                        slideOutHorizontally { -it } + fadeOut()
             },
             label = "NavTransition",
         ) { targetEntry ->
 
-            androidx.compose.runtime.key(targetEntry) {
+            key(targetEntry) {
+
                 NavDisplay(
-                    entryDecorators =
-                        listOf(
-                            rememberSaveableStateHolderNavEntryDecorator(),
-                            rememberViewModelStoreNavEntryDecorator(),
-                        ),
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
                     backStack = navBackStack,
-                    entryProvider =
-                        entryProvider {
-                            entry<Routes.HomeScreen> { FoodSearchScreen(
-                                onBackClick = { navBackStack.removeLast() },
-                                onFoodClick = {
-                                }
-                            ) }
-                            entry<Routes.ProgressScreen> { ProgressScreen() }
-                            entry<Routes.GoalsScreen> { GoalScreen() }
-                            entry<Routes.SettingsScreen> { SettingsScreen() }
-                        },
+                    entryProvider = entryProvider {
+
+                        entry<Routes.HomeScreen> { HomeScreen() }
+                        entry<Routes.ProgressScreen> { ProgressScreen() }
+                        entry<Routes.GoalsScreen> { GoalScreen() }
+                        entry<Routes.SettingsScreen> { SettingsScreen() }
+
+                        entry<Routes.FoodDatabaseScreen> {
+                            FoodDatabaseScreen()
+                        }
+
+                        entry<Routes.FoodDetailScreen> { route ->
+                            FoodDetailScreen(route.foodId)
+                        }
+                    },
                 )
             }
         }
@@ -192,27 +219,34 @@ private fun MainContent(
 @Composable
 fun HomeScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Home Screen", modifier = Modifier.align(Alignment.Center))
+        Text("Home Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Composable
 fun ProgressScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Progress Screen", modifier = Modifier.align(Alignment.Center))
+        Text("Progress Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Composable
 fun GoalScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Goal Screen", modifier = Modifier.align(Alignment.Center))
+        Text("Goal Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Composable
 fun SettingsScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Settings Screen", modifier = Modifier.align(Alignment.Center))
+        Text("Settings Screen", modifier = Modifier.align(Alignment.Center))
+    }
+}
+
+@Composable
+fun FoodDetailScreen(foodId: String) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Text("Food Detail: $foodId", modifier = Modifier.align(Alignment.Center))
     }
 }

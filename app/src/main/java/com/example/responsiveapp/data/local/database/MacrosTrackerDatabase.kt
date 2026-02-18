@@ -9,15 +9,12 @@ import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.entity.FoodEntity
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
 
-/**
- * Room Database for Macros Tracker
- */
 @Database(
     entities = [
         FoodEntity::class,
         FoodLogEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

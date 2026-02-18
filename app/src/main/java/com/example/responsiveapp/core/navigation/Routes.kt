@@ -22,5 +22,9 @@ sealed interface Routes : NavKey {
     object GoalsScreen: Routes, NavKey
     @Serializable
     object SettingsScreen: Routes, NavKey
+    @Serializable
+    object FoodDatabaseScreen: Routes, NavKey
+    @Serializable
+    data class FoodDetailScreen(val foodId: String): Routes, NavKey
 
 }

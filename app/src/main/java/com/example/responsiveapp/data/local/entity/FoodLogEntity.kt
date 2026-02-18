@@ -8,12 +8,17 @@ data class FoodLogEntity(
     @PrimaryKey
     val id: String,
     val userId: String,
-    val foodId: String,
+    val date: Long,
+    val logSource: String,  // "DATABASE", "CUSTOM_MEAL", "MANUAL_ENTRY", etc.
+    // ── Nullable: only set for DATABASE/BARCODE_SCAN ──────────────────────────
+    val foodId: String? = null,
+    val brand: String? = null,
+    val servingId: String? = null,
+    // ── Always present ────────────────────────────────────────────────────────
     val foodName: String,
-    val brand: String?,
-    val servingId: String,
     val servingDescription: String,
     val quantity: Float,
+    // ── Nutrition (flattened from NutritionInfo) ──────────────────────────────
     val calories: Float,
     val protein: Float,
     val carbs: Float,
@@ -24,11 +29,10 @@ data class FoodLogEntity(
     val cholesterol: Float,
     val saturatedFat: Float,
     val transFat: Float,
-    val date: Long,
-    val logMethod: String,
-    val notes: String?,
-    val imageUrl: String?,
+    val ingredientsJson: String? = null,
+    val notes: String? = null,
+    val imageUrl: String? = null,
     val createdAt: Long,
     val updatedAt: Long,
-    val syncStatus: String  // PENDING, SYNCED, FAILED
+    val syncStatus: String
 )

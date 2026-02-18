@@ -30,24 +30,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.responsiveapp.presentation.main_screen.AddFoodOption
 
-data class AddFoodOption(
-    val title: String,
-    val subtitle: String,
-    val icon: ImageVector,
-    val iconColor: Color,
-    val backgroundColor: Color,
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFoodBottomSheet(
     onDismiss: () -> Unit,
-    onOptionSelected: (AddFoodOption) -> Unit,
+    onOptionSelected: (String) -> Unit,
 ) {
     val sheetState =
         rememberModalBottomSheetState(
@@ -144,7 +137,7 @@ fun AddFoodBottomSheet(
                 AddFoodOptionItem(
                     option = option,
                     onClick = {
-                        onOptionSelected(option)
+                        onOptionSelected(option.title)
                         onDismiss()
                     },
                 )

@@ -1,5 +1,6 @@
 package com.example.responsiveapp.data.repository
 
+import android.util.Log
 import com.example.responsiveapp.data.local.dao.FoodDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
@@ -12,69 +13,59 @@ import javax.inject.Singleton
 @Singleton
 class FoodRepositoryImpl @Inject constructor(
     private val foodDao: FoodDao,
-    private val fatSecretApi: FatSecretApiService,
+    private val api: FatSecretApiService
 ) : FoodRepository {
 
-    override suspend fun searchFoods(
-        query: String,
-        limit: Int
-    ): Result<List<Food>> {
-
+    override suspend fun searchFoods(query: String, limit: Int): Result<List<Food>> {
         return try {
 
-            val cachedFoods = foodDao.searchFoods(query.lowercase(), limit)
-            if (cachedFoods.isNotEmpty()) {
-                return Result.success(cachedFoods.map { it.toDomain() })
+            val cached = foodDao.searchFoods(query.lowercase(), limit)
+
+            if (cached.isNotEmpty()) {
+                return Result.success(cached.map { it.toDomain() })
             }
 
-            val apiResponse = fatSecretApi.searchFoods(
-                searchExpression = query,
-                maxResults = limit
-            )
-
-            if (!apiResponse.isSuccessful) {
-                return Result.failure(
-                    Exception("FatSecret API error: ${apiResponse.code()} - ${apiResponse.message()}")
-                )
+            val response = api.searchFoods(searchExpression = query, maxResults = limit)
+            if (!response.isSuccessful) {
+                return Result.failure(Exception("API error ${response.code()} ${response.message()}"))
             }
 
-            val searchResult = apiResponse.body()
-            val foodItems = searchResult?.foods?.food
+            val foodsDto = response.body()?.foods?.food.orEmpty()
+            val foods = foodsDto.map { it.toDomain() }
 
-            if (foodItems.isNullOrEmpty()) {
-                return Result.success(emptyList())
+            try {
+                foodDao.insertFoods(foods.map { it.toEntity("fatsecret") })
+            } catch (e: Exception) {
+                Log.e("FoodRepository", "Cache write failed: ${e.message}")
             }
-
-            val foods = foodItems.map { it.toDomain() }
-            foodDao.insertFoods(foods.map { it.toEntity("fatsecret") })
 
             Result.success(foods)
 
         } catch (e: Exception) {
+            Log.e("FoodRepository", "API error: ${e.message}")
             Result.failure(e)
         }
     }
 
     override suspend fun getFoodById(foodId: String): Result<Food> {
-
         return try {
-            val cachedFood = foodDao.getFoodById(foodId)
-            if (cachedFood != null && cachedFood.servings.isNotEmpty()) {
-                return Result.success(cachedFood.toDomain())
+
+            val cached = foodDao.getFoodById(foodId)
+            if (cached != null && cached.servings.isNotEmpty()) {
+                return Result.success(cached.toDomain())
             }
 
-            val apiResponse = fatSecretApi.getFoodById(foodId = foodId)
+            val response = api.getFoodById(foodId = foodId)
 
-            if (!apiResponse.isSuccessful) {
-                return Result.failure(
-                    Exception("Food not found: ${apiResponse.code()}")
-                )
+            if (!response.isSuccessful) {
+                return Result.failure(Exception("Food not found ${response.code()}"))
             }
 
-            val foodDetail = apiResponse.body()?.food
+            val foodDto = response.body()?.food
                 ?: return Result.failure(Exception("Food not found"))
 
-            val food = foodDetail.toDomain()
+            val food = foodDto.toDomain()
+
             foodDao.insertFood(food.toEntity("fatsecret"))
 
             Result.success(food)

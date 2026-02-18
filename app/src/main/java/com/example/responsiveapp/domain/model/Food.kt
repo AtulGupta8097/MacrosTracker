@@ -10,4 +10,8 @@ data class Food(
     val isVerified: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val searchableName: String = name.lowercase()
-)
+) {
+    val defaultServing: Serving?
+        get() = servings.firstOrNull { it.isDefault }
+            ?: servings.firstOrNull()
+}
