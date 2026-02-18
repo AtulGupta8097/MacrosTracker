@@ -24,6 +24,7 @@ fun SearchField(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
         placeholder = {
             Text(
                 text = "Describe what you ate",

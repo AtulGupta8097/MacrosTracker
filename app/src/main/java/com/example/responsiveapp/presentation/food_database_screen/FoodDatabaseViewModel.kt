@@ -41,7 +41,7 @@ class FoodDatabaseViewModel @Inject constructor(
         loadFoods()
     }
 
-    private fun loadFoods(query: String = "French Fries") {
+    private fun loadFoods(query: String = "Pizza") {
         viewModelScope.launch {
             searchFoodUseCase(query, 20).collect { result ->
                 when (result) {

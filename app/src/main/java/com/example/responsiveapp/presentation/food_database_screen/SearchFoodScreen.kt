@@ -2,8 +2,10 @@ package com.example.responsiveapp.presentation.food_database_screen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -53,8 +55,13 @@ fun SearchFoodScreen(
             if(!state.isLoading) {
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = MaterialTheme.spacing.md,
+                        vertical = MaterialTheme.spacing.sm
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
+
                 ) {
                     items(
                         state.data,

@@ -9,6 +9,7 @@ import com.example.responsiveapp.domain.model.Food
 import com.example.responsiveapp.domain.repository.FoodRepository
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.roundToInt
 
 @Singleton
 class FoodRepositoryImpl @Inject constructor(
@@ -31,7 +32,9 @@ class FoodRepositoryImpl @Inject constructor(
             }
 
             val foodsDto = response.body()?.foods?.food.orEmpty()
-            val foods = foodsDto.map { it.toDomain() }
+            val foods = foodsDto.map { it.toDomain() }.filter {
+                (it.defaultServing?.nutrition?.calories?.roundToInt() ?: 0) > 0
+            }
 
             try {
                 foodDao.insertFoods(foods.map { it.toEntity("fatsecret") })
