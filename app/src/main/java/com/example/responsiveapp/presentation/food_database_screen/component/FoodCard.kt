@@ -1,5 +1,6 @@
 package com.example.responsiveapp.presentation.food_database_screen.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,8 +25,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FoodCard(
+    modifier: Modifier = Modifier,
     food: Food,
-    modifier: Modifier = Modifier
+    onFoodClick: (String) -> Unit
 ) {
     val serving = food.defaultServing
 
@@ -42,7 +44,10 @@ fun FoodCard(
     }
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
+            .clickable{
+                onFoodClick(food.id)
+            },
         color = MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.medium
     ) {

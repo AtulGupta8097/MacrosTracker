@@ -23,58 +23,48 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun SearchFoodScreen(
+    modifier: Modifier = Modifier,
     query: String,
     onQueryChange: (String) -> Unit,
     state: FoodDatabaseState<Food>,
-    modifier: Modifier = Modifier
+    onFoodClick: (String) -> Unit
 ) {
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
-    ){
-        Column(
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        SearchField(
+            query = query,
+            onQueryChange = onQueryChange,
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            SearchField(
-                query = query,
-                onQueryChange = {
-                    onQueryChange(it)
-                },
-                modifier = modifier.fillMaxWidth()
-                    .padding(MaterialTheme.spacing.md)
-            )
-            AnimatedVisibility(state.isLoading) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                .fillMaxWidth()
+                .padding(MaterialTheme.spacing.md)
+        )
 
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-            if(!state.isLoading) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        horizontal = MaterialTheme.spacing.md,
-                        vertical = MaterialTheme.spacing.sm
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
-
-                ) {
-                    items(
-                        state.data,
-                        key = {
-                            it.id
-                        }
-                    ) {
-                        FoodCard(it)
-                    }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    horizontal = MaterialTheme.spacing.md,
+                    vertical = MaterialTheme.spacing.sm
+                ),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
+            ) {
+                items(state.data, key = { it.id }) { food ->
+                    FoodCard(
+                        food = food,
+                        onFoodClick = onFoodClick
+                    )
                 }
             }
-
         }
     }
 }
-
