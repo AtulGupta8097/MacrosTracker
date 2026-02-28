@@ -19,6 +19,7 @@ fun FoodBrowseListScreen(
     query: String,
     onQueryChange: (String) -> Unit,
     data: List<FoodItem>,
+    isVertical: Boolean,
     isLoading: Boolean,
     onFoodClick: (String) -> Unit
 ) {
@@ -39,7 +40,10 @@ fun FoodBrowseListScreen(
         Box(Modifier.fillMaxSize()) {
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .then(
+                        if (isVertical) Modifier.navigationBarsPadding() else Modifier
+                    ),
                 contentPadding = PaddingValues(
                     horizontal = MaterialTheme.spacing.md,
                     vertical = MaterialTheme.spacing.sm

@@ -1,11 +1,12 @@
 package com.example.responsiveapp.presentation.food_browse
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.responsiveapp.domain.model.FoodDetail
@@ -32,6 +33,7 @@ fun FoodBrowse(
                 query = state.query,
                 onQueryChange = viewModel::onQueryChange,
                 data = state.foods,
+                isVertical = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT,
                 isLoading = state.isLoading,
                 onFoodClick = viewModel::openFoodDetail
             )

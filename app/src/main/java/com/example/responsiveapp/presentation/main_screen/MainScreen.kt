@@ -12,6 +12,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -57,7 +58,7 @@ fun MainScreen() {
     val navBackStack = rememberNavBackStack(Routes.HomeScreen)
 
     var showBottomSheet by remember { mutableStateOf(false) }
-    var bottomBarHeight by remember { mutableStateOf(0.dp) }
+    var bottomBarHeight by remember { mutableStateOf(64.dp) }
 
     val currentRoute = navBackStack.lastOrNull()
 
@@ -86,14 +87,14 @@ fun MainScreen() {
 
             if (showBottomBar) {
                 Scaffold(
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     bottomBar = {
                         BottomNav(
                             items = navItems,
                             selectedTab = selectedTabIndex,
                             onTabSelected = { index ->
                                 navBackStack.navigateSingleTop(navItems[index].route)
-                            },
-                            onHeightMeasured = { bottomBarHeight = it },
+                            }
                         )
                     },
                     floatingActionButton = {
