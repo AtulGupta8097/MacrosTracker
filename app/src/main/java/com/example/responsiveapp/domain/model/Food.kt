@@ -1,17 +1,17 @@
 package com.example.responsiveapp.domain.model
 
-data class Food(
-    val id: String = "",
-    val name: String = "",
+data class FoodItem(
+    val id: String,
+    val name: String,
     val brand: String? = null,
-    val servings: List<Serving> = emptyList(),
-    val imageUrl: String? = null,
-    val barcode: String? = null,
-    val isVerified: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis(),
-    val searchableName: String = name.lowercase()
-) {
-    val defaultServing: Serving?
-        get() = servings.firstOrNull { it.isDefault }
-            ?: servings.firstOrNull()
-}
+    val foodType: String = "Generic",
+    val macroSummary: MacroSummary
+)
+
+data class MacroSummary(
+    val servingLabel: String,
+    val calories: Float,
+    val fat: Float,
+    val carbs: Float,
+    val protein: Float,
+)

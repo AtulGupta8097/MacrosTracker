@@ -7,16 +7,14 @@ val FitnessOrange = Color(0xFFE17E47)
 
 // 🌑 Neutrals
 val DarkNavy = Color(0xFF252A3D)
-val DarkGray = Color(0xFF334155)
-
 val FitnessGreen = Color(0xFF22C55E)
 
 val FitnessBlue = Color(0xFF3B82F6)
 
-val CardBackground = Color(0xFFF5F3F3)
+val CardBackground = Color(0xFFF1F1F1)
 
 val ErrorRed = Color(0xFFEF4444)
-val primaryVarient = Color(0xFFEED0C4)
+val primaryVarient = Color(0xFFF3D9CF)
 val Surfacevarient = Color(0xFFEFEEEE)
 
 // 🌑 Dark Backgrounds
@@ -40,3 +38,5 @@ val FitnessBlueDarkMode = Color(0xFF60A5FA)
 
 // ❌ Error
 val ErrorRedDark = Color(0xFFF87171)
+
+val grey = Color(0xFFB3B3B3)

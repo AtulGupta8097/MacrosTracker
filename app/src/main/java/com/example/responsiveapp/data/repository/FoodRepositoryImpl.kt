@@ -1,80 +1,80 @@
 package com.example.responsiveapp.data.repository
 
 import android.util.Log
-import com.example.responsiveapp.data.local.dao.FoodDao
+import com.example.responsiveapp.data.local.dao.FoodDetailDao
+import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
-import com.example.responsiveapp.domain.model.Food
+import com.example.responsiveapp.domain.model.FoodDetail
+import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.repository.FoodRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
 
 @Singleton
 class FoodRepositoryImpl @Inject constructor(
-    private val foodDao: FoodDao,
-    private val api: FatSecretApiService
+    private val foodItemDao: FoodItemDao,
+    private val foodDetailDao: FoodDetailDao,
+    private val api: FatSecretApiService,
+    private val ioDispatcher: CoroutineDispatcher
 ) : FoodRepository {
 
-    override suspend fun searchFoods(query: String, limit: Int): Result<List<Food>> {
-        return try {
-
-            val cached = foodDao.searchFoods(query.lowercase(), limit)
-
-            if (cached.isNotEmpty()) {
-                return Result.success(cached.map { it.toDomain() })
-            }
-
-            val response = api.searchFoods(searchExpression = query, maxResults = limit)
-            if (!response.isSuccessful) {
-                return Result.failure(Exception("API error ${response.code()} ${response.message()}"))
-            }
-
-            val foodsDto = response.body()?.foods?.food.orEmpty()
-            val foods = foodsDto.map { it.toDomain() }.filter {
-                (it.defaultServing?.nutrition?.calories?.roundToInt() ?: 0) > 0
-            }
-
+    override suspend fun searchFoods(query: String, limit: Int): Result<List<FoodItem>> =
+        withContext(ioDispatcher) {
             try {
-                foodDao.insertFoods(foods.map { it.toEntity("fatsecret") })
+                val cached = foodItemDao.searchFoods(query.lowercase(), limit)
+                if (cached.isNotEmpty()) {
+                    return@withContext Result.success(cached.map { it.toDomain() })
+                }
+
+                val response = api.searchFoods(query, maxResults = limit)
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(
+                        Exception("API error ${response.code()} ${response.message()}")
+                    )
+                }
+
+                val items = response.body()?.foods?.food.orEmpty()
+                    .map { it.toDomain() }
+                    .filter { (it.macroSummary?.calories?.roundToInt() ?: 0) > 0 }
+
+                runCatching { foodItemDao.insertAll(items.map { it.toEntity() }) }
+
+                Result.success(items)
             } catch (e: Exception) {
-                Log.e("FoodRepository", "Cache write failed: ${e.message}")
+                Log.e("FoodRepository", "Search error: ${e.message}")
+                Result.failure(e)
             }
-
-            Result.success(foods)
-
-        } catch (e: Exception) {
-            Log.e("FoodRepository", "API error: ${e.message}")
-            Result.failure(e)
         }
-    }
 
-    override suspend fun getFoodById(foodId: String): Result<Food> {
-        return try {
+    override suspend fun getFoodDetail(foodId: String): Result<FoodDetail> =
+        withContext(ioDispatcher) {
+            try {
+                val cached = foodDetailDao.getById(foodId)
+                if (cached != null && cached.servings.isNotEmpty()) {
+                    return@withContext Result.success(cached.toDomain())
+                }
 
-            val cached = foodDao.getFoodById(foodId)
-            if (cached != null && cached.servings.isNotEmpty()) {
-                return Result.success(cached.toDomain())
+                val response = api.getFoodById(foodId)
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(
+                        Exception("Food not found ${response.code()}")
+                    )
+                }
+
+                val detail = response.body()?.food
+                    ?: return@withContext Result.failure(Exception("Food not found"))
+
+                val domainDetail = detail.toDomain()
+                runCatching { foodDetailDao.insert(domainDetail.toEntity()) }
+
+                Result.success(domainDetail)
+            } catch (e: Exception) {
+                Result.failure(e)
             }
-
-            val response = api.getFoodById(foodId = foodId)
-
-            if (!response.isSuccessful) {
-                return Result.failure(Exception("Food not found ${response.code()}"))
-            }
-
-            val foodDto = response.body()?.food
-                ?: return Result.failure(Exception("Food not found"))
-
-            val food = foodDto.toDomain()
-
-            foodDao.insertFood(food.toEntity("fatsecret"))
-
-            Result.success(food)
-
-        } catch (e: Exception) {
-            Result.failure(e)
         }
-    }
 }

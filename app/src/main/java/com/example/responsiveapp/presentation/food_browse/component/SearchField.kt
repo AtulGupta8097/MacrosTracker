@@ -1,4 +1,4 @@
-package com.example.responsiveapp.presentation.food_database_screen.component
+package com.example.responsiveapp.presentation.food_browse.component
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons

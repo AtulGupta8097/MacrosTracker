@@ -1,14 +1,7 @@
-package com.example.responsiveapp.presentation.food_database_screen
+package com.example.responsiveapp.presentation.food_browse
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -16,24 +9,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.responsiveapp.domain.model.Food
-import com.example.responsiveapp.presentation.food_database_screen.component.FoodCard
-import com.example.responsiveapp.presentation.food_database_screen.component.SearchField
+import com.example.responsiveapp.domain.model.FoodItem
+import com.example.responsiveapp.presentation.food_browse.component.FoodCard
+import com.example.responsiveapp.presentation.food_browse.component.SearchField
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
-fun SearchFoodScreen(
-    modifier: Modifier = Modifier,
+fun FoodBrowseListScreen(
     query: String,
     onQueryChange: (String) -> Unit,
-    state: FoodDatabaseState<Food>,
+    data: List<FoodItem>,
+    isLoading: Boolean,
     onFoodClick: (String) -> Unit
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+
         SearchField(
             query = query,
             onQueryChange = onQueryChange,
@@ -42,14 +36,8 @@ fun SearchFoodScreen(
                 .padding(MaterialTheme.spacing.md)
         )
 
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
+        Box(Modifier.fillMaxSize()) {
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
@@ -58,12 +46,16 @@ fun SearchFoodScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
             ) {
-                items(state.data, key = { it.id }) { food ->
+                items(data, key = { it.id }) { food ->
                     FoodCard(
                         food = food,
                         onFoodClick = onFoodClick
                     )
                 }
+            }
+
+            if (isLoading) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
         }
     }

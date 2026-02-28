@@ -41,7 +41,8 @@ fun BottomNav(
                 fabRadius = fabRadius,
                 cutoutMargin = fabRadius * 0.25f,
             ),
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.primaryContainer
+            .copy(alpha = 0.8f),
         tonalElevation = 8.dp,
     ) {
         Row(

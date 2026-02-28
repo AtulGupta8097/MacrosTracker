@@ -7,7 +7,8 @@ import com.example.responsiveapp.data.datasource.UserProfileLocalDataSource
 import com.example.responsiveapp.data.datasource.UserProfileRemoteDataSource
 import com.example.responsiveapp.data.datastore.EncryptedTokenDataStore
 import com.example.responsiveapp.data.datastore.TokenDataStore
-import com.example.responsiveapp.data.local.dao.FoodDao
+import com.example.responsiveapp.data.local.dao.FoodDetailDao
+import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
@@ -28,6 +29,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -93,10 +97,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFoodRepository(
-        foodDao: FoodDao,
-        fatSecretApi: FatSecretApiService
+        foodDao: FoodItemDao,
+        foodDetailDao: FoodDetailDao,
+        fatSecretApi: FatSecretApiService,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): FoodRepository {
-        return FoodRepositoryImpl(foodDao, fatSecretApi)
+        return FoodRepositoryImpl(foodDao,foodDetailDao,fatSecretApi,ioDispatcher)
 
     }
 
@@ -109,4 +115,12 @@ object AppModule {
     ): FoodLogRepository {
         return FoodLogRepositoryImpl(foodLogDao, firestore, firebaseAuth)
     }
+
+
+    @IoDispatcher
+    @Provides
+    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class IoDispatcher

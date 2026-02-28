@@ -1,6 +1,5 @@
 package com.example.responsiveapp.presentation.food_database_screen
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,15 +13,14 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.responsiveapp.presentation.food_browse.FoodBrowse
 import com.example.responsiveapp.presentation.food_database_screen.component.TopBar
+import com.example.responsiveapp.presentation.ui.theme.grey
 import kotlinx.coroutines.launch
 
 enum class FoodTab(val title: String) {
@@ -34,32 +32,30 @@ enum class FoodTab(val title: String) {
 
 @Composable
 fun FoodDatabaseScreen(
-    viewModel: FoodDatabaseViewModel = hiltViewModel(),
     onBack: () -> Unit = {}
 ) {
     val tabs = FoodTab.entries
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
 
-    val tab1Destination by viewModel.tab1Destination.collectAsState()
-    val tab2Destination by viewModel.tab2Destination.collectAsState()
+    var isAtRoot by remember { mutableStateOf(true) }
 
-    val topBarVisible = tab1Destination == FoodDatabaseDestination.FoodList
-            && tab2Destination == MyMealsDestination.MealList
-
-    val isInSubScreen = tab1Destination != FoodDatabaseDestination.FoodList
-            || tab2Destination != MyMealsDestination.MealList
+    LaunchedEffect(pagerState.currentPage) {
+        isAtRoot = true
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            if (topBarVisible) {
+
+            if (isAtRoot) {
                 TopBar(onBack = onBack)
 
                 PrimaryScrollableTabRow(
@@ -69,16 +65,28 @@ fun FoodDatabaseScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 ) {
                     tabs.forEachIndexed { index, tab ->
+                        val selected = pagerState.currentPage == index
+
                         Tab(
-                            selected = pagerState.currentPage == index,
+                            selected = selected,
                             onClick = {
-                                scope.launch { pagerState.animateScrollToPage(index) }
+                                scope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
                             },
                             text = {
                                 Text(
                                     text = tab.title,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Visible
+                                    overflow = TextOverflow.Visible,
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        color = if (selected)
+                                            MaterialTheme.colorScheme.primary
+                                        else grey,
+                                        fontWeight = if (selected)
+                                            FontWeight.Normal
+                                        else FontWeight.Thin
+                                    )
                                 )
                             }
                         )
@@ -88,65 +96,21 @@ fun FoodDatabaseScreen(
 
             HorizontalPager(
                 state = pagerState,
-                userScrollEnabled = !isInSubScreen,
+                userScrollEnabled = isAtRoot,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
+
                 when (tabs[page]) {
 
-                    FoodTab.ALL -> {
-                        val query by viewModel.searchQuery.collectAsState()
-                        val state by viewModel.tab1State.collectAsState()
+                    FoodTab.ALL -> FoodBrowse(
+                        onRootChanged = { isAtRoot = it }
+                    )
 
-                        BackHandler(enabled = tab1Destination != FoodDatabaseDestination.FoodList) {
-                            viewModel.onBackFromFoodDetail()
-                        }
+                    FoodTab.MY_MEALS -> {}
 
-                        when (val destination = tab1Destination) {
-                            is FoodDatabaseDestination.FoodList -> {
-                                SearchFoodScreen(
-                                    query = query,
-                                    onQueryChange = viewModel::onQueryChange,
-                                    state = state,
-                                    onFoodClick = viewModel::onFoodClick
-                                )
-                            }
-                            is FoodDatabaseDestination.FoodDetail -> {
-                                FoodDetailScreen(
-                                    state = state,
-                                    onBack = viewModel::onBackFromFoodDetail
-                                )
-                            }
-                        }
-                    }
+                    FoodTab.MY_FOODS -> {}
 
-                    FoodTab.MY_MEALS -> {
-                        BackHandler(enabled = tab2Destination != MyMealsDestination.MealList) {
-                            viewModel.onBackFromMeals()
-                        }
-
-                        when (val destination = tab2Destination) {
-                            is MyMealsDestination.MealList -> {
-                                MyMealsScreen(
-                                    onMealClick = viewModel::onMealClick,
-                                    onCreateMealClick = viewModel::onCreateMealClick
-                                )
-                            }
-                            is MyMealsDestination.MealDetail -> {
-                                MealDetailScreen(
-                                    mealId = destination.mealId,
-                                    onBack = viewModel::onBackFromMeals
-                                )
-                            }
-                            is MyMealsDestination.CreateMeal -> {
-                                CreateMealScreen(
-                                    onBack = viewModel::onBackFromMeals
-                                )
-                            }
-                        }
-                    }
-
-                    FoodTab.MY_FOODS -> Text("My foods")
-                    FoodTab.SAVED_SCANS -> Text("Saved scans")
+                    FoodTab.SAVED_SCANS -> {}
                 }
             }
         }

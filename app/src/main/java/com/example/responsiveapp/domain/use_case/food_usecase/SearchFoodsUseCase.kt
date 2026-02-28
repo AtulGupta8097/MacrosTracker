@@ -1,7 +1,7 @@
 package com.example.responsiveapp.domain.use_case.food_usecase
 
 import com.example.responsiveapp.core.utils.Resource
-import com.example.responsiveapp.domain.model.Food
+import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.repository.FoodRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -14,7 +14,7 @@ class SearchFoodsUseCase @Inject constructor(
     operator fun invoke(
         query: String,
         limit: Int
-    ): Flow<Resource<List<Food>>> = flow {
+    ): Flow<Resource<List<FoodItem>>> = flow {
 
         emit(Resource.Loading())
 

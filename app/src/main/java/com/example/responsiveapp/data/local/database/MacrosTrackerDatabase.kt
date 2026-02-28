@@ -4,23 +4,27 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.responsiveapp.data.local.converter.Converters
-import com.example.responsiveapp.data.local.dao.FoodDao
+import com.example.responsiveapp.data.local.dao.FoodDetailDao
+import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
-import com.example.responsiveapp.data.local.entity.FoodEntity
+import com.example.responsiveapp.data.local.entity.FoodDetailEntity
+import com.example.responsiveapp.data.local.entity.FoodItemEntity
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
 
 @Database(
     entities = [
-        FoodEntity::class,
-        FoodLogEntity::class
+        FoodItemEntity::class,
+        FoodDetailEntity::class,
+        FoodLogEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class MacrosTrackerDatabase : RoomDatabase() {
 
-    abstract fun foodDao(): FoodDao
+    abstract fun foodItemDao(): FoodItemDao
+    abstract fun foodDetailDao(): FoodDetailDao
     abstract fun foodLogDao(): FoodLogDao
 
     companion object {

@@ -1,8 +1,9 @@
-package com.example.responsiveapp.di
+package com.example.responsiveapp.core.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.responsiveapp.data.local.dao.FoodDao
+import com.example.responsiveapp.data.local.dao.FoodDetailDao
+import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import dagger.Module
@@ -32,13 +33,16 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideFoodDao(database: MacrosTrackerDatabase): FoodDao {
-        return database.foodDao()
-    }
+    fun provideFoodItemDao(database: MacrosTrackerDatabase): FoodItemDao =
+        database.foodItemDao()
 
     @Provides
     @Singleton
-    fun provideFoodLogDao(database: MacrosTrackerDatabase): FoodLogDao {
-        return database.foodLogDao()
-    }
+    fun provideFoodDetailDao(database: MacrosTrackerDatabase): FoodDetailDao =
+        database.foodDetailDao()
+
+    @Provides
+    @Singleton
+    fun provideFoodLogDao(database: MacrosTrackerDatabase): FoodLogDao =
+        database.foodLogDao()
 }
