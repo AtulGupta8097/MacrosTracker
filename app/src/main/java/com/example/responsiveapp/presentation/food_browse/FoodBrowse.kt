@@ -2,14 +2,12 @@ package com.example.responsiveapp.presentation.food_browse
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.responsiveapp.domain.model.FoodDetail
 
 @Composable
 fun FoodBrowse(
@@ -41,19 +39,11 @@ fun FoodBrowse(
 
         is FoodBrowseDestination.Detail -> {
             FoodDetailScreen(
-                food = state.selectedFood,
+                foodDetail = state.selectedFood,
                 isLoading = state.isDetailLoading,
+                error = state.detailError,
                 onBack = viewModel::onBackFromDetail
             )
         }
     }
-}
-
-@Composable
-fun FoodDetailScreen(
-    food: FoodDetail?,
-    isLoading: Boolean,
-    onBack: () -> Unit
-) {
-    Text("FoodDetails")
 }

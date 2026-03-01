@@ -16,34 +16,36 @@ fun FoodDetailDto.toDomain(): FoodDetail = FoodDetail(
         servingDto.toDomain(isDefault = index == 0)
     }
 )
+
 fun ServingDto.toDomain(isDefault: Boolean = false): Serving = Serving(
     id = servingId,
     description = servingDescription,
-    metricAmount = metricServingAmount?.toFloatOrNull() ?: 100f,
+    metricAmount = metricServingAmount ?: 100f,
     metricUnit = parseServingUnit(metricServingUnit ?: "g"),
-    numberOfUnits = numberOfUnits?.toFloatOrNull() ?: 1f,
+    numberOfUnits = numberOfUnits ?: 1f,
     measurementDescription = measurementDescription ?: "serving",
     nutrition = NutritionInfo(
-        calories = calories?.toFloatOrNull() ?: 0f,
-        protein = protein?.toFloatOrNull() ?: 0f,
-        carbs = carbohydrate?.toFloatOrNull() ?: 0f,
-        fat = fat?.toFloatOrNull() ?: 0f,
-        fiber = fiber?.toFloatOrNull() ?: 0f,
-        sugar = sugar?.toFloatOrNull() ?: 0f,
-        sodium = sodium?.toFloatOrNull() ?: 0f,
-        cholesterol = cholesterol?.toFloatOrNull() ?: 0f,
-        saturatedFat = saturatedFat?.toFloatOrNull() ?: 0f,
-        // Not present in ServingDto — default to 0f
-        polyunsaturatedFat = 0f,
-        monounsaturatedFat = 0f,
-        transFat = 0f,
-        potassium = 0f,
-        addedSugars = 0f,
-        vitaminD = 0f,
-        calcium = 0f,
-        iron = 0f
+        calories = calories ?: 0f,
+        protein = protein ?: 0f,
+        carbs = carbohydrate ?: 0f,
+        fat = fat ?: 0f,
+        fiber = fiber ?: 0f,
+        sugar = sugar ?: 0f,
+        sodium = sodium ?: 0f,
+        cholesterol = cholesterol ?: 0f,
+        saturatedFat = saturatedFat ?: 0f,
+        polyunsaturatedFat = polyunsaturatedFat ?: 0f,
+        monounsaturatedFat = monounsaturatedFat ?: 0f,
+        transFat = transFat ?: 0f,
+        potassium = potassium ?: 0f,
+        addedSugars = addedSugars ?: 0f,
+        vitaminA = vitaminA ?: 0f,
+        vitaminC = vitaminC ?: 0f,
+        vitaminD = vitaminD ?: 0f,
+        calcium = calcium ?: 0f,
+        iron = iron ?: 0f,
     ),
-    isDefault = isDefault
+    isDefault = isDefault,
 )
 
 internal fun parseServingUnit(unitString: String): ServingUnit {

@@ -8,29 +8,49 @@ data class ServingDto(
     @SerializedName("serving_description")
     val servingDescription: String,
     @SerializedName("metric_serving_amount")
-    val metricServingAmount: String?,
+    val metricServingAmount: Float?,
     @SerializedName("metric_serving_unit")
     val metricServingUnit: String?,
     @SerializedName("number_of_units")
-    val numberOfUnits: String?,
+    val numberOfUnits: Float?,
     @SerializedName("measurement_description")
     val measurementDescription: String?,
     @SerializedName("calories")
-    val calories: String?,
+    val calories: Float?,
     @SerializedName("carbohydrate")
-    val carbohydrate: String?,
+    val carbohydrate: Float?,
     @SerializedName("protein")
-    val protein: String?,
+    val protein: Float?,
     @SerializedName("fat")
-    val fat: String?,
+    val fat: Float?,
     @SerializedName("saturated_fat")
-    val saturatedFat: String?,
-    @SerializedName("sugar")
-    val sugar: String?,
-    @SerializedName("fiber")
-    val fiber: String?,
-    @SerializedName("sodium")
-    val sodium: String?,
+    val saturatedFat: Float?,
+    @SerializedName("polyunsaturated_fat")
+    val polyunsaturatedFat: Float?,
+    @SerializedName("monounsaturated_fat")
+    val monounsaturatedFat: Float?,
+    @SerializedName("trans_fat")
+    val transFat: Float?,
     @SerializedName("cholesterol")
-    val cholesterol: String?
+    val cholesterol: Float?,
+    @SerializedName("sodium")
+    val sodium: Float?,
+    @SerializedName("potassium")
+    val potassium: Float?,
+    @SerializedName("fiber")
+    val fiber: Float?,
+    @SerializedName("sugar")
+    val sugar: Float?,
+    @SerializedName("added_sugars")
+    val addedSugars: Float?,
+    @SerializedName("vitamin_a")
+    val vitaminA: Float?,
+    @SerializedName("vitamin_c")
+    val vitaminC: Float?,
+    @SerializedName("vitamin_d")
+    val vitaminD: Float?,
+    @SerializedName("calcium")
+    val calcium: Float?,
+    @SerializedName("iron")
+    val iron: Float?,
 )

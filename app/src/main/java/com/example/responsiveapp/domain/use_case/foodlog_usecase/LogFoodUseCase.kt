@@ -33,8 +33,4 @@ class LogFoodUseCase @Inject constructor(
             emit(Resource.Error(e.message ?: "Unexpected error"))
         }
     }
-
-//    private fun generateLogId(): String {
-//        return "log_${System.currentTimeMillis()}_${(0..9999).random()}"
-//    }
 }

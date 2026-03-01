@@ -102,9 +102,11 @@ fun FoodDatabaseScreen(
 
                 when (tabs[page]) {
 
-                    FoodTab.ALL -> FoodBrowse(
-                        onRootChanged = { isAtRoot = it }
-                    )
+                    FoodTab.ALL ->  {
+                        FoodBrowse (
+                            onRootChanged = { isAtRoot = it }
+                        )
+                    }
 
                     FoodTab.MY_MEALS -> {}
 

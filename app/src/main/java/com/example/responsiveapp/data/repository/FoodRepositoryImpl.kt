@@ -46,7 +46,6 @@ class FoodRepositoryImpl @Inject constructor(
 
                 Result.success(items)
             } catch (e: Exception) {
-                Log.e("FoodRepository", "Search error: ${e.message}")
                 Result.failure(e)
             }
         }
@@ -60,6 +59,7 @@ class FoodRepositoryImpl @Inject constructor(
                 }
 
                 val response = api.getFoodById(foodId)
+
                 if (!response.isSuccessful) {
                     return@withContext Result.failure(
                         Exception("Food not found ${response.code()}")
@@ -68,6 +68,8 @@ class FoodRepositoryImpl @Inject constructor(
 
                 val detail = response.body()?.food
                     ?: return@withContext Result.failure(Exception("Food not found"))
+                Log.d("FoodRepository", "Returning API food detail")
+
 
                 val domainDetail = detail.toDomain()
                 runCatching { foodDetailDao.insert(domainDetail.toEntity()) }
