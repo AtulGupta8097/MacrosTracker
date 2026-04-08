@@ -1,7 +1,6 @@
 package com.example.responsiveapp.data.remote.auth
 
-import android.util.Log
-import com.example.responsiveapp.core.constant.Constants.LOG
+
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request

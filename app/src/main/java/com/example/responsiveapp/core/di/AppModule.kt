@@ -64,7 +64,6 @@ object AppModule {
 
         return firestore
     }
-
     @Provides
     fun provideMacroCalculatorDataSource(): MacroCalculatorDataSource =
         MacroCalculatorDataSourceImpl()

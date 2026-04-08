@@ -16,7 +16,7 @@ fun FoodBrowse(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state.destination) {
+    LaunchedEffect(state.destination is FoodBrowseDestination.List) {
         onRootChanged(state.destination is FoodBrowseDestination.List)
     }
 

@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -204,7 +205,12 @@ private fun MainContent(
                         entry<Routes.SettingsScreen> { SettingsScreen() }
 
                         entry<Routes.FoodDatabaseScreen> {
-                            FoodDatabaseScreen()
+                            FoodDatabaseScreen(
+                                onBack = {
+                                    navBackStack.removeLastOrNull()
+                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
+                                }
+                            )
                         }
 
                         entry<Routes.FoodDetailScreen> { route ->

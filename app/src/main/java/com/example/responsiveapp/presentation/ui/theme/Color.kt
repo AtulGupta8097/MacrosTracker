@@ -40,3 +40,10 @@ val FitnessBlueDarkMode = Color(0xFF60A5FA)
 val ErrorRedDark = Color(0xFFF87171)
 
 val grey = Color(0xFFB3B3B3)
+
+
+// Common
+val ProteinColor = Color(0xFF4A90D9)
+val CarbsColor   = Color(0xFFF5A623)
+val FatColor     = Color(0xFFE8526A)
+val CaloriesColor = Color(0xFF6FCF97)

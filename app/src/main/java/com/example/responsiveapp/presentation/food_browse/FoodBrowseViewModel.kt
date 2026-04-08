@@ -1,5 +1,6 @@
 package com.example.responsiveapp.presentation.food_browse
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.domain.repository.FoodLogRepository
@@ -13,20 +14,26 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val TAG = "FoodBrowseViewModel"
+
 @HiltViewModel
 class FoodBrowseViewModel @Inject constructor(
     private val foodRepository: FoodRepository,
-    private val foodLogRepository: FoodLogRepository
+    private val foodLogRepository: FoodLogRepository,
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(FoodBrowseState())
     val state = _state.asStateFlow()
     private var searchJob: Job? = null
 
     init {
+        Log.d(TAG, "init: ")
         onQueryChange()
     }
 
+    override fun onCleared() {
+        Log.d(TAG, "onCleared: ")
+        super.onCleared()
+    }
     fun onQueryChange(query: String = "") {
         _state.update { it.copy(query = query) }
 
