@@ -44,7 +44,8 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FoodDetailHeader(
-    foodDetail: FoodDetail,
+    foodName: String,
+    foodBrand: String? = null,
     selectedServing: Serving,
     nutrition: NutritionInfo,
     onBack: () -> Unit
@@ -88,7 +89,7 @@ fun FoodDetailHeader(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = foodDetail.name,
+                        text = foodName,
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -97,7 +98,7 @@ fun FoodDetailHeader(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    foodDetail.brand?.let {
+                    foodBrand?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodySmall.copy(

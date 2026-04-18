@@ -6,26 +6,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun FoodBrowse(
     viewModel: FoodBrowseViewModel = hiltViewModel(),
-    onRootChanged: (Boolean) -> Unit
+    onRootChanged: (Boolean) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val foodDetailUiState by viewModel.foodDetailUiState.collectAsStateWithLifecycle()
+    val isOnList = state.destination is FoodBrowseDestination.List
 
-    LaunchedEffect(state.destination is FoodBrowseDestination.List) {
-        onRootChanged(state.destination is FoodBrowseDestination.List)
+    LaunchedEffect(isOnList) {
+        onRootChanged(isOnList)
     }
 
-    BackHandler(enabled = state.destination !is FoodBrowseDestination.List) {
+    BackHandler(enabled = !isOnList) {
         viewModel.onBackFromDetail()
     }
 
     when (state.destination) {
-
         FoodBrowseDestination.List -> {
             FoodBrowseListScreen(
                 query = state.query,
@@ -33,16 +34,16 @@ fun FoodBrowse(
                 data = state.foods,
                 isVertical = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT,
                 isLoading = state.isLoading,
-                onFoodClick = viewModel::openFoodDetail
+                onFoodClick = viewModel::openFoodDetail,
             )
         }
 
         is FoodBrowseDestination.Detail -> {
             FoodDetailScreen(
-                foodDetail = state.selectedFood,
-                isLoading = state.isDetailLoading,
-                error = state.detailError,
-                onBack = viewModel::onBackFromDetail
+                uiState = foodDetailUiState,
+                onBack = viewModel::onBackFromDetail,
+                onServingSelected = viewModel::onServingSelected,
+                onQuantityChanged = viewModel::onQuantityChanged,
             )
         }
     }

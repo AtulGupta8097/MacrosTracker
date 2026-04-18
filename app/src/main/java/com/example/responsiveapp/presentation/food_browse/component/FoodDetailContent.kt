@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.responsiveapp.domain.model.FoodDetail
 import com.example.responsiveapp.domain.model.NutritionInfo
 import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.presentation.common_component.CustomButton
@@ -28,34 +28,35 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 @Composable
 fun FoodDetailContent(
     modifier: Modifier = Modifier,
-    foodDetail: FoodDetail,
+    foodName: String,
+    foodBrand: String? = null,
+    foodServing: List<Serving>,
     selectedServing: Serving,
     quantity: Float,
     scaledNutrition: NutritionInfo,
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
     onBack: () -> Unit,
-    onLog: () -> Unit = {}
+    onLog: () -> Unit = {},
 ) {
-
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.lg)
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.lg),
     ) {
-
         item {
             FoodDetailHeader(
-                foodDetail = foodDetail,
+                foodName = foodName,
+                foodBrand = foodBrand,
                 selectedServing = selectedServing,
                 nutrition = scaledNutrition,
-                onBack = onBack
+                onBack = onBack,
             )
         }
 
-        if (foodDetail.servings.size > 1) {
+        if (foodServing.size > 1) {
             item {
                 ServingSelector(
-                    servings = foodDetail.servings,
+                    servings = foodServing,
                     selectedServing = selectedServing,
                     onServingSelected = onServingSelected,
                 )
@@ -68,7 +69,7 @@ fun FoodDetailContent(
                 onQuantityChanged = onQuantityChanged,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.md)
+                    .padding(horizontal = MaterialTheme.spacing.md),
             )
         }
 
@@ -78,7 +79,7 @@ fun FoodDetailContent(
                     .fillMaxWidth()
                     .padding(horizontal = MaterialTheme.spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
             ) {
                 Box(
                     Modifier
@@ -86,7 +87,7 @@ fun FoodDetailContent(
                         .height(16.dp)
                         .background(
                             MaterialTheme.colorScheme.primary,
-                            androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
+                            RoundedCornerShape(2.dp),
                         )
                 )
                 Text(
@@ -94,8 +95,8 @@ fun FoodDetailContent(
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
                 )
             }
         }
@@ -103,7 +104,7 @@ fun FoodDetailContent(
         item {
             NutritionTable(
                 nutrition = scaledNutrition,
-                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.md)
+                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.md),
             )
         }
 
@@ -117,8 +118,8 @@ fun FoodDetailContent(
                     .padding(MaterialTheme.spacing.md),
                 buttonColors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             )
         }
     }
