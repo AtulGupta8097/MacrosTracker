@@ -20,15 +20,12 @@ enum class DeviceConfiguration {
             val windowSizeClass = adaptiveInfo.windowSizeClass
 
             return when {
-                // Desktop / large screens
                 windowSizeClass.isWidthAtLeastBreakpoint(840) ->
                     DESKTOP
 
-                // Tablets
-                windowSizeClass.isWidthAtLeastBreakpoint(600) ->
+                windowSizeClass.isWidthAtLeastBreakpoint(600)  ->
                     TABLET
 
-                // Phones
                 else ->
                     MOBILE
             }

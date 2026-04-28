@@ -12,12 +12,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
-import com.example.responsiveapp.presentation.main_screen.MainScreen
-import com.example.responsiveapp.presentation.signin_screen.SignInScreen
-import com.example.responsiveapp.presentation.signup_screen.SignUpScreen
-import com.example.responsiveapp.presentation.splash_screen.SplashScreen
+import com.example.responsiveapp.presentation.mainscreen.MainScreen
+import com.example.responsiveapp.presentation.signin.SignInScreen
+import com.example.responsiveapp.presentation.signup.SignUpScreen
+import com.example.responsiveapp.presentation.splash.SplashScreen
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
-import com.example.responsiveapp.presentation.user_setup_screens.screens.UserSetupMainScreen
+import com.example.responsiveapp.presentation.usersetup.screens.UserSetupMainScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
