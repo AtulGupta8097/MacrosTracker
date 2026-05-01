@@ -8,6 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
+
 @Composable
 fun FoodBrowse(
     viewModel: FoodBrowseViewModel = hiltViewModel(),

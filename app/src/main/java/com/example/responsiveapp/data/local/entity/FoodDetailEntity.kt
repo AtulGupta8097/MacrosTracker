@@ -3,7 +3,7 @@ package com.example.responsiveapp.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.example.responsiveapp.data.local.converter.Converters
+import com.example.responsiveapp.data.local.converter.ServingConverter
 
 @Entity(tableName = "food_details")
 data class FoodDetailEntity(
@@ -14,7 +14,7 @@ data class FoodDetailEntity(
     val imageUrl: String?,
     val barcode: String?,
     val isVerified: Boolean,
-    @TypeConverters(Converters::class)
+    @TypeConverters(ServingConverter::class)
     val servings: List<ServingEntity>,
     val cachedAt: Long = System.currentTimeMillis(),
 )

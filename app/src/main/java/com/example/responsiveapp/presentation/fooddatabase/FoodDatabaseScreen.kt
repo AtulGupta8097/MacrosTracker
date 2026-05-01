@@ -107,7 +107,9 @@ fun FoodDatabaseScreen(
 
                     FoodTab.ALL ->  {
                         FoodBrowse (
-                            onRootChanged = { isAtRoot = it }
+                            onRootChanged = {
+                                isAtRoot = it
+                            }
                         )
                     }
 

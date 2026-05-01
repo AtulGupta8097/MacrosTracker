@@ -5,7 +5,7 @@ import com.example.responsiveapp.data.local.entity.ServingEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class Converters {
+class ServingConverter {
 
     private val gson = Gson()
 
@@ -19,4 +19,5 @@ class Converters {
         val type = object : TypeToken<List<ServingEntity>>() {}.type
         return gson.fromJson(servingsJson, type)
     }
+
 }

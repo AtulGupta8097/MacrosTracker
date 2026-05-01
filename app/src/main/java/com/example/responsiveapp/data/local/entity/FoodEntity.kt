@@ -2,8 +2,6 @@ package com.example.responsiveapp.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import com.example.responsiveapp.data.local.converter.Converters
 
 @Entity(tableName = "food_items")
 data class FoodItemEntity(

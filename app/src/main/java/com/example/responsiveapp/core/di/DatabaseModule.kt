@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
+import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import dagger.Module
 import dagger.Provides
@@ -45,4 +46,9 @@ object DatabaseModule {
     @Singleton
     fun provideFoodLogDao(database: MacrosTrackerDatabase): FoodLogDao =
         database.foodLogDao()
+
+    @Provides
+    @Singleton
+    fun provideMyMealsDao(database: MacrosTrackerDatabase): MyMealsDao =
+        database.myMealsDAo()
 }
