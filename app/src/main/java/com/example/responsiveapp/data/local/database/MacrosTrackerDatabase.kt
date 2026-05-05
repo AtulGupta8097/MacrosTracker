@@ -20,7 +20,7 @@ import com.example.responsiveapp.data.local.entity.MyMealsEntity
         FoodLogEntity::class,
         MyMealsEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(ServingConverter::class)

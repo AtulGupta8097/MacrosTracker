@@ -10,16 +10,19 @@ import com.example.responsiveapp.data.datastore.TokenDataStore
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
+import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
 import com.example.responsiveapp.data.repository.FoodLogRepositoryImpl
 import com.example.responsiveapp.data.repository.FoodRepositoryImpl
 import com.example.responsiveapp.data.repository.MacroRepositoryImpl
+import com.example.responsiveapp.data.repository.MyMealRepositoryImpl
 import com.example.responsiveapp.data.repository.UserProfileRepositoryImpl
 import com.example.responsiveapp.domain.repository.AuthRepository
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.FoodRepository
 import com.example.responsiveapp.domain.repository.MacroRepository
+import com.example.responsiveapp.domain.repository.MyMealRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -119,6 +122,12 @@ object AppModule {
     @IoDispatcher
     @Provides
     fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @Singleton
+    @Provides
+    fun provideMyMealRepository(
+        myMealDao: MyMealsDao
+    ): MyMealRepository = MyMealRepositoryImpl(myMealDao)
 }
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

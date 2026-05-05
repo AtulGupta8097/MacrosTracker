@@ -97,7 +97,7 @@ object NetworkModule {
         return retrofit.create(FatSecretAuthApiService::class.java)
     }
 
-    // ============ TOKEN MANAGER ============
+    // TOKEN MANAGER
 
     @Provides
     @Singleton
@@ -108,7 +108,7 @@ object NetworkModule {
         return FatSecretTokenManager(tokenDataStore, authApiService)
     }
 
-    // ============ MAIN FATSECRET RETROFIT (For API calls) ============
+    // MAIN FATSECRET RETROFIT (For API calls)
 
     @Provides
     @Singleton

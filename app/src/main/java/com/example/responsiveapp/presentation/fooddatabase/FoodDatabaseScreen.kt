@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.foodbrowse.FoodBrowse
 import com.example.responsiveapp.presentation.fooddatabase.component.TopBar
+import com.example.responsiveapp.presentation.mymeal.MyMealScreen
 import com.example.responsiveapp.presentation.ui.theme.grey
 import kotlinx.coroutines.launch
 
@@ -45,7 +46,7 @@ fun FoodDatabaseScreen(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
 
         Column(
@@ -114,6 +115,11 @@ fun FoodDatabaseScreen(
                     }
 
                     FoodTab.MY_MEALS -> {
+                        MyMealScreen(
+                            onRootChanged = {
+                                isAtRoot = it
+                            }
+                        )
                     }
 
                     FoodTab.MY_FOODS -> {}

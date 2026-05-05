@@ -18,7 +18,11 @@ class SearchFoodsUseCase @Inject constructor(
 
         emit(Resource.Loading())
 
-        val result = repository.searchFoods(query, limit)
+        val finalQuery = query.ifBlank {
+            "Pizza"
+        }
+
+        val result = repository.searchFoods(finalQuery, limit)
 
         result.fold(
             onSuccess = { foods ->
