@@ -6,13 +6,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.example.responsiveapp.presentation.mymeal.MyMealDestination
 import com.example.responsiveapp.presentation.mymeal.MyMealUIState
+import com.example.responsiveapp.presentation.mymeal.TotalMacros
 
 @Composable
 fun MyMealPhoneLayout(
-    state: MyMealUIState,
     modifier: Modifier = Modifier,
+    state: MyMealUIState,
+    totalMacros: TotalMacros,
     onBack: () -> Unit = {},
     onRootChanged: (Boolean) -> Unit,
+    onMealNameChange: (String) -> Unit,
     onCreateMealClick: () -> Unit,
 ) {
     val isOnList = state.destination is MyMealDestination.MyMealList
@@ -35,7 +38,16 @@ fun MyMealPhoneLayout(
         }
 
         MyMealDestination.Create -> {
-
+            CreateMealScreen(
+                mealName = state.mealName,
+                onMealNameChanged = onMealNameChange,
+                ingredients = state.ingredient,
+                totalCal = totalMacros.calories,
+                totalProtein = totalMacros.protein,
+                totalCarbs = totalMacros.carbs,
+                totalFat = totalMacros.fat,
+                onBack = onBack,
+            )
         }
 
         else -> Unit

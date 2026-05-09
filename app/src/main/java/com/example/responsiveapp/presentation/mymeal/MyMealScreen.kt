@@ -15,20 +15,31 @@ fun MyMealScreen(
     onRootChanged: (Boolean) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val totalMacros = state.ingredient.totalMacros()
+
     val deviceConfiguration = MaterialTheme.deviceConfiguration
 
     when (deviceConfiguration) {
         DeviceConfiguration.MOBILE -> {
             MyMealPhoneLayout(
                 state = state,
+                totalMacros = totalMacros,
                 onCreateMealClick = viewModel::onCreateMealClicked,
                 onRootChanged = onRootChanged,
+                onMealNameChange = viewModel::onMealNameChange,
                 onBack = viewModel::onBack
             )
         }
 
         DeviceConfiguration.TABLET -> {
-            MyMealTabLayout()
+            MyMealPhoneLayout(
+                state = state,
+                totalMacros = totalMacros,
+                onCreateMealClick = viewModel::onCreateMealClicked,
+                onRootChanged = onRootChanged,
+                onMealNameChange = viewModel::onMealNameChange,
+                onBack = viewModel::onBack
+            )
         }
 
         else -> {

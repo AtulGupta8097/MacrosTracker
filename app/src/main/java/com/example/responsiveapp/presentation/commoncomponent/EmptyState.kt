@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,7 +32,7 @@ fun EmptyState(
     tint: Color = MaterialTheme.colorScheme.primary
 ) {
     Column(
-        modifier = modifier.padding(40.dp),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -43,7 +44,7 @@ fun EmptyState(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             tint.copy(alpha = 0.14f),
-                            Color.Transparent   // ✅ correct Compose Color
+                            Color.Transparent
                         )
                     ),
                     shape = CircleShape
@@ -65,7 +66,8 @@ fun EmptyState(
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold
             ),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,7 +77,9 @@ fun EmptyState(
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             ),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+
         )
     }
 }

@@ -8,7 +8,12 @@ data class MyMealUIState(
     val meals: List<MyMeal> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val mealName: String = "",
     val ingredient: Map<String, MealIngredient> = emptyMap(),
+    val totalCal: Float = 0f,
+    val totalProtein: Float = 0f,
+    val totalCarbs: Float = 0f,
+    val totalFat: Float = 0f,
     val showCreateSheet: Boolean = false,
     val destination: MyMealDestination = MyMealDestination.MyMealList,
 

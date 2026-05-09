@@ -30,7 +30,9 @@ fun SearchField(
                 text = "Describe what you ate",
                 style = MaterialTheme.typography.bodySmall
                     .copy(
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = 0.56f
+                        ),
                         fontWeight = FontWeight.Bold
                     )
             )

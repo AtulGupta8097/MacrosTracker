@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -112,8 +114,10 @@ fun FoodDetailContent(
             CustomButton(
                 text = "Log Food",
                 onClick = onLog,
+                imageVector = Icons.Default.Add,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(80.dp)
                     .navigationBarsPadding()
                     .padding(MaterialTheme.spacing.md),
                 buttonColors = ButtonDefaults.buttonColors(

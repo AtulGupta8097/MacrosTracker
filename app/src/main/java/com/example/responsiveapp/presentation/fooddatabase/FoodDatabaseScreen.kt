@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.foodbrowse.FoodBrowse
-import com.example.responsiveapp.presentation.fooddatabase.component.TopBar
+import com.example.responsiveapp.presentation.commoncomponent.TopBar
 import com.example.responsiveapp.presentation.mymeal.MyMealScreen
 import com.example.responsiveapp.presentation.ui.theme.grey
 import kotlinx.coroutines.launch
@@ -58,7 +58,10 @@ fun FoodDatabaseScreen(
 
             AnimatedVisibility(isAtRoot) {
                 Column {
-                    TopBar(onBack = onBack)
+                    TopBar(
+                        heading = "Log Food",
+                        onBack = onBack
+                    )
 
                     PrimaryScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage,

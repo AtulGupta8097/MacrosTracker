@@ -1,7 +1,7 @@
 package com.example.responsiveapp.domain.model
 
 data class MealIngredient(
-    val foodId: String? = null,
+    val foodId: String,
     val foodName: String,
     val brand: String? = null,
     val servingId: String? = null,

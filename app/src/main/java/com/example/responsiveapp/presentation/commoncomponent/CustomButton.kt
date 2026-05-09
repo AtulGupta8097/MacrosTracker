@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
@@ -40,7 +41,14 @@ fun CustomButton(
     )
     {
         if(!isLoading) {
-            Text(text, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text= text,
+                style = MaterialTheme.typography.labelLarge
+                    .copy(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    ),
+                )
             Spacer(modifier = Modifier.width(MaterialTheme.spacing.sm))
 
             if (imageVector != null) {

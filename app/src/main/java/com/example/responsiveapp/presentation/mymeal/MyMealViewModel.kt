@@ -43,6 +43,10 @@ class MyMealViewModel @Inject constructor(
         _state.update { it.copy(sheetSearchQuery = query) }
     }
 
+    fun onMealNameChange(mealName: String) {
+        _state.update { it.copy(mealName = mealName) }
+    }
+
     private fun loadMyMeals() {
         observeMyMeals()
             .onEach { meals -> _state.update { it.copy(meals = meals) } }

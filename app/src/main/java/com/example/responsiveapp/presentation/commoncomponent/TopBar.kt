@@ -1,8 +1,8 @@
-package com.example.responsiveapp.presentation.fooddatabase.component
+package com.example.responsiveapp.presentation.commoncomponent
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -18,35 +18,36 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
-fun TopBar(onBack: () -> Unit) {
-    Row(
-        modifier = Modifier
+fun TopBar(
+    modifier: Modifier = Modifier,
+    heading: String,
+    onBack: () -> Unit) {
+    Box(
+        modifier = modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .padding(horizontal = MaterialTheme.spacing.md, MaterialTheme.spacing.md),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = MaterialTheme.spacing.md, MaterialTheme.spacing.md)
     ) {
             Icon(
                 modifier = Modifier.clickable(
                     onClick = onBack
                 )
-                    .align(Alignment.CenterVertically),
+                    .align(Alignment.CenterStart),
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 tint = MaterialTheme.colorScheme.onBackground,
             )
 
 
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
             Text(
-                text = "Log food",
+                text = heading,
                 style = MaterialTheme.typography.titleLarge
                     .copy(
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     ),
                 modifier = Modifier.align(Alignment.Center)
             )
-        }
     }
 }
