@@ -16,8 +16,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,7 +48,9 @@ fun CreateMealScreen(
     ingredients: Map<String, MealIngredient>,
     onMealNameChanged: (String) -> Unit = {},
     onIngredientAdd: () -> Unit = {},
+    isEditMode: Boolean = false,
     onSave: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onIngredientRemove: (String) -> Unit = {},
     onBack: () -> Unit = {}
 ) {
@@ -60,8 +64,19 @@ fun CreateMealScreen(
     ) {
 
         TopBar(
-            heading = "Create Meal",
-            onBack = onBack
+            heading = if (isEditMode) "Edit Meal" else "Create Meal",
+            onBack  = onBack,
+            actions = {
+                if (isEditMode) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete meal",
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            },
         )
 
         Column(
@@ -168,7 +183,6 @@ fun CreateMealScreen(
                 }
             }
 
-            // Pinned below all items, scrolls with content
             CustomButton(
                 text = "Save Meal",
                 onClick = onSave,

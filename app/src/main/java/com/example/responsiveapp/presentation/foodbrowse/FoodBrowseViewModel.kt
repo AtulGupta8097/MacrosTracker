@@ -6,8 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.domain.model.scale
-import com.example.responsiveapp.domain.repository.FoodLogRepository
-import com.example.responsiveapp.domain.repository.FoodRepository
 import com.example.responsiveapp.domain.use_case.food_usecase.GetFoodByIdUseCase
 import com.example.responsiveapp.domain.use_case.food_usecase.SearchFoodsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map

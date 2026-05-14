@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BakeryDining
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -60,16 +61,19 @@ fun MacroSummarySection(
                     )
             )
 
-            Column(
-                modifier = Modifier.padding(spacing.lg)
-            ) {
+            Column{
                 Text(
                     text = "TOTAL CALORIES",
                     style = MaterialTheme.typography.labelMedium.copy(
                         letterSpacing = 2.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    modifier = Modifier
+                        .padding(
+                            top = MaterialTheme.spacing.md,
+                            start = MaterialTheme.spacing.md
+                        )
                 )
 
                 Row(
@@ -81,6 +85,10 @@ fun MacroSummarySection(
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
                             lineHeight = 90.sp
+                        ),
+                        modifier = Modifier.padding(
+                            start = MaterialTheme.spacing.md,
+                            top = MaterialTheme.spacing.md
                         )
                     )
                     Text(
@@ -96,10 +104,10 @@ fun MacroSummarySection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = spacing.lg)
+                        .padding(vertical = MaterialTheme.spacing.lg,
+                            horizontal = spacing.xs)
                         .clip(MaterialTheme.shapes.large)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.55f))
-                        .padding(vertical = spacing.md, horizontal = spacing.sm),
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)),
                     horizontalArrangement = Arrangement.spacedBy(spacing.sm)
                 ) {
                     MacroCard(
@@ -132,7 +140,7 @@ fun MacroSummarySection(
 @Preview
 @Composable
 private fun PrevMacroSummary() {
-    ResponsiveAppTheme(darkTheme = true) {
+    ResponsiveAppTheme(darkTheme = false) {
         MacroSummarySection(
             totalCal = 480f,
             totalProtein = 10.2f,

@@ -3,14 +3,17 @@ package com.example.responsiveapp.presentation.mymeal
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.Resource
+import com.example.responsiveapp.domain.model.CustomToastProperty
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.MealIngredient
 import com.example.responsiveapp.domain.model.NutritionInfo
+import com.example.responsiveapp.domain.model.mymeals.MyMeal
 import com.example.responsiveapp.domain.use_case.food_usecase.SearchFoodsUseCase
-import com.example.responsiveapp.domain.use_case.foodlog_usecase.LogFoodUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.DeleteMyMealUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.ObServeMyMealUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.SaveMyMealUseCase
+import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
+import com.example.responsiveapp.presentation.commoncomponent.SuccessToast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,9 +32,9 @@ class MyMealViewModel @Inject constructor(
     private val observeMyMeals: ObServeMyMealUseCase,
     private val saveMyMeal: SaveMyMealUseCase,
     private val deleteMyMeal: DeleteMyMealUseCase,
-    private val logFood: LogFoodUseCase,
     private val searchFoodUseCase: SearchFoodsUseCase,
-): ViewModel() {
+) : ViewModel() {
+
     private val _state = MutableStateFlow(MyMealUIState())
     val state = _state.asStateFlow()
 
@@ -40,17 +44,26 @@ class MyMealViewModel @Inject constructor(
     }
 
     fun onQueryChange(query: String) {
-        _state.update { it.copy(sheetSearchQuery = query) }
+        _state.update {
+            it.copy(sheetSearchQuery = query)
+        }
     }
 
     fun onMealNameChange(mealName: String) {
-        _state.update { it.copy(mealName = mealName) }
+        _state.update {
+            it.copy(mealName = mealName)
+        }
     }
 
     private fun loadMyMeals() {
         observeMyMeals()
-            .onEach { meals -> _state.update { it.copy(meals = meals) } }
+            .onEach { meals ->
+                _state.update {
+                    it.copy(meals = meals)
+                }
+            }
             .launchIn(viewModelScope)
+
         searchFood("")
     }
 
@@ -71,22 +84,18 @@ class MyMealViewModel @Inject constructor(
 
     private fun searchFood(query: String) {
         viewModelScope.launch {
-            if (query.isBlank()) {
-                _state.update { it.copy(sheetFoods = emptyList(), isLoading = false) }
-                return@launch
-            }
 
-            _state.update { it.copy(isLoading = true) }
+            _state.update {
+                it.copy(isLoading = true)
+            }
 
             searchFoodUseCase(query, 38)
                 .collect { result ->
                     when (result) {
-
                         is Resource.Loading -> {
                             _state.update {
                                 it.copy(
                                     sheetErrorMessage = null,
-                                    sheetFoods = emptyList(),
                                     isFoodListLoading = true
                                 )
                             }
@@ -115,9 +124,19 @@ class MyMealViewModel @Inject constructor(
         }
     }
 
+    fun onMealCardClick(meal: MyMeal) {
+        _state.update {
+            it.copy(
+                destination  = MyMealDestination.Edit(meal.id),
+                editingMeal  = meal,
+                mealName     = meal.name,
+                ingredient   = meal.ingredients.associateBy { ing -> ing.foodId },
+            )
+        }
+    }
+
     fun onAddFoodToMeal(food: FoodItem) {
         viewModelScope.launch {
-
             val ingredient = MealIngredient(
                 foodId = food.id,
                 foodName = food.name,
@@ -130,8 +149,10 @@ class MyMealViewModel @Inject constructor(
                     carbs = food.macroSummary.carbs
                 )
             )
+
             _state.update {
                 it.copy(
+                    showCreateSheet = false,
                     ingredient = it.ingredient.plus(food.id to ingredient)
                 )
             }
@@ -147,11 +168,31 @@ class MyMealViewModel @Inject constructor(
             }
         }
     }
+
+    fun onDeleteMeal() {
+        viewModelScope.launch {
+            val mealId = _state.value.editingMeal?.id ?: return@launch
+            deleteMyMeal(mealId)
+            showToast("Meal deleted", SuccessToast())
+            _state.update {
+                it.copy(
+                    destination = MyMealDestination.MyMealList,
+                    editingMeal = null,
+                    mealName    = "",
+                    ingredient  = emptyMap(),
+                )
+            }
+        }
+    }
+
     fun onBack() {
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    destination = MyMealDestination.MyMealList
+                    destination = MyMealDestination.MyMealList,
+                    editingMeal = null,
+                    mealName    = "",
+                    ingredient  = emptyMap()
                 )
             }
         }
@@ -167,4 +208,108 @@ class MyMealViewModel @Inject constructor(
         }
     }
 
+    fun onShowAddSheet() {
+        _state.update {
+            it.copy(showCreateSheet = true)
+        }
+    }
+
+    fun onHideAddSheet() {
+        _state.update {
+            it.copy(
+                showCreateSheet = false,
+                sheetSearchQuery = ""
+            )
+        }
+    }
+
+    fun onSaveMeal() {
+        viewModelScope.launch {
+            val current = _state.value
+
+            if (current.mealName.isBlank()) {
+                showToast(
+                    message = "Please enter meal name",
+                    type = ErrorToast()
+                )
+                return@launch
+            }
+
+            else if(current.ingredient.isEmpty()) {
+                showToast(
+                    message = "Please add at least one food",
+                    type = ErrorToast()
+                )
+                return@launch
+            }
+
+            val totalNutrition =
+                current.ingredient.values.fold(NutritionInfo()) { acc, ingredient ->
+                    acc.copy(
+                        calories = acc.calories + ingredient.nutrition.calories,
+                        protein = acc.protein + ingredient.nutrition.protein,
+                        carbs = acc.carbs + ingredient.nutrition.carbs,
+                        fat = acc.fat + ingredient.nutrition.fat,
+                        fiber = acc.fiber + ingredient.nutrition.fiber,
+                        sugar = acc.sugar + ingredient.nutrition.sugar,
+                        sodium = acc.sodium + ingredient.nutrition.sodium,
+                    )
+                }
+
+
+            val mealId = current.editingMeal?.id ?: UUID.randomUUID().toString()
+
+            val myMeal = MyMeal(
+                id = mealId,
+                name = current.mealName,
+                ingredients = current.ingredient.values.toList(),
+                totalNutritionInfo = totalNutrition,
+                createAt = System.currentTimeMillis()
+            )
+
+            saveMyMeal(myMeal)
+            val successMsg = if(current.editingMeal != null) "Meal updated successfully" else "Meal saved successfully"
+
+            showToast(
+                message = successMsg,
+                type = SuccessToast()
+            )
+
+            _state.update {
+                it.copy(
+                    mealName = "",
+                    ingredient = emptyMap(),
+                    destination = MyMealDestination.MyMealList
+                )
+            }
+        }
+    }
+
+    private fun showToast(
+        message: String,
+        type: CustomToastProperty = SuccessToast(),
+        duration: Long = 3000
+    ) {
+        _state.update {
+            it.copy(showToast = false)
+        }
+
+        _state.update {
+            it.copy(
+                showToast = true,
+                toastMessage = message,
+                toastType = type,
+                toastDuration = duration
+            )
+        }
+    }
+
+    fun hideToast() {
+        _state.update {
+            it.copy(
+                showToast = false,
+                toastMessage = null
+            )
+        }
+    }
 }

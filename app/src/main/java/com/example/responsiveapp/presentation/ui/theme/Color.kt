@@ -11,7 +11,7 @@ val FitnessGreen = Color(0xFF22C55E)
 
 val FitnessBlue = Color(0xFF3B82F6)
 
-val CardBackground = Color(0xFFF1F1F1)
+val CardBackground = Color(0xFFF5F5F5)
 
 val ErrorRed = Color(0xFFEF4444)
 val primaryVarient = Color(0xFFF3D9CF)

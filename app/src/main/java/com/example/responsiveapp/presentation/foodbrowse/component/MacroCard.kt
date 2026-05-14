@@ -113,7 +113,7 @@ fun MacroCard(
                 ) { v ->
                     Text(
                         text = "${v}g",
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = accentColor,
                             textAlign = TextAlign.Center

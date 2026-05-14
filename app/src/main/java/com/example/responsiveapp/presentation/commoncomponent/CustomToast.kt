@@ -21,10 +21,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,6 +51,7 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun CustomToast(
+    modifier: Modifier = Modifier,
     message: String,
     type: CustomToastProperty,
     durationMillis: Long = 3000,
@@ -70,7 +71,6 @@ fun CustomToast(
         }
     }
 
-    // Slide-Up Animation
     val animatedOffset by animateFloatAsState(
         targetValue = 0f,
         animationSpec = tween(800, easing = LinearOutSlowInEasing),
@@ -78,13 +78,13 @@ fun CustomToast(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp)
             .background(Color.Transparent)
-            .offset(y = animatedOffset.dp)
-            .imePadding(),
-        contentAlignment = Alignment.BottomCenter
+            .offset(y = animatedOffset.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
         AnimatedVisibility(
             visible = visibility,
@@ -100,7 +100,7 @@ fun CustomToast(
                         shape = RoundedCornerShape(MaterialTheme.spacing.sm),
                         clip = false
                     )
-                    .clip(RoundedCornerShape(MaterialTheme.spacing.sm)) // 🔑 THIS
+                    .clip(RoundedCornerShape(MaterialTheme.spacing.sm))
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(MaterialTheme.spacing.sm)
@@ -148,7 +148,6 @@ fun CustomToast(
                     )
                 }
 
-                // Smooth Progress Bar
                 LinearProgressIndicator(
                     progress = progress.value,
                     color = type.progressBarColor(),

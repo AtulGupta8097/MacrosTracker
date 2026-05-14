@@ -27,14 +27,15 @@ import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 fun MyMealCard(
     modifier: Modifier = Modifier,
     myMeal: MyMeal,
-    onLog: () -> Unit = {}
+    onLog: () -> Unit = {},
+    onEdit: () -> Unit
 ) {
     val ingredientCount = myMeal.ingredients.size
 
     Surface(
         modifier = modifier.fillMaxWidth(),
+        onClick = onEdit,
         shape = MaterialTheme.shapes.medium,
-        tonalElevation = 2.dp,
         color = MaterialTheme.colorScheme.surface
     ) {
 
@@ -121,7 +122,8 @@ private fun PrevMyMealCard() {
                 ingredients = emptyList(),
                 totalNutritionInfo = com.example.responsiveapp.domain.model.NutritionInfo(),
                 createAt = System.currentTimeMillis()
-            )
+            ),
+            onEdit = {}
         )
     }
 }

@@ -33,6 +33,7 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 fun MyMealListScreen(
     modifier: Modifier = Modifier,
     meals: List<MyMeal> = emptyList(),
+    onMealClicked: (MyMeal)-> Unit,
     onCreateClick: () -> Unit,
 ) {
     Column(
@@ -75,7 +76,10 @@ fun MyMealListScreen(
                     items(meals, key = { it.id }) { meal ->
                         MyMealCard(
                             myMeal = meal,
-                            onLog = { }
+                            onLog = { },
+                            onEdit = {
+                                onMealClicked(meal)
+                            }
                         )
                     }
                 }
