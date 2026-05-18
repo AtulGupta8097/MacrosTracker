@@ -38,9 +38,11 @@ class MyMealViewModel @Inject constructor(
     private val _state = MutableStateFlow(MyMealUIState())
     val state = _state.asStateFlow()
 
+    private var originalMealName: String = ""
+    private var originalIngredients: Map<String, MealIngredient> = emptyMap()
+
     init {
         loadMyMeals()
-        observeSearchQuery()
     }
 
     fun onQueryChange(query: String) {
@@ -53,6 +55,7 @@ class MyMealViewModel @Inject constructor(
         _state.update {
             it.copy(mealName = mealName)
         }
+        recomputeUnsavedChanges()
     }
 
     private fun loadMyMeals() {
@@ -124,16 +127,34 @@ class MyMealViewModel @Inject constructor(
         }
     }
 
+    private fun recomputeUnsavedChanges() {
+        val currentState = _state.value
+        val isEdit = currentState.editingMeal != null
+        val changed = isEdit && (
+                currentState.mealName.trim() != originalMealName.trim() ||
+                        currentState.ingredient.keys != originalIngredients.keys
+                )
+        if (currentState.hasUnsavedChanges != changed) {
+            _state.update { it.copy(hasUnsavedChanges = changed) }
+        }
+    }
+
     fun onMealCardClick(meal: MyMeal) {
+        val ingredientMap = meal.ingredients.associateBy { it.foodId }
+        originalMealName  = meal.name
+        originalIngredients = ingredientMap
+
         _state.update {
             it.copy(
-                destination  = MyMealDestination.Edit(meal.id),
-                editingMeal  = meal,
-                mealName     = meal.name,
-                ingredient   = meal.ingredients.associateBy { ing -> ing.foodId },
+                destination = MyMealDestination.Edit(meal.id),
+                editingMeal = meal,
+                mealName = meal.name,
+                ingredient = ingredientMap,
+                hasUnsavedChanges = false,
             )
         }
     }
+
 
     fun onAddFoodToMeal(food: FoodItem) {
         viewModelScope.launch {
@@ -149,13 +170,14 @@ class MyMealViewModel @Inject constructor(
                     carbs = food.macroSummary.carbs
                 )
             )
-
+            observeSearchQuery()
             _state.update {
                 it.copy(
                     showCreateSheet = false,
                     ingredient = it.ingredient.plus(food.id to ingredient)
                 )
             }
+        recomputeUnsavedChanges()
         }
     }
 
@@ -192,7 +214,8 @@ class MyMealViewModel @Inject constructor(
                     destination = MyMealDestination.MyMealList,
                     editingMeal = null,
                     mealName    = "",
-                    ingredient  = emptyMap()
+                    ingredient  = emptyMap(),
+                    hasUnsavedChanges = false,
                 )
             }
         }
@@ -202,7 +225,10 @@ class MyMealViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    destination = MyMealDestination.Create
+                    destination = MyMealDestination.Create,
+                    editingMeal = null,
+                    mealName = "",
+                    ingredient = emptyMap(),
                 )
             }
         }
@@ -279,7 +305,9 @@ class MyMealViewModel @Inject constructor(
                 it.copy(
                     mealName = "",
                     ingredient = emptyMap(),
-                    destination = MyMealDestination.MyMealList
+                    destination = MyMealDestination.MyMealList,
+                    editingMeal = null,
+                    hasUnsavedChanges = false,
                 )
             }
         }

@@ -64,6 +64,7 @@ fun MyMealPhoneLayout(
                 totalProtein = totalMacros.protein,
                 totalCarbs = totalMacros.carbs,
                 totalFat = totalMacros.fat,
+                hasUnsavedChanges = state.hasUnsavedChanges,
                 onIngredientAdd = onShowAddSheet,
                 onIngredientRemove = onIngredientRemove,
                 isEditMode = isEditMode,

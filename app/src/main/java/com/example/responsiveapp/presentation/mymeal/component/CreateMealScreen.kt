@@ -46,6 +46,7 @@ fun CreateMealScreen(
     totalCarbs: Float,
     totalFat: Float,
     ingredients: Map<String, MealIngredient>,
+    hasUnsavedChanges: Boolean = false,
     onMealNameChanged: (String) -> Unit = {},
     onIngredientAdd: () -> Unit = {},
     isEditMode: Boolean = false,
@@ -55,6 +56,12 @@ fun CreateMealScreen(
     onBack: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
+
+    val saveEnabled = if (isEditMode) {
+        hasUnsavedChanges && mealName.isNotBlank() && ingredients.isNotEmpty()
+    } else {
+        true // Always enable for create
+    }
 
     Column(
         modifier = modifier
@@ -184,8 +191,9 @@ fun CreateMealScreen(
             }
 
             CustomButton(
-                text = "Save Meal",
+                text = if(isEditMode) "Edit Meal" else "Save Meal",
                 onClick = onSave,
+                enabled = saveEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(

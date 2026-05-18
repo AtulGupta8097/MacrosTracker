@@ -10,6 +10,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.responsiveapp.presentation.commoncomponent.CustomToast
 import com.example.responsiveapp.presentation.mymeal.component.MyMealPhoneLayout
+import com.example.responsiveapp.presentation.mymeal.component.MyMealTabletLayout
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
@@ -25,8 +26,7 @@ fun MyMealScreen(
     Box(modifier = Modifier.fillMaxSize()) {
 
         when (deviceConfiguration) {
-            DeviceConfiguration.MOBILE,
-            DeviceConfiguration.TABLET -> {
+            DeviceConfiguration.MOBILE -> {
                 MyMealPhoneLayout(
                     state = state,
                     totalMacros = totalMacros,
@@ -44,8 +44,25 @@ fun MyMealScreen(
                     onBack = viewModel::onBack,
                 )
             }
+            DeviceConfiguration.TABLET,
+            DeviceConfiguration.DESKTOP -> {
+                MyMealTabletLayout(
+                    state              = state,
+                    totalMacros        = totalMacros,
+                    onMealCardClick    = viewModel::onMealCardClick,
+                    onCreateMealClick  = viewModel::onCreateMealClicked,
+                    onMealNameChange   = viewModel::onMealNameChange,
+                    onShowAddSheet     = viewModel::onShowAddSheet,
+                    onHideAddSheet     = viewModel::onHideAddSheet,
+                    onQueryChange      = viewModel::onQueryChange,
+                    onFoodAdd          = viewModel::onAddFoodToMeal,
+                    onIngredientRemove = viewModel::onRemoveFoodToMeal,
+                    onSave             = viewModel::onSaveMeal,
+                    onDelete           = viewModel::onDeleteMeal,
+                )
+            }
 
-            else -> MyMealTabLayout()
+
         }
 
         CustomToast(
@@ -56,9 +73,4 @@ fun MyMealScreen(
             visibility = state.showToast
         )
     }
-}
-
-@Composable
-fun MyMealTabLayout() {
-
 }

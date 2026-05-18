@@ -12,11 +12,8 @@ data class MyMealUIState(
     val errorMessage: String? = null,
     val mealName: String = "",
     val ingredient: Map<String, MealIngredient> = emptyMap(),
-    val totalCal: Float = 0f,
-    val totalProtein: Float = 0f,
-    val totalCarbs: Float = 0f,
-    val totalFat: Float = 0f,
     val editingMeal: MyMeal? = null,
+    val hasUnsavedChanges : Boolean = false,
     val showCreateSheet: Boolean = false,
     val destination: MyMealDestination = MyMealDestination.MyMealList,
 

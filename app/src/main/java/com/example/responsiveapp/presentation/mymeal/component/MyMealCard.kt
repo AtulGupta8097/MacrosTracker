@@ -27,6 +27,7 @@ import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 fun MyMealCard(
     modifier: Modifier = Modifier,
     myMeal: MyMeal,
+    isSelected: Boolean = false,
     onLog: () -> Unit = {},
     onEdit: () -> Unit
 ) {
@@ -36,7 +37,8 @@ fun MyMealCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onEdit,
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surface,
     ) {
 
         Box(
