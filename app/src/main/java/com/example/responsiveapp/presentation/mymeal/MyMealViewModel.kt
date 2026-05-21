@@ -188,6 +188,8 @@ class MyMealViewModel @Inject constructor(
                     ingredient = it.ingredient.minus(foodId)
                 )
             }
+            recomputeUnsavedChanges()
+
         }
     }
 

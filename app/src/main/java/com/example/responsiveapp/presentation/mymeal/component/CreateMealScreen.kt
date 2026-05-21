@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -176,7 +176,9 @@ fun CreateMealScreen(
 
             AnimatedVisibility(
                 visible = ingredients.isNotEmpty(),
-                modifier = Modifier.padding(top = MaterialTheme.spacing.lg)
+                modifier = Modifier
+                    .padding(top = MaterialTheme.spacing.lg)
+
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
@@ -190,22 +192,23 @@ fun CreateMealScreen(
                 }
             }
 
-            CustomButton(
-                text = if(isEditMode) "Edit Meal" else "Save Meal",
-                onClick = onSave,
-                enabled = saveEnabled,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        vertical = MaterialTheme.spacing.lg
-                    )
-                    .height(56.dp),
-                buttonColors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
-            )
         }
+        CustomButton(
+            text = if(isEditMode) "Edit Meal" else "Save Meal",
+            onClick = onSave,
+            enabled = saveEnabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp,max = 90.dp)
+                .padding(
+                    vertical = MaterialTheme.spacing.lg,
+                    horizontal = MaterialTheme.spacing.md
+                ),
+            buttonColors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
+        )
     }
 }
 

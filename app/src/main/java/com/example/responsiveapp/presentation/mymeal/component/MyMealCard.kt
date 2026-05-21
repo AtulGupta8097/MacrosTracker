@@ -61,7 +61,7 @@ fun MyMealCard(
                 )
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
@@ -72,23 +72,22 @@ fun MyMealCard(
                         modifier = Modifier.size(18.dp)
                     )
 
-                    Text(
-                        text = "${myMeal.totalNutritionInfo.calories} cal",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
 
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Text(
+                            text = "${myMeal.totalNutritionInfo.calories} cal",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
 
-                    Text(
-                        text = "$ingredientCount ingredients",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Text(
+                            text = "$ingredientCount ingredients",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             
