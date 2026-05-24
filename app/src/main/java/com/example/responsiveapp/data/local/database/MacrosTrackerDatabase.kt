@@ -3,6 +3,7 @@ package com.example.responsiveapp.data.local.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.responsiveapp.data.local.converter.NutritionInfoConverter
 import com.example.responsiveapp.data.local.converter.ServingConverter
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodItemDao
@@ -23,7 +24,10 @@ import com.example.responsiveapp.data.local.entity.MyMealsEntity
     version = 4,
     exportSchema = true
 )
-@TypeConverters(ServingConverter::class)
+@TypeConverters(
+    ServingConverter::class,
+            NutritionInfoConverter::class
+)
 abstract class MacrosTrackerDatabase : RoomDatabase() {
 
     abstract fun foodItemDao(): FoodItemDao
