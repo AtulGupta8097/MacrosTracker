@@ -2,6 +2,7 @@ package com.example.responsiveapp.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
@@ -21,12 +22,12 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): MacrosTrackerDatabase {
         return Room.databaseBuilder(
             context,
             MacrosTrackerDatabase::class.java,
-            MacrosTrackerDatabase.DATABASE_NAME
+            MacrosTrackerDatabase.DATABASE_NAME,
         )
             .fallbackToDestructiveMigration()
             .build()
@@ -34,21 +35,36 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideFoodItemDao(database: MacrosTrackerDatabase): FoodItemDao =
+    fun provideFoodItemDao(
+        database: MacrosTrackerDatabase,
+    ): FoodItemDao =
         database.foodItemDao()
 
     @Provides
     @Singleton
-    fun provideFoodDetailDao(database: MacrosTrackerDatabase): FoodDetailDao =
+    fun provideFoodDetailDao(
+        database: MacrosTrackerDatabase,
+    ): FoodDetailDao =
         database.foodDetailDao()
 
     @Provides
     @Singleton
-    fun provideFoodLogDao(database: MacrosTrackerDatabase): FoodLogDao =
+    fun provideFoodLogDao(
+        database: MacrosTrackerDatabase,
+    ): FoodLogDao =
         database.foodLogDao()
 
     @Provides
     @Singleton
-    fun provideMyMealsDao(database: MacrosTrackerDatabase): MyMealsDao =
+    fun provideMyMealsDao(
+        database: MacrosTrackerDatabase,
+    ): MyMealsDao =
         database.myMealsDAo()
+
+    @Provides
+    @Singleton
+    fun provideCustomFoodDao(
+        database: MacrosTrackerDatabase,
+    ): CustomFoodDao =
+        database.customFoodDao()
 }

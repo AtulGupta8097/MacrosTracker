@@ -124,8 +124,9 @@ fun FoodDatabaseScreen(
                             }
                         )
                     }
-
-                    FoodTab.MY_FOODS -> {}
+                    FoodTab.MY_FOODS -> {
+//                        MyFoodScreen(onRootChanged = { isAtRoot = it })
+                    }
 
                     FoodTab.SAVED_SCANS -> {}
                 }
