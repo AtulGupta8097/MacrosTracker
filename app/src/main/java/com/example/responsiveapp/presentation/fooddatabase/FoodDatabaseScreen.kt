@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.foodbrowse.FoodBrowse
 import com.example.responsiveapp.presentation.commoncomponent.TopBar
+import com.example.responsiveapp.presentation.myfood.MyFoodScreen
 import com.example.responsiveapp.presentation.mymeal.MyMealScreen
 import com.example.responsiveapp.presentation.ui.theme.grey
 import kotlinx.coroutines.launch
@@ -125,7 +126,7 @@ fun FoodDatabaseScreen(
                         )
                     }
                     FoodTab.MY_FOODS -> {
-//                        MyFoodScreen(onRootChanged = { isAtRoot = it })
+                        MyFoodScreen(onRootChanged = { isAtRoot = it })
                     }
 
                     FoodTab.SAVED_SCANS -> {}
