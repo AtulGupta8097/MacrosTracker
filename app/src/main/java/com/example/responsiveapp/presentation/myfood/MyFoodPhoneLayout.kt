@@ -74,7 +74,14 @@ fun MyFoodPhoneLayout(
 
             CreateFoodScreen(
                 modifier = modifier,
-                state = state,
+                destination = state.destination,
+                currentStep = state.currentStep,
+                basicInfo = state.basicInfo,
+                macros = state.macros,
+                minerals = state.minerals,
+                vitamins = state.vitamins,
+                canProceedToNutrients = state.canProceedToNutrients,
+                canSave = state.canSave,
 
                 onBack =
                     if (

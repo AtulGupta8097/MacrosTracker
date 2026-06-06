@@ -1,5 +1,8 @@
 package com.example.responsiveapp.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class NutritionInfo(
     val calories: Float = 0f,
     val protein: Float = 0f,

@@ -57,9 +57,6 @@ fun MyFoodTabletLayout(
     val isOnList =
         state.destination is MyFoodDestination.List
 
-    val isEditMode =
-        state.destination is MyFoodDestination.Edit
-
     Row(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -99,7 +96,14 @@ fun MyFoodTabletLayout(
                 CreateFoodScreen(
                     modifier =
                         Modifier.fillMaxSize(),
-                    state = state,
+                    destination = state.destination,
+                    currentStep = state.currentStep,
+                    basicInfo = state.basicInfo,
+                    macros = state.macros,
+                    minerals = state.minerals,
+                    vitamins = state.vitamins,
+                    canProceedToNutrients = state.canProceedToNutrients,
+                    canSave = state.canSave,
                     onBack = {},
 
                     onNextStep =

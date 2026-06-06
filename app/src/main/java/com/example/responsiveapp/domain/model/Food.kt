@@ -1,5 +1,8 @@
 package com.example.responsiveapp.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class FoodItem(
     val id: String,
     val name: String,
@@ -8,6 +11,7 @@ data class FoodItem(
     val macroSummary: MacroSummary
 )
 
+@Immutable
 data class MacroSummary(
     val servingLabel: String,
     val calories: Float,

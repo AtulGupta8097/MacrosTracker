@@ -24,17 +24,17 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FoodCard(
-    modifier: Modifier = Modifier,
     food: FoodItem,
-    onFoodClick: (String) -> Unit,
+    onFoodClick: () -> Unit,
     isSelected: Boolean = false,
+    modifier: Modifier = Modifier,
 ){
     val macros = food.macroSummary
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onFoodClick(food.id) },
+            .clickable { onFoodClick() },
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.surface,
         shape = MaterialTheme.shapes.medium

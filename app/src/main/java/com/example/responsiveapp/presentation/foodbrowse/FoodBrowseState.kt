@@ -1,9 +1,11 @@
 package com.example.responsiveapp.presentation.foodbrowse
 
+import androidx.compose.runtime.Immutable
 import com.example.responsiveapp.domain.model.FoodDetail
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.Serving
 
+@Immutable
 data class FoodBrowseState(
     val foods: List<FoodItem> = emptyList(),
     val isLoading: Boolean = false,

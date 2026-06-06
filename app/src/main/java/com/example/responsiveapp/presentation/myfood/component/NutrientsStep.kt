@@ -16,13 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.commoncomponent.CustomButton
-import com.example.responsiveapp.presentation.myfood.MyFoodUIState
+import com.example.responsiveapp.presentation.myfood.MacronutrientsState
+import com.example.responsiveapp.presentation.myfood.MineralsState
+import com.example.responsiveapp.presentation.myfood.VitaminsState
 import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
 import com.example.responsiveapp.presentation.ui.theme.ProteinColor
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 private val SodiumColor = Color(0xFFFFC107)
@@ -38,7 +42,12 @@ private val SugarColor = Color(0xFFE91E8C)
 
 @Composable
 fun NutrientsStep(
-    state: MyFoodUIState,
+    foodName: String,
+    servingSize: String,
+    macros: MacronutrientsState,
+    minerals: MineralsState,
+    vitamins: VitaminsState,
+    canSave: Boolean,
     isEditMode: Boolean,
     onCaloriesChanged: (String) -> Unit,
     onProteinChanged: (String) -> Unit,
@@ -62,7 +71,7 @@ fun NutrientsStep(
         contentPadding = PaddingValues(MaterialTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.md),
     ) {
-        if (state.foodName.isNotBlank()) {
+        if (foodName.isNotBlank()) {
             item {
                 Column(
                     modifier = Modifier
@@ -71,7 +80,7 @@ fun NutrientsStep(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
-                        text = state.foodName,
+                        text = foodName,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold,
                         ),
@@ -79,7 +88,7 @@ fun NutrientsStep(
                     )
 
                     Text(
-                        text = "Serving: ${state.servingSize}",
+                        text = "Serving: $servingSize",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -95,7 +104,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Calories",
                     unit = "kcal",
-                    value = state.calories,
+                    value = macros.calories,
                     color = CaloriesColor,
                     onChange = onCaloriesChanged,
                 )
@@ -103,7 +112,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Protein",
                     unit = "g",
-                    value = state.protein,
+                    value = macros.protein,
                     color = ProteinColor,
                     onChange = onProteinChanged,
                 )
@@ -111,7 +120,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Carbohydrates",
                     unit = "g",
-                    value = state.carbohydrates,
+                    value = macros.carbohydrates,
                     color = CarbsColor,
                     onChange = onCarbohydratesChanged,
                 )
@@ -119,7 +128,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Total Fat",
                     unit = "g",
-                    value = state.totalFat,
+                    value = macros.totalFat,
                     color = FatColor,
                     onChange = onTotalFatChanged,
                 )
@@ -127,7 +136,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Fiber",
                     unit = "g",
-                    value = state.fiber,
+                    value = macros.fiber,
                     color = FiberColor,
                     onChange = onFiberChanged,
                 )
@@ -135,7 +144,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Sugar",
                     unit = "g",
-                    value = state.sugar,
+                    value = macros.sugar,
                     color = SugarColor,
                     onChange = onSugarChanged,
                 )
@@ -150,7 +159,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Sodium",
                     unit = "mg",
-                    value = state.sodium,
+                    value = minerals.sodium,
                     color = SodiumColor,
                     onChange = onSodiumChanged,
                 )
@@ -158,7 +167,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Cholesterol",
                     unit = "mg",
-                    value = state.cholesterol,
+                    value = minerals.cholesterol,
                     color = CholesterolColor,
                     onChange = onCholesterolChanged,
                 )
@@ -166,7 +175,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Potassium",
                     unit = "mg",
-                    value = state.potassium,
+                    value = minerals.potassium,
                     color = PotassiumColor,
                     onChange = onPotassiumChanged,
                 )
@@ -174,7 +183,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Calcium",
                     unit = "mg",
-                    value = state.calcium,
+                    value = minerals.calcium,
                     color = CalciumColor,
                     onChange = onCalciumChanged,
                 )
@@ -182,7 +191,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Iron",
                     unit = "mg",
-                    value = state.iron,
+                    value = minerals.iron,
                     color = IronColor,
                     onChange = onIronChanged,
                 )
@@ -197,7 +206,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Vitamin A",
                     unit = "mcg",
-                    value = state.vitaminA,
+                    value = vitamins.vitaminA,
                     color = VitaminAColor,
                     onChange = onVitaminAChanged,
                 )
@@ -205,7 +214,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Vitamin C",
                     unit = "mg",
-                    value = state.vitaminC,
+                    value = vitamins.vitaminC,
                     color = VitaminCColor,
                     onChange = onVitaminCChanged,
                 )
@@ -213,7 +222,7 @@ fun NutrientsStep(
                 NutrientInputRow(
                     label = "Vitamin D",
                     unit = "mcg",
-                    value = state.vitaminD,
+                    value = vitamins.vitaminD,
                     color = VitaminDColor,
                     onChange = onVitaminDChanged,
                 )
@@ -228,7 +237,7 @@ fun NutrientsStep(
             CustomButton(
                 text = if (isEditMode) "Update Food" else "Save Food",
                 onClick = onSave,
-                enabled = state.canSave,
+                enabled = canSave,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -240,5 +249,53 @@ fun NutrientsStep(
                 ),
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PrevNutrientsStep() {
+    ResponsiveAppTheme {
+        NutrientsStep(
+            foodName = "Grilled Chicken Breast",
+            servingSize = "100g",
+            macros = MacronutrientsState(
+                calories = "165",
+                protein = "31",
+                carbohydrates = "0",
+                totalFat = "3.6",
+                fiber = "0",
+                sugar = "0",
+            ),
+            minerals = MineralsState(
+                sodium = "74",
+                cholesterol = "85",
+                potassium = "256",
+                calcium = "15",
+                iron = "1.2",
+            ),
+            vitamins = VitaminsState(
+                vitaminA = "13",
+                vitaminC = "0",
+                vitaminD = "0.1",
+            ),
+            canSave = true,
+            isEditMode = false,
+            onCaloriesChanged = {},
+            onProteinChanged = {},
+            onCarbohydratesChanged = {},
+            onTotalFatChanged = {},
+            onFiberChanged = {},
+            onSugarChanged = {},
+            onSodiumChanged = {},
+            onCholesterolChanged = {},
+            onPotassiumChanged = {},
+            onCalciumChanged = {},
+            onIronChanged = {},
+            onVitaminAChanged = {},
+            onVitaminCChanged = {},
+            onVitaminDChanged = {},
+            onSave = {},
+        )
     }
 }

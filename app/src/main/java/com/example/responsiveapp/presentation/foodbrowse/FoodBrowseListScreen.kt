@@ -60,10 +60,14 @@ fun FoodBrowseListScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
                 ) {
-                    items(data, key = { it.id }) { food ->
+                    items(
+                        items = data,
+                        key = { it.id },
+                        contentType = { "food_item" }
+                    ) { food ->
                         FoodCard(
                             food = food,
-                            onFoodClick = onFoodClick,
+                            onFoodClick = { onFoodClick(food.id) },
                             isSelected = food.id == selectedFoodId,
                         )
                     }

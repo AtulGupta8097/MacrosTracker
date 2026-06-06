@@ -3,6 +3,7 @@ package com.example.responsiveapp.presentation.foodbrowse
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.Serving
 
 @Composable
@@ -24,7 +25,7 @@ fun FoodBrowsePhoneLayout(
 
     when (state.destination) {
         FoodBrowseDestination.List -> {
-            FoodBrowseListScreen(
+            FoodBrowseListScreenImpl(
                 query = state.query,
                 onQueryChange = onQueryChange,
                 data = state.foods,
@@ -43,4 +44,23 @@ fun FoodBrowsePhoneLayout(
             )
         }
     }
+}
+
+@Composable
+private fun FoodBrowseListScreenImpl(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    data: List<FoodItem>,
+    isLoading: Boolean,
+    onFoodClick: (String) -> Unit,
+    selectedFoodId: String? = null,
+) {
+    FoodBrowseListScreen(
+        query = query,
+        onQueryChange = onQueryChange,
+        data = data,
+        isLoading = isLoading,
+        onFoodClick = onFoodClick,
+        selectedFoodId = selectedFoodId,
+    )
 }

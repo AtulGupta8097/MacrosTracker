@@ -19,14 +19,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.responsiveapp.presentation.commoncomponent.TopBar
+import com.example.responsiveapp.presentation.myfood.BasicInfoState
 import com.example.responsiveapp.presentation.myfood.CreateFoodStep
+import com.example.responsiveapp.presentation.myfood.MacronutrientsState
+import com.example.responsiveapp.presentation.myfood.MineralsState
 import com.example.responsiveapp.presentation.myfood.MyFoodDestination
-import com.example.responsiveapp.presentation.myfood.MyFoodUIState
+import com.example.responsiveapp.presentation.myfood.VitaminsState
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun CreateFoodScreen(
-    state: MyFoodUIState,
+    destination: MyFoodDestination,
+    currentStep: CreateFoodStep,
+    basicInfo: BasicInfoState,
+    macros: MacronutrientsState,
+    minerals: MineralsState,
+    vitamins: VitaminsState,
+    canProceedToNutrients: Boolean,
+    canSave: Boolean,
     onBack: () -> Unit,
     onNextStep: () -> Unit,
     onFoodNameChanged: (String) -> Unit,
@@ -51,7 +61,7 @@ fun CreateFoodScreen(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isEditMode = state.destination is MyFoodDestination.Edit
+    val isEditMode = destination is MyFoodDestination.Edit
 
     Column(
         modifier = modifier
@@ -76,7 +86,7 @@ fun CreateFoodScreen(
         )
 
         StepIndicator(
-            currentStep = state.currentStep,
+            currentStep = currentStep,
             modifier = Modifier.padding(
                 horizontal = MaterialTheme.spacing.md,
                 vertical = MaterialTheme.spacing.sm,
@@ -84,7 +94,7 @@ fun CreateFoodScreen(
         )
 
         AnimatedContent(
-            targetState = state.currentStep,
+            targetState = currentStep,
             transitionSpec = {
                 val forward = targetState == CreateFoodStep.NUTRIENTS
 
@@ -101,7 +111,8 @@ fun CreateFoodScreen(
             when (step) {
                 CreateFoodStep.BASIC_INFO -> {
                     BasicInfoStep(
-                        state = state,
+                        state = basicInfo,
+                        canProceedToNutrients = canProceedToNutrients,
                         onFoodNameChanged = onFoodNameChanged,
                         onDescriptionChanged = onDescriptionChanged,
                         onServingSizeChanged = onServingSizeChanged,
@@ -112,7 +123,12 @@ fun CreateFoodScreen(
 
                 CreateFoodStep.NUTRIENTS -> {
                     NutrientsStep(
-                        state = state,
+                        foodName = basicInfo.foodName,
+                        servingSize = basicInfo.servingSize,
+                        macros = macros,
+                        minerals = minerals,
+                        vitamins = vitamins,
+                        canSave = canSave,
                         isEditMode = isEditMode,
                         onCaloriesChanged = onCaloriesChanged,
                         onProteinChanged = onProteinChanged,

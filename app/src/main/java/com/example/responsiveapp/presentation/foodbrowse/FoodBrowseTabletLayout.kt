@@ -9,9 +9,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.Serving
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -28,25 +30,27 @@ fun FoodBrowseTabletLayout(
     onQuantityChanged: (Float) -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val foods = remember(state.foods) { state.foods }
+    val selectedFoodId = remember(state.selectedFood?.id) { state.selectedFood?.id }
 
-    LaunchedEffect(listState, state.foods) {
+    LaunchedEffect(listState, foods) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect { index ->
-                state.foods.getOrNull(index)?.id?.let { foodId ->
+                foods.getOrNull(index)?.id?.let { foodId ->
                     onFirstVisibleFoodChanged(foodId)
                 }
             }
     }
 
     Row(modifier = Modifier.fillMaxSize()) {
-        FoodBrowseListScreen(
+        FoodBrowseListScreenImpl(
             query = state.query,
             onQueryChange = onQueryChange,
-            data = state.foods,
+            data = foods,
             isLoading = state.isLoading,
             onFoodClick = onFoodClick,
-            selectedFoodId = state.selectedFood?.id,
+            selectedFoodId = selectedFoodId,
             listState = listState,
             modifier = Modifier
                 .width(LIST_PANE_WIDTH)
@@ -68,4 +72,27 @@ fun FoodBrowseTabletLayout(
                 .fillMaxHeight(),
         )
     }
+}
+
+@Composable
+private fun FoodBrowseListScreenImpl(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    data: List<FoodItem>,
+    isLoading: Boolean,
+    onFoodClick: (String) -> Unit,
+    selectedFoodId: String? = null,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    modifier: Modifier = Modifier,
+) {
+    FoodBrowseListScreen(
+        query = query,
+        onQueryChange = onQueryChange,
+        data = data,
+        isLoading = isLoading,
+        onFoodClick = onFoodClick,
+        selectedFoodId = selectedFoodId,
+        listState = listState,
+        modifier = modifier,
+    )
 }

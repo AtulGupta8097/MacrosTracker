@@ -10,7 +10,9 @@ import com.example.responsiveapp.domain.use_case.food_usecase.GetFoodByIdUseCase
 import com.example.responsiveapp.domain.use_case.food_usecase.SearchFoodsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +28,7 @@ import javax.inject.Inject
 
 private const val TAG = "FoodBrowseViewModel"
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class FoodBrowseViewModel @Inject constructor(
     private val searchFoods: SearchFoodsUseCase,
@@ -55,6 +58,7 @@ class FoodBrowseViewModel @Inject constructor(
                 else -> FoodDetailUiState.Loading
             }
         }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -70,16 +74,17 @@ class FoodBrowseViewModel @Inject constructor(
         state
             .map { it.query }
             .distinctUntilChanged()
-            .onEach { query ->
+            .flatMapLatest { query ->
                 if (query.isBlank()) {
-                    // No debounce for initial / empty
-                    searchFood(query)
+                    flowOf(query)
                 } else {
-                    // Debounce only when typing
-                    delay(300)
-                    searchFood(query)
+                    flow {
+                        kotlinx.coroutines.delay(300)
+                        emit(query)
+                    }
                 }
             }
+            .onEach { query -> searchFood(query) }
             .launchIn(viewModelScope)
     }
 

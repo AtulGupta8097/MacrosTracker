@@ -1,6 +1,8 @@
 package com.example.responsiveapp.domain.model
 
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class Serving(
     val id: String,
     val description: String,        // "1 egg", "100g", "14 pieces"

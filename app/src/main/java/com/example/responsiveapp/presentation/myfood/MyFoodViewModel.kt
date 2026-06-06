@@ -61,27 +61,35 @@ class MyFoodViewModel @Inject constructor(
                 editingFood = food,
                 currentStep = CreateFoodStep.BASIC_INFO,
 
-                foodName = food.name,
-                description = food.description,
-                servingSize = food.servingSize,
-                servingsPerContainer = food.servingsPerContainer.fmt(),
+                basicInfo = BasicInfoState(
+                    foodName = food.name,
+                    description = food.description,
+                    servingSize = food.servingSize,
+                    servingsPerContainer = food.servingsPerContainer.fmt()
+                ),
 
-                calories = food.nutrition.calories.fmt(),
-                protein = food.nutrition.protein.fmt(),
-                carbohydrates = food.nutrition.carbs.fmt(),
-                totalFat = food.nutrition.fat.fmt(),
-                fiber = food.nutrition.fiber.fmt(),
-                sugar = food.nutrition.sugar.fmt(),
+                macros = MacronutrientsState(
+                    calories = food.nutrition.calories.fmt(),
+                    protein = food.nutrition.protein.fmt(),
+                    carbohydrates = food.nutrition.carbs.fmt(),
+                    totalFat = food.nutrition.fat.fmt(),
+                    fiber = food.nutrition.fiber.fmt(),
+                    sugar = food.nutrition.sugar.fmt()
+                ),
 
-                sodium = food.nutrition.sodium.fmt(),
-                cholesterol = food.nutrition.cholesterol.fmt(),
-                potassium = food.nutrition.potassium.fmt(),
-                calcium = food.nutrition.calcium.fmt(),
-                iron = food.nutrition.iron.fmt(),
+                minerals = MineralsState(
+                    sodium = food.nutrition.sodium.fmt(),
+                    cholesterol = food.nutrition.cholesterol.fmt(),
+                    potassium = food.nutrition.potassium.fmt(),
+                    calcium = food.nutrition.calcium.fmt(),
+                    iron = food.nutrition.iron.fmt()
+                ),
 
-                vitaminA = food.nutrition.vitaminA.fmt(),
-                vitaminC = food.nutrition.vitaminC.fmt(),
-                vitaminD = food.nutrition.vitaminD.fmt(),
+                vitamins = VitaminsState(
+                    vitaminA = food.nutrition.vitaminA.fmt(),
+                    vitaminC = food.nutrition.vitaminC.fmt(),
+                    vitaminD = food.nutrition.vitaminD.fmt()
+                ),
 
                 hasUnsavedChanges = false,
             ).recompute()
@@ -113,62 +121,63 @@ class MyFoodViewModel @Inject constructor(
         }
     }
 
+    // Basic Info
     fun onFoodNameChanged(v: String) =
-        update { it.copy(foodName = v) }
+        update { it.copy(basicInfo = it.basicInfo.copy(foodName = v)) }
 
     fun onDescriptionChanged(v: String) =
-        update { it.copy(description = v) }
+        update { it.copy(basicInfo = it.basicInfo.copy(description = v)) }
 
     fun onServingSizeChanged(v: String) =
-        update { it.copy(servingSize = v) }
+        update { it.copy(basicInfo = it.basicInfo.copy(servingSize = v)) }
 
     fun onServingsPerContainerChanged(v: String) =
-        update { it.copy(servingsPerContainer = v) }
+        update { it.copy(basicInfo = it.basicInfo.copy(servingsPerContainer = v)) }
 
-
+    // Macros
     fun onCaloriesChanged(v: String) =
-        update { it.copy(calories = v) }
+        update { it.copy(macros = it.macros.copy(calories = v)) }
 
     fun onProteinChanged(v: String) =
-        update { it.copy(protein = v) }
+        update { it.copy(macros = it.macros.copy(protein = v)) }
 
     fun onCarbohydratesChanged(v: String) =
-        update { it.copy(carbohydrates = v) }
+        update { it.copy(macros = it.macros.copy(carbohydrates = v)) }
 
     fun onTotalFatChanged(v: String) =
-        update { it.copy(totalFat = v) }
+        update { it.copy(macros = it.macros.copy(totalFat = v)) }
 
     fun onFiberChanged(v: String) =
-        update { it.copy(fiber = v) }
+        update { it.copy(macros = it.macros.copy(fiber = v)) }
 
     fun onSugarChanged(v: String) =
-        update { it.copy(sugar = v) }
+        update { it.copy(macros = it.macros.copy(sugar = v)) }
 
-    // ── Minerals ───────────────────────────────────────────
-
+    // Minerals
     fun onSodiumChanged(v: String) =
-        update { it.copy(sodium = v) }
+        update { it.copy(minerals = it.minerals.copy(sodium = v)) }
 
     fun onCholesterolChanged(v: String) =
-        update { it.copy(cholesterol = v) }
+        update { it.copy(minerals = it.minerals.copy(cholesterol = v)) }
 
     fun onPotassiumChanged(v: String) =
-        update { it.copy(potassium = v) }
+        update { it.copy(minerals = it.minerals.copy(potassium = v)) }
 
     fun onCalciumChanged(v: String) =
-        update { it.copy(calcium = v) }
+        update { it.copy(minerals = it.minerals.copy(calcium = v)) }
 
     fun onIronChanged(v: String) =
-        update { it.copy(iron = v) }
+        update { it.copy(minerals = it.minerals.copy(iron = v)) }
 
+    // Vitamins
     fun onVitaminAChanged(v: String) =
-        update { it.copy(vitaminA = v) }
+        update { it.copy(vitamins = it.vitamins.copy(vitaminA = v)) }
 
     fun onVitaminCChanged(v: String) =
-        update { it.copy(vitaminC = v) }
+        update { it.copy(vitamins = it.vitamins.copy(vitaminC = v)) }
 
     fun onVitaminDChanged(v: String) =
-        update { it.copy(vitaminD = v) }
+        update { it.copy(vitamins = it.vitamins.copy(vitaminD = v)) }
 
     fun onSave() {
         viewModelScope.launch {
@@ -182,28 +191,28 @@ class MyFoodViewModel @Inject constructor(
 
             val food = CustomFood(
                 id = s.editingFood?.id ?: UUID.randomUUID().toString(),
-                name = s.foodName.trim(),
-                description = s.description.trim(),
-                servingSize = s.servingSize.trim(),
-                servingsPerContainer = s.servingsPerContainer.f(),
+                name = s.basicInfo.foodName.trim(),
+                description = s.basicInfo.description.trim(),
+                servingSize = s.basicInfo.servingSize.trim(),
+                servingsPerContainer = s.basicInfo.servingsPerContainer.f(),
 
                 nutrition = NutritionInfo(
-                    calories = s.calories.f(),
-                    protein = s.protein.f(),
-                    carbs = s.carbohydrates.f(),
-                    fat = s.totalFat.f(),
-                    fiber = s.fiber.f(),
-                    sugar = s.sugar.f(),
+                    calories = s.macros.calories.f(),
+                    protein = s.macros.protein.f(),
+                    carbs = s.macros.carbohydrates.f(),
+                    fat = s.macros.totalFat.f(),
+                    fiber = s.macros.fiber.f(),
+                    sugar = s.macros.sugar.f(),
 
-                    sodium = s.sodium.f(),
-                    cholesterol = s.cholesterol.f(),
-                    potassium = s.potassium.f(),
-                    calcium = s.calcium.f(),
-                    iron = s.iron.f(),
+                    sodium = s.minerals.sodium.f(),
+                    cholesterol = s.minerals.cholesterol.f(),
+                    potassium = s.minerals.potassium.f(),
+                    calcium = s.minerals.calcium.f(),
+                    iron = s.minerals.iron.f(),
 
-                    vitaminA = s.vitaminA.f(),
-                    vitaminC = s.vitaminC.f(),
-                    vitaminD = s.vitaminD.f(),
+                    vitaminA = s.vitamins.vitaminA.f(),
+                    vitaminC = s.vitamins.vitaminC.f(),
+                    vitaminD = s.vitamins.vitaminD.f(),
                 ),
 
                 createdAt =
@@ -293,11 +302,11 @@ class MyFoodViewModel @Inject constructor(
 
     private fun MyFoodUIState.recompute(): MyFoodUIState {
         val basicValid =
-            foodName.isNotBlank() &&
-                    servingSize.isNotBlank()
+            basicInfo.foodName.isNotBlank() &&
+                    basicInfo.servingSize.isNotBlank()
 
         val nutrientValid =
-            calories.isNotBlank()
+            macros.calories.isNotBlank()
 
         val isEdit =
             editingFood != null
@@ -306,26 +315,26 @@ class MyFoodViewModel @Inject constructor(
             if (isEdit && originalFood != null) {
                 val o = originalFood!!
 
-                foodName.trim() != o.name ||
-                        description.trim() != o.description ||
-                        servingSize.trim() != o.servingSize ||
+                basicInfo.foodName.trim() != o.name ||
+                        basicInfo.description.trim() != o.description ||
+                        basicInfo.servingSize.trim() != o.servingSize ||
 
-                        calories.f() != o.nutrition.calories ||
-                        protein.f() != o.nutrition.protein ||
-                        carbohydrates.f() != o.nutrition.carbs ||
-                        totalFat.f() != o.nutrition.fat ||
-                        fiber.f() != o.nutrition.fiber ||
-                        sugar.f() != o.nutrition.sugar ||
+                        macros.calories.f() != o.nutrition.calories ||
+                        macros.protein.f() != o.nutrition.protein ||
+                        macros.carbohydrates.f() != o.nutrition.carbs ||
+                        macros.totalFat.f() != o.nutrition.fat ||
+                        macros.fiber.f() != o.nutrition.fiber ||
+                        macros.sugar.f() != o.nutrition.sugar ||
 
-                        sodium.f() != o.nutrition.sodium ||
-                        cholesterol.f() != o.nutrition.cholesterol ||
-                        potassium.f() != o.nutrition.potassium ||
-                        calcium.f() != o.nutrition.calcium ||
-                        iron.f() != o.nutrition.iron ||
+                        minerals.sodium.f() != o.nutrition.sodium ||
+                        minerals.cholesterol.f() != o.nutrition.cholesterol ||
+                        minerals.potassium.f() != o.nutrition.potassium ||
+                        minerals.calcium.f() != o.nutrition.calcium ||
+                        minerals.iron.f() != o.nutrition.iron ||
 
-                        vitaminA.f() != o.nutrition.vitaminA ||
-                        vitaminC.f() != o.nutrition.vitaminC ||
-                        vitaminD.f() != o.nutrition.vitaminD
+                        vitamins.vitaminA.f() != o.nutrition.vitaminA ||
+                        vitamins.vitaminC.f() != o.nutrition.vitaminC ||
+                        vitamins.vitaminD.f() != o.nutrition.vitaminD
             } else {
                 false
             }
