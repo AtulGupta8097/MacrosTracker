@@ -137,8 +137,8 @@ class FoodBrowseViewModel @Inject constructor(
     }
 
     fun openFoodDetail(foodId: String) {
+        _state.update { it.copy(destination = FoodBrowseDestination.Detail(foodId), isManuallySelected = true) }
         loadDetail(foodId, manuallySelected = true)
-        _state.update { it.copy(destination = FoodBrowseDestination.Detail(foodId)) }
     }
 
     fun onFirstVisibleFoodChanged(foodId: String) {
@@ -185,9 +185,8 @@ class FoodBrowseViewModel @Inject constructor(
                                 it.copy(
                                     isDetailLoading = true,
                                     detailError = null,
-                                    selectedFood = null,
-                                    selectedServing = null,
-                                    quantity = 1f,
+                                    selectedServing = it.selectedServing,
+                                    quantity = it.quantity,
                                     isManuallySelected = manuallySelected,
                                 )
                             }
@@ -202,6 +201,7 @@ class FoodBrowseViewModel @Inject constructor(
                                     selectedServing = food.defaultServing,
                                     quantity = 1f,
                                     isDetailLoading = false,
+                                    destination = if (manuallySelected) FoodBrowseDestination.Detail(food.id) else it.destination,
                                 )
                             }
                         }

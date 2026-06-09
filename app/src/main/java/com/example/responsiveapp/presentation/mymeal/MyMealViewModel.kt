@@ -15,12 +15,11 @@ import com.example.responsiveapp.domain.use_case.mymeal.SaveMyMealUseCase
 import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
 import com.example.responsiveapp.presentation.commoncomponent.SuccessToast
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,6 +39,7 @@ class MyMealViewModel @Inject constructor(
 
     private var originalMealName: String = ""
     private var originalIngredients: Map<String, MealIngredient> = emptyMap()
+    private var searchJob: Job? = null
 
     init {
         loadMyMeals()
@@ -48,6 +48,16 @@ class MyMealViewModel @Inject constructor(
     fun onQueryChange(query: String) {
         _state.update {
             it.copy(sheetSearchQuery = query)
+        }
+
+        searchJob?.cancel()
+
+        searchJob = viewModelScope.launch {
+            if (query.isNotBlank()) {
+                delay(300)
+            }
+
+            searchFood(query)
         }
     }
 
@@ -67,25 +77,9 @@ class MyMealViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        searchFood("")
     }
 
-    private fun observeSearchQuery() {
-        state
-            .map { it.sheetSearchQuery }
-            .distinctUntilChanged()
-            .onEach { query ->
-                if (query.isBlank()) {
-                    searchFood(query)
-                } else {
-                    delay(300)
-                    searchFood(query)
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    private fun searchFood(query: String) {
+    fun searchFood(query: String) {
         viewModelScope.launch {
 
             _state.update {
@@ -170,14 +164,13 @@ class MyMealViewModel @Inject constructor(
                     carbs = food.macroSummary.carbs
                 )
             )
-            observeSearchQuery()
             _state.update {
                 it.copy(
                     showCreateSheet = false,
                     ingredient = it.ingredient.plus(food.id to ingredient)
                 )
             }
-        recomputeUnsavedChanges()
+            recomputeUnsavedChanges()
         }
     }
 
@@ -238,8 +231,13 @@ class MyMealViewModel @Inject constructor(
 
     fun onShowAddSheet() {
         _state.update {
-            it.copy(showCreateSheet = true)
+            it.copy(
+                showCreateSheet = true,
+                sheetSearchQuery = it.sheetSearchQuery
+            )
         }
+
+        searchFood("")
     }
 
     fun onHideAddSheet() {

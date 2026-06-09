@@ -158,6 +158,11 @@ fun FoodDetailHeader(
         }
     }
 
+    MacroCardsRow(nutrition = nutrition)
+}
+
+@Composable
+private fun MacroCardsRow(nutrition: NutritionInfo) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

@@ -45,7 +45,7 @@ fun FoodDetailContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.lg),
     ) {
-        item {
+        item(key = "header") {
             FoodDetailHeader(
                 foodName = foodName,
                 foodBrand = foodBrand,
@@ -56,7 +56,7 @@ fun FoodDetailContent(
         }
 
         if (foodServing.size > 1) {
-            item {
+            item(key = "serving-selector") {
                 ServingSelector(
                     servings = foodServing,
                     selectedServing = selectedServing,
@@ -65,7 +65,7 @@ fun FoodDetailContent(
             }
         }
 
-        item {
+        item(key = "quantity-${quantity}") {
             QuantityControl(
                 quantity = quantity,
                 onQuantityChanged = onQuantityChanged,
@@ -75,7 +75,7 @@ fun FoodDetailContent(
             )
         }
 
-        item {
+        item(key = "nutrition-label") {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,14 +103,14 @@ fun FoodDetailContent(
             }
         }
 
-        item {
+        item(key = "nutrition-table") {
             NutritionTable(
                 nutrition = scaledNutrition,
                 modifier = Modifier.padding(horizontal = MaterialTheme.spacing.md),
             )
         }
 
-        item {
+        item(key = "log-button") {
             CustomButton(
                 text = "Log Food",
                 onClick = onLog,

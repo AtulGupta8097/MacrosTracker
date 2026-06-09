@@ -1,9 +1,11 @@
 package com.example.responsiveapp.presentation.mymeal.component
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,8 +35,8 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 fun MyMealListScreen(
     modifier: Modifier = Modifier,
     meals: List<MyMeal> = emptyList(),
-    selectedMealId : String? = null,
-    onMealClicked: (MyMeal)-> Unit,
+    selectedMealId: String? = null,
+    onMealClicked: (MyMeal) -> Unit,
     onCreateClick: () -> Unit,
 ) {
     Column(
@@ -46,60 +48,76 @@ fun MyMealListScreen(
         Box(
             modifier = Modifier.weight(1f)
         ) {
-            androidx.compose.animation.AnimatedVisibility(
-                visible = meals.isEmpty(),
-                enter = fadeIn(tween(300)),
-                exit = fadeOut(tween(200)),
-                modifier = Modifier.align(Alignment.Center),
-            ) {
-                EmptyState(
-                    title = "No meals yet",
-                    description = "Tap + to build your first\ncustom meal from real foods.",
-                    icon = Icons.Outlined.RestaurantMenu,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
 
-            androidx.compose.animation.AnimatedVisibility(
-                visible = meals.isNotEmpty(),
-                enter = fadeIn(tween(300)) +
-                        slideInVertically(tween(300)) { it / 8 },
-                exit = fadeOut(tween(200)),
-            ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        horizontal = MaterialTheme.spacing.md,
-                        vertical = MaterialTheme.spacing.md,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
-                ) {
-                    items(meals, key = { it.id }) { meal ->
-                        MyMealCard(
-                            myMeal = meal,
-                            isSelected = meal.id == selectedMealId,
-                            onLog = { },
-                            onEdit = { onMealClicked(meal) }
+            AnimatedContent(
+                targetState = meals.isEmpty(),
+                transitionSpec = {
+                    (fadeIn(tween(150)) +
+                            slideInVertically(tween(250)) { it / 8 })
+                        .togetherWith(
+                            fadeOut(tween(150))
                         )
+                },
+                label = "MealsContent"
+            ) { isEmpty ->
+
+                if (isEmpty) {
+                    EmptyState(
+                        modifier = Modifier.align(Alignment.Center),
+                        title = "No meals yet",
+                        description = "Tap + to build your first\ncustom meal from real foods.",
+                        icon = Icons.Outlined.RestaurantMenu,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            horizontal = MaterialTheme.spacing.md,
+                            vertical = MaterialTheme.spacing.md,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(
+                            MaterialTheme.spacing.sm
+                        ),
+                    ) {
+                        items(
+                            items = meals,
+                            key = { it.id }
+                        ) { meal ->
+
+                            MyMealCard(
+                                myMeal = meal,
+                                isSelected = meal.id == selectedMealId,
+                                onLog = { },
+                                onEdit = { onMealClicked(meal) }
+                            )
+                        }
                     }
                 }
             }
         }
-        CustomButton(
-            text = "Create Meal",
-            onClick = {
-                onCreateClick()
-            },
-            imageVector = Icons.Default.Add,
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(80.dp)
-                .padding(MaterialTheme.spacing.md),
-            buttonColors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
+
+        CreateMealButton(
+            onClick = onCreateClick
         )
     }
+}
 
+@Composable
+private fun CreateMealButton(
+    onClick: () -> Unit,
+) {
+    CustomButton(
+        text = "Create Meal",
+        onClick = onClick,
+        imageVector = Icons.Default.Add,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(80.dp)
+            .padding(MaterialTheme.spacing.md),
+        buttonColors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        )
+    )
 }

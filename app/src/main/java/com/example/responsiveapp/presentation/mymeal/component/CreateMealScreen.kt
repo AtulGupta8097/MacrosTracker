@@ -2,6 +2,7 @@ package com.example.responsiveapp.presentation.mymeal.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -150,7 +151,8 @@ fun CreateMealScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs),
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -237,6 +239,8 @@ private fun PrevCreateMealScreen() {
             totalProtein = 100f,
             totalCarbs = 100f,
             totalFat = 38f,
+            onIngredientAdd = {},
+            onIngredientRemove = {}
         )
     }
 }
