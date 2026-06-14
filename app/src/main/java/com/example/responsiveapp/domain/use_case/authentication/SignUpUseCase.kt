@@ -1,4 +1,4 @@
-package com.example.responsiveapp.domain.use_case
+package com.example.responsiveapp.domain.use_case.authentication
 
 import com.example.responsiveapp.domain.repository.AuthRepository
 import javax.inject.Inject

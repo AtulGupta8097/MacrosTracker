@@ -7,7 +7,7 @@ import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal
 import com.example.responsiveapp.domain.use_case.CalculateMacrosUseCase
-import com.example.responsiveapp.domain.use_case.profile_usecase.SaveUserProfileUseCase
+import com.example.responsiveapp.domain.use_case.profile.SaveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

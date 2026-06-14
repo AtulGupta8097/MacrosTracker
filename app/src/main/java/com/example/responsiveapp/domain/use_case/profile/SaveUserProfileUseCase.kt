@@ -1,4 +1,4 @@
-package com.example.responsiveapp.domain.use_case.profile_usecase
+package com.example.responsiveapp.domain.use_case.profile
 
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.domain.repository.UserProfileRepository

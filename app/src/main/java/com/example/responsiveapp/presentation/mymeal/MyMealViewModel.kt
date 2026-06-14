@@ -8,7 +8,7 @@ import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.MealIngredient
 import com.example.responsiveapp.domain.model.NutritionInfo
 import com.example.responsiveapp.domain.model.mymeals.MyMeal
-import com.example.responsiveapp.domain.use_case.food_usecase.SearchFoodsUseCase
+import com.example.responsiveapp.domain.use_case.food.SearchFoodsUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.DeleteMyMealUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.ObServeMyMealUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.SaveMyMealUseCase

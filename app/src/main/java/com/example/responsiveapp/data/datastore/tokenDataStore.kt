@@ -30,7 +30,7 @@ interface TokenDataStore {
 
 @Singleton
 class EncryptedTokenDataStore @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : TokenDataStore {
     
     private val dataStore = context.tokenDataStore

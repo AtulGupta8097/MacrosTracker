@@ -1,8 +1,6 @@
 package com.example.responsiveapp.core.di
 
 import android.content.Context
-import com.example.responsiveapp.data.datasource.MacroCalculatorDataSource
-import com.example.responsiveapp.data.datasource.MacroCalculatorDataSourceImpl
 import com.example.responsiveapp.data.datastore.EncryptedTokenDataStore
 import com.example.responsiveapp.data.datastore.TokenDataStore
 import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
@@ -73,15 +71,9 @@ object AppModule {
     }
 
     @Provides
-    fun provideMacroCalculatorDataSource():
-            MacroCalculatorDataSource =
-        MacroCalculatorDataSourceImpl()
-
-    @Provides
     fun provideMacroRepository(
-        dataSource: MacroCalculatorDataSource,
     ): MacroRepository =
-        MacroRepositoryImpl(dataSource)
+        MacroRepositoryImpl()
 
     @Provides
     @Singleton

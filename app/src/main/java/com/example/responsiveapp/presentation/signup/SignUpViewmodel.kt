@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.data.datastore.AppPrefManager
-import com.example.responsiveapp.domain.use_case.SignUpUseCase
+import com.example.responsiveapp.domain.use_case.authentication.SignUpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow

@@ -1,11 +1,8 @@
-package com.example.responsiveapp.domain.use_case.foodlog_usecase
+package com.example.responsiveapp.domain.use_case.foodlog
 
 import com.example.responsiveapp.core.utils.Resource
-import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.domain.model.FoodLog
-import com.example.responsiveapp.domain.model.LogFoodRequest
 import com.example.responsiveapp.domain.repository.FoodLogRepository
-import com.example.responsiveapp.domain.repository.FoodRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.example.responsiveapp.domain.use_case.food_usecase
+package com.example.responsiveapp.domain.use_case.food
 
 import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.domain.model.FoodDetail

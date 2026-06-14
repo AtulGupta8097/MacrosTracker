@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.domain.model.scale
-import com.example.responsiveapp.domain.use_case.food_usecase.GetFoodByIdUseCase
-import com.example.responsiveapp.domain.use_case.food_usecase.SearchFoodsUseCase
+import com.example.responsiveapp.domain.use_case.food.GetFoodByIdUseCase
+import com.example.responsiveapp.domain.use_case.food.SearchFoodsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.flatMapLatest

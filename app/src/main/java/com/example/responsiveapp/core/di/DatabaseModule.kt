@@ -29,7 +29,7 @@ object DatabaseModule {
             MacrosTrackerDatabase::class.java,
             MacrosTrackerDatabase.DATABASE_NAME,
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(false)
             .build()
 
     @Provides
