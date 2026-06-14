@@ -25,23 +25,16 @@ class FoodLogRepositoryImpl (
         return firebaseAuth.currentUser?.uid 
             ?: throw IllegalStateException("User not authenticated")
     }
-    
+
     override suspend fun logFood(foodLog: FoodLog): Result<FoodLog> {
         return try {
 
-            val entity = foodLog.toEntity()
-            foodLogDao.insertFoodLog(entity)
+            foodLogDao.insertFoodLog(
+                foodLog.toEntity()
+            )
 
-            val savedLog = foodLog.copy(isSynced = false)
+            Result.success(foodLog)
 
-            try {
-                syncLogToFirestore(savedLog)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            
-            Result.success(savedLog)
-            
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -3,14 +3,13 @@ package com.example.responsiveapp.core.di
 import android.content.Context
 import com.example.responsiveapp.data.datasource.MacroCalculatorDataSource
 import com.example.responsiveapp.data.datasource.MacroCalculatorDataSourceImpl
-import com.example.responsiveapp.data.datasource.UserProfileLocalDataSource
-import com.example.responsiveapp.data.datasource.UserProfileRemoteDataSource
 import com.example.responsiveapp.data.datastore.EncryptedTokenDataStore
 import com.example.responsiveapp.data.datastore.TokenDataStore
+import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
 import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
-import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
+import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
@@ -85,13 +84,16 @@ object AppModule {
         MacroRepositoryImpl(dataSource)
 
     @Provides
+    @Singleton
     fun provideUserProfileRepository(
-        local: UserProfileLocalDataSource,
-        remote: UserProfileRemoteDataSource,
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth,
+        preferences: UserPreferencesDataStore,
     ): UserProfileRepository =
         UserProfileRepositoryImpl(
-            local = local,
-            remote = remote
+            firestore = firestore,
+            auth = auth,
+            preferences = preferences
         )
 
     @Provides
@@ -104,13 +106,13 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFoodRepository(
-        foodDao: FoodItemDao,
+        foodSearchDao : FoodSearchDao,
         foodDetailDao: FoodDetailDao,
         fatSecretApi: FatSecretApiService,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): FoodRepository =
         FoodRepositoryImpl(
-            foodDao,
+            foodSearchDao,
             foodDetailDao,
             fatSecretApi,
             ioDispatcher

@@ -4,33 +4,24 @@ import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.repository.FoodRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class SearchFoodsUseCase @Inject constructor(
-    private val repository: FoodRepository
+    private val repository: FoodRepository,
 ) {
 
     operator fun invoke(
         query: String,
-        limit: Int
-    ): Flow<Resource<List<FoodItem>>> = flow {
-
-        emit(Resource.Loading())
+        limit: Int,
+    ): Flow<Resource<List<FoodItem>>> {
 
         val finalQuery = query.ifBlank {
             "Pizza"
         }
 
-        val result = repository.searchFoods(finalQuery, limit)
-
-        result.fold(
-            onSuccess = { foods ->
-                emit(Resource.Success(foods))
-            },
-            onFailure = { e ->
-                emit(Resource.Error(e.message ?: "Unknown error"))
-            }
+        return repository.searchFoods(
+            query = finalQuery,
+            limit = limit,
         )
     }
 }

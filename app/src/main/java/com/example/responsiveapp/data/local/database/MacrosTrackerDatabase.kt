@@ -8,14 +8,16 @@ import com.example.responsiveapp.data.local.converter.NutritionInfoConverter
 import com.example.responsiveapp.data.local.converter.ServingConverter
 import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
-import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
+import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.entity.CustomFoodEntity
 import com.example.responsiveapp.data.local.entity.FoodDetailEntity
 import com.example.responsiveapp.data.local.entity.FoodItemEntity
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
 import com.example.responsiveapp.data.local.entity.MyMealsEntity
+import com.example.responsiveapp.data.local.entity.SearchQueryEntity
+import com.example.responsiveapp.data.local.entity.SearchResultCrossRef
 
 @Database(
     entities = [
@@ -24,8 +26,10 @@ import com.example.responsiveapp.data.local.entity.MyMealsEntity
         FoodLogEntity::class,
         MyMealsEntity::class,
         CustomFoodEntity::class,
+        SearchQueryEntity::class,
+        SearchResultCrossRef::class,
     ],
-    version = 5,
+    version      = 6,
     exportSchema = false,
 )
 @TypeConverters(
@@ -35,15 +39,11 @@ import com.example.responsiveapp.data.local.entity.MyMealsEntity
 )
 abstract class MacrosTrackerDatabase : RoomDatabase() {
 
-    abstract fun foodItemDao(): FoodItemDao
-
-    abstract fun foodDetailDao(): FoodDetailDao
-
-    abstract fun foodLogDao(): FoodLogDao
-
-    abstract fun myMealsDAo(): MyMealsDao
-
-    abstract fun customFoodDao(): CustomFoodDao
+    abstract fun foodDetailDao() : FoodDetailDao
+    abstract fun foodLogDao()    : FoodLogDao
+    abstract fun myMealsDAo()    : MyMealsDao
+    abstract fun customFoodDao() : CustomFoodDao
+    abstract fun foodSearchDao() : FoodSearchDao
 
     companion object {
         const val DATABASE_NAME = "macros_tracker_db"

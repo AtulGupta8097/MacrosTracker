@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
-import com.example.responsiveapp.data.local.dao.FoodItemDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
+import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import dagger.Module
@@ -23,48 +23,37 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-    ): MacrosTrackerDatabase {
-        return Room.databaseBuilder(
+    ): MacrosTrackerDatabase =
+        Room.databaseBuilder(
             context,
             MacrosTrackerDatabase::class.java,
             MacrosTrackerDatabase.DATABASE_NAME,
         )
             .fallbackToDestructiveMigration()
             .build()
-    }
 
     @Provides
     @Singleton
-    fun provideFoodItemDao(
-        database: MacrosTrackerDatabase,
-    ): FoodItemDao =
-        database.foodItemDao()
-
-    @Provides
-    @Singleton
-    fun provideFoodDetailDao(
-        database: MacrosTrackerDatabase,
-    ): FoodDetailDao =
+    fun provideFoodDetailDao(database: MacrosTrackerDatabase): FoodDetailDao =
         database.foodDetailDao()
 
     @Provides
     @Singleton
-    fun provideFoodLogDao(
-        database: MacrosTrackerDatabase,
-    ): FoodLogDao =
+    fun provideFoodLogDao(database: MacrosTrackerDatabase): FoodLogDao =
         database.foodLogDao()
 
     @Provides
     @Singleton
-    fun provideMyMealsDao(
-        database: MacrosTrackerDatabase,
-    ): MyMealsDao =
+    fun provideMyMealsDao(database: MacrosTrackerDatabase): MyMealsDao =
         database.myMealsDAo()
 
     @Provides
     @Singleton
-    fun provideCustomFoodDao(
-        database: MacrosTrackerDatabase,
-    ): CustomFoodDao =
+    fun provideCustomFoodDao(database: MacrosTrackerDatabase): CustomFoodDao =
         database.customFoodDao()
+
+    @Provides
+    @Singleton
+    fun provideFoodSearchDao(database: MacrosTrackerDatabase): FoodSearchDao =
+        database.foodSearchDao()
 }

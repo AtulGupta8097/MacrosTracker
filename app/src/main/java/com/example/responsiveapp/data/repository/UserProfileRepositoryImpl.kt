@@ -1,38 +1,113 @@
 package com.example.responsiveapp.data.repository
 
-import com.example.responsiveapp.data.datasource.UserProfileLocalDataSource
+import androidx.datastore.preferences.core.edit
+import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
+import com.example.responsiveapp.data.datastore.UserPreferencesKeys
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toDto
-import com.example.responsiveapp.data.datasource.UserProfileRemoteDataSource
+import com.example.responsiveapp.data.remote.dto.UserProfileDto
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.domain.repository.UserProfileRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class UserProfileRepositoryImpl(
-    private val local: UserProfileLocalDataSource,
-    private val remote: UserProfileRemoteDataSource
+class UserProfileRepositoryImpl @Inject constructor(
+    private val firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth,
+    private val preferences: UserPreferencesDataStore
 ) : UserProfileRepository {
 
-    override suspend fun saveUserProfile(profile: UserProfile): Result<Unit> {
+    override suspend fun saveUserProfile(
+        profile: UserProfile
+    ): Result<Unit> {
+
         val dto = profile.toDto()
 
         return try {
-            remote.save(dto)
-            local.save(dto)
+
+            val uid = auth.currentUser?.uid
+                ?: throw IllegalStateException("User not logged in")
+
+            firestore
+                .collection("users")
+                .document(uid)
+                .set(dto)
+                .await()
+
+            saveToLocal(dto)
 
             Result.success(Unit)
+
         } catch (e: Exception) {
-            local.save(dto)
+
+            saveToLocal(dto)
+
             Result.failure(e)
         }
     }
 
     override suspend fun getUserProfile(): UserProfile? {
 
-        local.get()?.toDomain()?.let { return it }
-        val remoteDto = remote.get() ?: return null
-        local.save(remoteDto)
+        getLocalProfile()?.let {
+            return it.toDomain()
+        }
+
+        val uid = auth.currentUser?.uid ?: return null
+
+        val remoteDto = firestore
+            .collection("users")
+            .document(uid)
+            .get()
+            .await()
+            .toObject(UserProfileDto::class.java)
+            ?: return null
+
+        saveToLocal(remoteDto)
 
         return remoteDto.toDomain()
     }
-}
 
+    private suspend fun saveToLocal(dto: UserProfileDto) {
+        preferences.dataStore.edit { prefs ->
+
+            dto.gender?.let {
+                prefs[UserPreferencesKeys.GENDER] = it
+            }
+            dto.age?.let {
+                prefs[UserPreferencesKeys.AGE] = it
+            }
+            dto.weight?.let {
+                prefs[UserPreferencesKeys.WEIGHT] = it
+            }
+            dto.height?.let {
+                prefs[UserPreferencesKeys.HEIGHT] = it
+            }
+            dto.activityLevel?.let {
+                prefs[UserPreferencesKeys.ACTIVITY] = it
+            }
+            dto.goal?.let {
+                prefs[UserPreferencesKeys.GOAL] = it
+            }
+        }
+    }
+
+    private suspend fun getLocalProfile(): UserProfileDto? {
+
+        val prefs = preferences.dataStore.data.first()
+
+        val gender = prefs[UserPreferencesKeys.GENDER]
+            ?: return null
+
+        return UserProfileDto(
+            gender = gender,
+            age = prefs[UserPreferencesKeys.AGE],
+            weight = prefs[UserPreferencesKeys.WEIGHT],
+            height = prefs[UserPreferencesKeys.HEIGHT],
+            activityLevel = prefs[UserPreferencesKeys.ACTIVITY],
+            goal = prefs[UserPreferencesKeys.GOAL]
+        )
+    }
+}

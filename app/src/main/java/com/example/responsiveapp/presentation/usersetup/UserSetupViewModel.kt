@@ -58,7 +58,7 @@ class UserSetupViewModel @Inject constructor(
         _state.update { it.copy(userInput = it.userInput.copy(goal = goal)) }
     }
     fun onNextClicked() {
-        if (!(_state.value.currentScreen == UserSetupScreen.Goal)) {
+        if (_state.value.currentScreen != UserSetupScreen.Goal) {
             nextScreen()
         } else {
             onCompleteUserSetup()

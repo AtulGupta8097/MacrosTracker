@@ -5,12 +5,12 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "food_items")
 data class FoodItemEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey
+    val id: String,
     val name: String,
     val brand: String?,
     val foodType: String,
-    // Store MacroSummary as flat columns — it's just one row of numbers
-    val servingLabel: String?,      // "100g", "14 pieces"
+    val servingLabel: String?,
     val calories: Float?,
     val fat: Float?,
     val carbs: Float?,
