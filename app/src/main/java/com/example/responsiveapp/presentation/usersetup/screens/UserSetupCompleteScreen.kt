@@ -64,7 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.responsiveapp.domain.model.MacroNutrients
+import com.example.responsiveapp.domain.model.NutritionTargets
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.spacing
@@ -73,7 +73,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun UserSetupCompleteScreen(
     isSaving: Boolean,
-    macros: MacroNutrients?,
+    macros: NutritionTargets?,
     onNavigateToMain: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -275,7 +275,7 @@ private fun CompleteLoadingContent(deviceConfig: DeviceConfiguration) {
 
 @Composable
 private fun CompleteSuccessContent(
-    macros: MacroNutrients,
+    macros: NutritionTargets,
     maxWidth: Dp,
     horizontalPadding: Dp,
     deviceConfig: DeviceConfiguration
@@ -348,7 +348,7 @@ private fun CompleteSuccessContent(
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
-        BmrCard(bmr = macros.bmr, deviceConfig = deviceConfig)
+//        BmrCard(bmr = macros.bmr, deviceConfig = deviceConfig)
     }
 }
 
@@ -521,7 +521,7 @@ private fun CaloriesCard(calories: Int, deviceConfig: DeviceConfiguration) {
 }
 
 @Composable
-private fun MacroCardsGrid(macros: MacroNutrients, deviceConfig: DeviceConfiguration) {
+private fun MacroCardsGrid(macros: NutritionTargets, deviceConfig: DeviceConfiguration) {
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {

@@ -8,7 +8,7 @@ import com.example.responsiveapp.data.mapper.toDto
 import com.example.responsiveapp.data.remote.dto.UserProfileDto
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.domain.repository.UserProfileRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.example.responsiveapp.domain.session.SessionManager
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
@@ -16,8 +16,8 @@ import javax.inject.Inject
 
 class UserProfileRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth,
-    private val preferences: UserPreferencesDataStore
+    private val preferences: UserPreferencesDataStore,
+    private val sessionManager: SessionManager
 ) : UserProfileRepository {
 
     override suspend fun saveUserProfile(
@@ -28,8 +28,7 @@ class UserProfileRepositoryImpl @Inject constructor(
 
         return try {
 
-            val uid = auth.currentUser?.uid
-                ?: throw IllegalStateException("User not logged in")
+            val uid = sessionManager.requireUserId()
 
             firestore
                 .collection("users")
@@ -55,7 +54,8 @@ class UserProfileRepositoryImpl @Inject constructor(
             return it.toDomain()
         }
 
-        val uid = auth.currentUser?.uid ?: return null
+        val uid = sessionManager.currentUserId()
+            ?: return null
 
         val remoteDto = firestore
             .collection("users")

@@ -8,22 +8,25 @@ import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
+import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
 import com.example.responsiveapp.data.repository.CustomFoodRepositoryImpl
 import com.example.responsiveapp.data.repository.FoodLogRepositoryImpl
 import com.example.responsiveapp.data.repository.FoodRepositoryImpl
-import com.example.responsiveapp.data.repository.MacroRepositoryImpl
+import com.example.responsiveapp.data.repository.MacroTargetRepositoryImpl
 import com.example.responsiveapp.data.repository.MyMealRepositoryImpl
 import com.example.responsiveapp.data.repository.UserProfileRepositoryImpl
 import com.example.responsiveapp.domain.repository.AuthRepository
 import com.example.responsiveapp.domain.repository.CustomFoodRepository
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.FoodRepository
-import com.example.responsiveapp.domain.repository.MacroRepository
+import com.example.responsiveapp.domain.repository.MacroTargetRepository
 import com.example.responsiveapp.domain.repository.MyMealRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
+import com.example.responsiveapp.domain.session.SessionManager
+import com.example.responsiveapp.domain.session.SessionManagerImpl
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -48,100 +51,84 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAuthRepository(
-        auth: FirebaseAuth,
-    ): AuthRepository =
+    fun provideAuthRepository(auth: FirebaseAuth): AuthRepository =
         AuthRepositoryImp(auth)
+
+    @Singleton
+    @Provides
+    fun provideSessionManager(auth: FirebaseAuth): SessionManager =
+        SessionManagerImpl(auth)
 
     @Provides
     @Singleton
     fun provideFirebaseFirestore(): FirebaseFirestore {
         val firestore = FirebaseFirestore.getInstance()
-
         val settings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
-            .setCacheSizeBytes(
-                FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED
-            )
+            .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
             .build()
-
         firestore.firestoreSettings = settings
-
         return firestore
     }
 
+    // MacroCalculator is @Singleton with @Inject constructor — Hilt picks it up automatically.
+    // No manual @Provides needed.
+
     @Provides
-    fun provideMacroRepository(
-    ): MacroRepository =
-        MacroRepositoryImpl()
+    @Singleton
+    fun provideMacroTargetRepository(dao: MacroTargetDao): MacroTargetRepository =
+        MacroTargetRepositoryImpl(dao)
 
     @Provides
     @Singleton
     fun provideUserProfileRepository(
         firestore: FirebaseFirestore,
-        auth: FirebaseAuth,
+        sessionManager: SessionManager,
         preferences: UserPreferencesDataStore,
     ): UserProfileRepository =
         UserProfileRepositoryImpl(
-            firestore = firestore,
-            auth = auth,
-            preferences = preferences
+            firestore      = firestore,
+            sessionManager = sessionManager,
+            preferences    = preferences
         )
 
     @Provides
     @Singleton
-    fun provideTokenDataStore(
-        @ApplicationContext context: Context,
-    ): TokenDataStore =
+    fun provideTokenDataStore(@ApplicationContext context: Context): TokenDataStore =
         EncryptedTokenDataStore(context)
 
     @Provides
     @Singleton
     fun provideFoodRepository(
-        foodSearchDao : FoodSearchDao,
+        foodSearchDao: FoodSearchDao,
         foodDetailDao: FoodDetailDao,
         fatSecretApi: FatSecretApiService,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): FoodRepository =
-        FoodRepositoryImpl(
-            foodSearchDao,
-            foodDetailDao,
-            fatSecretApi,
-            ioDispatcher
-        )
+        FoodRepositoryImpl(foodSearchDao, foodDetailDao, fatSecretApi, ioDispatcher)
 
     @Provides
     @Singleton
     fun provideFoodLogRepository(
         foodLogDao: FoodLogDao,
         firestore: FirebaseFirestore,
-        firebaseAuth: FirebaseAuth,
+        sessionManager: SessionManager,
     ): FoodLogRepository =
-        FoodLogRepositoryImpl(
-            foodLogDao,
-            firestore,
-            firebaseAuth
-        )
+        FoodLogRepositoryImpl(foodLogDao, firestore, sessionManager)
 
     @Singleton
     @Provides
-    fun provideMyMealRepository(
-        myMealDao: MyMealsDao,
-    ): MyMealRepository =
+    fun provideMyMealRepository(myMealDao: MyMealsDao): MyMealRepository =
         MyMealRepositoryImpl(myMealDao)
 
     @Singleton
     @Provides
-    fun provideCustomFoodRepository(
-        dao: CustomFoodDao,
-    ): CustomFoodRepository =
+    fun provideCustomFoodRepository(dao: CustomFoodDao): CustomFoodRepository =
         CustomFoodRepositoryImpl(dao)
 
     @IoDispatcher
     @Provides
-    fun providesIoDispatcher():
-            CoroutineDispatcher =
-        Dispatchers.IO
+    fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
 
 @Qualifier

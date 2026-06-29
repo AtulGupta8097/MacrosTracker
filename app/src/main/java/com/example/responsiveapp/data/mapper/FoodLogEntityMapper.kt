@@ -16,42 +16,35 @@ fun FoodLogEntity.toDomain(): FoodLog {
         } ?: emptyList()
 
     return FoodLog(
-        id = id,
-        userId = userId,
-        date = date,
-        foodName = foodName,
-        servingDescription = servingDescription,
-        quantity = quantity,
-        nutrition = nutrition,
-        ingredients = ingredients,
-        createdAt = createdAt,
-        updatedAt = updatedAt
+        id                  = id,
+        date                = date,
+        foodName            = foodName,
+        servingDescription  = servingDescription,
+        quantity            = quantity,
+        nutrition           = nutrition,
+        ingredients         = ingredients,
+        createdAt           = createdAt,
+        updatedAt           = updatedAt,
+        syncStatus          = syncStatus,
+        retryCount          = retryCount,
+        lastSyncAttempt     = lastSyncAttempt
     )
 }
 
 fun FoodLog.toEntity(): FoodLogEntity {
 
     return FoodLogEntity(
-        id = id,
-        userId = userId,
-        date = date,
-
-        foodName = foodName,
-        servingDescription = servingDescription,
-        quantity = quantity,
-
-        nutrition = nutrition,
-
-        ingredientsJson =
-            if (ingredients.isNotEmpty()) {
-                Gson().toJson(ingredients)
-            } else {
-                null
-            },
-
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-
-        syncStatus = SyncStatus.PENDING
+        id                  = id,
+        date                = date,
+        foodName            = foodName,
+        servingDescription  = servingDescription,
+        quantity            = quantity,
+        nutrition           = nutrition,
+        ingredientsJson     = if (ingredients.isNotEmpty()) Gson().toJson(ingredients) else null,
+        createdAt           = createdAt,
+        updatedAt           = updatedAt,
+        syncStatus          = SyncStatus.PENDING,
+        retryCount          = 0,
+        lastSyncAttempt     = null
     )
 }

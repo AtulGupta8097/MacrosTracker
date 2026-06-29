@@ -3,31 +3,23 @@ package com.example.responsiveapp.data.local.entity
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.responsiveapp.domain.model.NutritionInfo
+import com.example.responsiveapp.domain.model.NutritionTargets
 import com.example.responsiveapp.domain.model.SyncStatus
 
-@Entity(tableName = "food_logs")
-data class FoodLogEntity(
+@Entity(tableName = "macro_targets")
+data class MacroTargetEntity(
 
     @PrimaryKey
     val id: String,
 
-    val date: Long,
+    @Embedded(prefix = "target_")
+    val targets: NutritionTargets,
 
-    val foodName: String,
+    val bmr: Int,
 
-    val servingDescription: String,
-
-    val quantity: Float,
-
-    @Embedded(prefix = "nutrition_")
-    val nutrition: NutritionInfo = NutritionInfo(),
-
-    val ingredientsJson: String? = null,
+    val tdee: Int,
 
     val createdAt: Long,
-
-    val updatedAt: Long,
 
     val syncStatus: SyncStatus = SyncStatus.PENDING,
 

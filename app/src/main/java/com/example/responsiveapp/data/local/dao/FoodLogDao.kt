@@ -6,22 +6,23 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
+import com.example.responsiveapp.domain.model.SyncStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FoodLogDao {
 
-    @Query("SELECT * FROM food_logs WHERE userId = :userId AND date = :date ORDER BY createdAt DESC")
-    fun getFoodLogsForDate(userId: String, date: Long): Flow<List<FoodLogEntity>>
+    @Query("SELECT * FROM food_logs WHERE date = :date ORDER BY createdAt DESC")
+    fun getFoodLogsForDate(date: Long): Flow<List<FoodLogEntity>>
 
     @Query("SELECT * FROM food_logs WHERE id = :logId")
     suspend fun getFoodLogById(logId: String): FoodLogEntity?
 
-    @Query("SELECT * FROM food_logs WHERE userId = :userId AND syncStatus = 'PENDING'")
-    suspend fun getPendingLogs(userId: String): List<FoodLogEntity>
+    @Query("SELECT * FROM food_logs WHERE syncStatus = 'PENDING'")
+    suspend fun getPendingLogs(): List<FoodLogEntity>
 
-    @Query("SELECT COUNT(*) FROM food_logs WHERE userId = :userId AND syncStatus = 'PENDING'")
-    suspend fun getPendingLogsCount(userId: String): Int
+    @Query("SELECT COUNT(*) FROM food_logs WHERE syncStatus = 'PENDING'")
+    suspend fun getPendingLogsCount(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFoodLog(foodLog: FoodLogEntity)
@@ -30,11 +31,11 @@ interface FoodLogDao {
     suspend fun updateFoodLog(foodLog: FoodLogEntity)
 
     @Query("UPDATE food_logs SET syncStatus = :status WHERE id = :logId")
-    suspend fun updateSyncStatus(logId: String, status: String)
+    suspend fun updateSyncStatus(logId: String, status: SyncStatus)
 
     @Query("DELETE FROM food_logs WHERE id = :logId")
     suspend fun deleteFoodLog(logId: String)
 
-    @Query("DELETE FROM food_logs WHERE userId = :userId")
-    suspend fun deleteAllUserLogs(userId: String)
+    @Query("DELETE FROM food_logs")
+    suspend fun deleteAllLogs()
 }

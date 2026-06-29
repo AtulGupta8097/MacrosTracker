@@ -4,76 +4,58 @@ import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.domain.model.FoodLog
+import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.example.responsiveapp.domain.session.SessionManager
 import com.google.firebase.firestore.FirebaseFirestore
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FoodLogRepositoryImpl (
+class FoodLogRepositoryImpl @Inject constructor(
     private val foodLogDao: FoodLogDao,
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val sessionManager: SessionManager
 ) : FoodLogRepository {
-    
-    private fun getFoodLogsCollection() = firestore
-        .collection("users")
-        .document(getCurrentUserId())
-        .collection("food_logs")
-    
-    private fun getCurrentUserId(): String {
-        return firebaseAuth.currentUser?.uid 
-            ?: throw IllegalStateException("User not authenticated")
-    }
 
     override suspend fun logFood(foodLog: FoodLog): Result<FoodLog> {
         return try {
-
-            foodLogDao.insertFoodLog(
-                foodLog.toEntity()
-            )
-
+            foodLogDao.insertFoodLog(foodLog.toEntity())
             Result.success(foodLog)
-
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    
+
     override suspend fun syncPendingLogs(userId: String): Result<Int> {
         return try {
-            val pendingLogs = foodLogDao.getPendingLogs(userId)
+            val pendingLogs = foodLogDao.getPendingLogs()
             var syncedCount = 0
-            
+
             for (entity in pendingLogs) {
                 try {
                     val foodLog = entity.toDomain()
                     syncLogToFirestore(foodLog)
-
-                    foodLogDao.updateSyncStatus(entity.id, "SYNCED")
+                    foodLogDao.updateSyncStatus(entity.id, SyncStatus.SYNCED)
                     syncedCount++
-                    
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    foodLogDao.updateSyncStatus(entity.id, "FAILED")
+                    foodLogDao.updateSyncStatus(entity.id, SyncStatus.FAILED)
                 }
             }
-            
+
             Result.success(syncedCount)
-            
+
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
+    private fun getFoodLogsCollection() = firestore
+        .collection("users")
+        .document(sessionManager.requireUserId())
+        .collection("food_logs")
+
     private suspend fun syncLogToFirestore(foodLog: FoodLog) {
-//        val firebaseDto = foodLog.toFirebaseDto()
-//
-//        getFoodLogsCollection()
-//            .document(foodLog.id)
-//            .set(firebaseDto)
-//            .await()
-//
-//        foodLogDao.updateSyncStatus(foodLog.id, "SYNCED")
+
     }
 }

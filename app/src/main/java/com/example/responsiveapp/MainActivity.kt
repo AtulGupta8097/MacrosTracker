@@ -21,7 +21,7 @@ import com.example.responsiveapp.presentation.usersetup.screens.UserSetupMainScr
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class  MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     override fun onCreate(savedInstanceState: Bundle?) {

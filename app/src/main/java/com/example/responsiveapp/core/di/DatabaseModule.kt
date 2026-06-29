@@ -6,6 +6,7 @@ import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
+import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import dagger.Module
@@ -56,4 +57,13 @@ object DatabaseModule {
     @Singleton
     fun provideFoodSearchDao(database: MacrosTrackerDatabase): FoodSearchDao =
         database.foodSearchDao()
+
+    @Provides
+    @Singleton
+    fun provideMacroTargetDao(
+        database: MacrosTrackerDatabase
+    ): MacroTargetDao =
+        database.macroTargetDao()
+
+
 }

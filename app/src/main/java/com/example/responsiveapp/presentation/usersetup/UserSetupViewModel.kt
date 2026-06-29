@@ -6,7 +6,6 @@ import com.example.responsiveapp.data.datastore.AppPrefManager
 import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal
-import com.example.responsiveapp.domain.use_case.CalculateMacrosUseCase
 import com.example.responsiveapp.domain.use_case.profile.SaveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -19,7 +18,6 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class UserSetupViewModel @Inject constructor(
     private val saveUserProfileUseCase: SaveUserProfileUseCase,
-    private val calculateMacrosUseCase: CalculateMacrosUseCase,
     private val appPrefManager: AppPrefManager
 ): ViewModel() {
     private val _state = MutableStateFlow(UserSetupState())
@@ -108,13 +106,13 @@ class UserSetupViewModel @Inject constructor(
             val result = saveUserProfileUseCase(profile)
 
             result.fold(
-                onSuccess = {
+                onSuccess = { nutritionTarget ->
                     appPrefManager.setUserSetup(true)
-                    val macros = calculateMacrosUseCase(profile)
                     _state.update {
                         it.copy(
                             isSaving = false,
-                            macros = macros
+                            macros = nutritionTarget
+
                         )
                     }
                 },
