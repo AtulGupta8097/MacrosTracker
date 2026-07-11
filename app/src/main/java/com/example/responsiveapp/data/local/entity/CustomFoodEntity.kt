@@ -3,6 +3,7 @@ package com.example.responsiveapp.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.responsiveapp.domain.model.NutritionInfo
+import com.example.responsiveapp.domain.model.SyncStatus
 
 @Entity(tableName = "custom_foods")
 data class CustomFoodEntity(
@@ -18,5 +19,8 @@ data class CustomFoodEntity(
 
     // Nutrition
     val nutrition: NutritionInfo,
-    val createdAt: Long
+    val createdAt: Long,
+    val syncStatus: SyncStatus = SyncStatus.PENDING,
+    val retryCount: Int = 0,
+    val lastSyncAttempt: Long? = null,
 )

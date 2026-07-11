@@ -2,6 +2,7 @@ package com.example.responsiveapp.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.responsiveapp.domain.model.SyncStatus
 
 @Entity(tableName = "my_meals")
 data class MyMealsEntity(
@@ -29,5 +30,7 @@ data class MyMealsEntity(
     val calcium: Float = 0f,
     val iron: Float = 0f,
     val createdAt: Long,
-    val isSynced: Boolean = false
+    val syncStatus: SyncStatus = SyncStatus.PENDING,
+    val retryCount: Int = 0,
+    val lastSyncAttempt: Long? = null,
 )
