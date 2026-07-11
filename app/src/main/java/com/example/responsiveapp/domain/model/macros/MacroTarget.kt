@@ -9,6 +9,7 @@ data class MacroTarget(
     val bmr: Int,
     val tdee: Int,
     val createdAt: Long,
+    val updatedAt: Long,
     val syncStatus: SyncStatus = SyncStatus.PENDING,
     val retryCount: Int = 0,
     val lastSyncAttempt: Long? = null

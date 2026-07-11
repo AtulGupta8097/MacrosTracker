@@ -18,19 +18,13 @@ class FoodLogRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager
 ) : FoodLogRepository {
 
-    override suspend fun logFood(foodLog: FoodLog): Result<FoodLog> {
-        return try {
-            foodLogDao.insertFoodLog(foodLog.toEntity())
-            Result.success(foodLog)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun logFood(foodLog: FoodLog) {
+        foodLogDao.insertFoodLog(foodLog.toEntity())
     }
 
-    override suspend fun syncPendingLogs(userId: String): Result<Int> {
+    override suspend fun syncPending() {
         TODO("Not yet implemented")
     }
-
 
     private fun getFoodLogsCollection() = firestore
         .collection("users")

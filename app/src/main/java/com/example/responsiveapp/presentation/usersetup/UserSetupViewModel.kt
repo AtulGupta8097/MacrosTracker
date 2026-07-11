@@ -103,28 +103,29 @@ class UserSetupViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            val result = saveUserProfileUseCase(profile)
+            try {
 
-            result.fold(
-                onSuccess = { nutritionTarget ->
-                    appPrefManager.setUserSetup(true)
-                    _state.update {
-                        it.copy(
-                            isSaving = false,
-                            macros = nutritionTarget
+                val nutritionTargets = saveUserProfileUseCase(profile)
 
-                        )
-                    }
-                },
-                onFailure = { throwable ->
-                    _state.update {
-                        it.copy(
-                            isSaving = false,
-                            error = throwable.message,
-                        )
-                    }
+                appPrefManager.setUserSetup(true)
+
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        macros = nutritionTargets
+                    )
                 }
-            )
+
+            } catch (e: Exception) {
+
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        error = e.message
+                    )
+                }
+
+            }
         }
     }
 

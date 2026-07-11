@@ -12,20 +12,15 @@ class UpdateDailySummaryUseCase @Inject constructor(
     private val getOrCreate: GetOrCreateDailySummaryUseCase
 ) {
 
-    suspend operator fun invoke(foodLog: FoodLog): Result<Unit> {
-        return try {
-            val summary = getOrCreate().getOrThrow()
+    suspend operator fun invoke(foodLog: FoodLog) {
 
-            val updatedSummary = summary.copy(
-                consumed = summary.consumed + foodLog.nutrition,
-                updatedAt = System.currentTimeMillis()
-            )
+        val summary = getOrCreate()
 
-            dailySummaryRepository.update(updatedSummary)
+        val updatedSummary = summary.copy(
+            consumed = summary.consumed + foodLog.nutrition,
+            updatedAt = System.currentTimeMillis()
+        )
 
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        dailySummaryRepository.update(updatedSummary)
     }
 }

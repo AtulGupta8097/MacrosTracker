@@ -32,30 +32,8 @@ class DailySummaryRepositoryImpl @Inject constructor(
         return dao.getForDate(startOfDay)?.toDomain()
     }
 
-    override suspend fun getPendingSummaries(): List<DailySummary> {
-        return dao.getPending().map { it.toDomain() }
+    override suspend fun syncPending() {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun updateSyncStatus(
-        date: Long,
-        status: SyncStatus
-    ) {
-        dao.updateSyncStatus(
-            date = date,
-            status = status,
-            lastSyncAttempt = System.currentTimeMillis()
-        )
-    }
-
-    override suspend fun updateRetryInfo(
-        date: Long,
-        retryCount: Int,
-        lastSyncAttempt: Long
-    ) {
-        dao.updateRetryInfo(
-            date = date,
-            retryCount = retryCount,
-            lastSyncAttempt = lastSyncAttempt
-        )
-    }
 }

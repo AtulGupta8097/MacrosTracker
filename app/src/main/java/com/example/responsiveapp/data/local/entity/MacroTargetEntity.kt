@@ -26,5 +26,6 @@ data class MacroTargetEntity(
     val retryCount: Int = 0,
 
     val lastSyncAttempt: Long? = null,
+    val updatedAt: Long
 
 )

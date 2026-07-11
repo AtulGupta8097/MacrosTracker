@@ -16,29 +16,24 @@ class SaveUserProfileUseCase @Inject constructor(
     private val macroCalculator: MacroCalculator,
     private val saveMacroTargetUseCase: SaveMacroTargetUseCase
 ) {
-    suspend operator fun invoke(profile: UserProfile): Result<NutritionTargets> {
-        return try {
 
-            userProfileRepository
-                .saveUserProfile(profile)
-                .getOrThrow()
+    suspend operator fun invoke(profile: UserProfile): NutritionTargets {
 
-            val result = macroCalculator.calculate(profile)
+        userProfileRepository.saveUserProfile(profile)
 
-            saveMacroTargetUseCase(
-                MacroTarget(
-                    id        = UUID.randomUUID().toString(),
-                    targets   = result.targets,
-                    bmr       = result.bmr,
-                    tdee      = result.tdee,
-                    createdAt = System.currentTimeMillis()
-                )
-            ).getOrThrow()
+        val result = macroCalculator.calculate(profile)
 
-            Result.success(result.targets)
+        saveMacroTargetUseCase(
+            MacroTarget(
+                id = UUID.randomUUID().toString(),
+                targets = result.targets,
+                bmr = result.bmr,
+                tdee = result.tdee,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+        )
 
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return result.targets
     }
 }

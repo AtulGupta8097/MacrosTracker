@@ -22,6 +22,10 @@ class MyMealRepositoryImpl(
         }
     }
 
+    override suspend fun syncPending() {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun deleteMeal(myMealid: String) {
         myMealDao.deleteMyMealsById(myMealid)
     }

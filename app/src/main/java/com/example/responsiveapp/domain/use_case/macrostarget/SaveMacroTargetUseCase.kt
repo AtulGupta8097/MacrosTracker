@@ -9,7 +9,7 @@ import javax.inject.Singleton
 class SaveMacroTargetUseCase @Inject constructor(
     private val macroTargetRepository: MacroTargetRepository
 ) {
-    suspend operator fun invoke(target: MacroTarget): Result<Unit> {
-        return macroTargetRepository.saveTarget(target)
+    suspend operator fun invoke(target: MacroTarget) {
+        macroTargetRepository.saveTarget(target)
     }
 }

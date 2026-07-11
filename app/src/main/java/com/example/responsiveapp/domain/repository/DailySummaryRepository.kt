@@ -10,13 +10,9 @@ interface DailySummaryRepository {
 
     suspend fun update(summary: DailySummary)
 
-    fun observeForDate(startOfDay: Long): Flow<DailySummary?>
+    fun observeForDate(date: Long): Flow<DailySummary?>
 
-    suspend fun getForDate(startOfDay: Long): DailySummary?
+    suspend fun getForDate(date: Long): DailySummary?
 
-    suspend fun getPendingSummaries(): List<DailySummary>
-
-    suspend fun updateSyncStatus(date: Long, status: SyncStatus)
-
-    suspend fun updateRetryInfo(date: Long, retryCount: Int, lastSyncAttempt: Long)
+    suspend fun syncPending()
 }

@@ -13,25 +13,11 @@ class LogFoodUseCase @Inject constructor(
     private val updateDailySummary: UpdateDailySummaryUseCase
 ) {
 
-    operator fun invoke(foodLog: FoodLog): Flow<Resource<FoodLog>> = flow {
-        emit(Resource.Loading())
+    suspend operator fun invoke(foodLog: FoodLog) {
 
-        try {
-            val logResult = foodLogRepository.logFood(foodLog)
+        foodLogRepository.logFood(foodLog)
 
-            val savedLog = logResult.getOrElse {
-                emit(Resource.Error(it.message ?: "Failed to log food"))
-                return@flow
-            }
+        updateDailySummary(foodLog)
 
-            updateDailySummary(savedLog).getOrElse {
-                emit(Resource.Error(it.message ?: "Failed to update daily summary"))
-                return@flow
-            }
-
-            emit(Resource.Success(savedLog))
-        } catch (e: Exception) {
-            emit(Resource.Error(e.message ?: "Unexpected error"))
-        }
     }
 }

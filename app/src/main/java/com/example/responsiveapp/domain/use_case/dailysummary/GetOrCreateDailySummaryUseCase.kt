@@ -14,38 +14,31 @@ class GetOrCreateDailySummaryUseCase @Inject constructor(
     private val macroTargetRepository: MacroTargetRepository
 ) {
 
-    suspend operator fun invoke(): Result<DailySummary> {
-        return try {
-            val today = todayStartOfDay()
+    suspend operator fun invoke(): DailySummary {
 
-            dailySummaryRepository.getForDate(today)?.let {
-                return Result.success(it)
-            }
+        val today = todayStartOfDay()
 
-            val macroTarget = macroTargetRepository.getCurrentTarget()
-                ?: return Result.failure(
-                    IllegalStateException(
-                        "No MacroTarget found. Complete user setup before logging food."
-                    )
-                )
-
-            val now = System.currentTimeMillis()
-
-            val newSummary = DailySummary(
-                date = today,
-                target = macroTarget.targets,
-                consumed = NutritionProgress(),
-                createdAt = now,
-                updatedAt = now
-            )
-
-            dailySummaryRepository.insert(newSummary)
-
-            Result.success(
-                dailySummaryRepository.getForDate(today) ?: newSummary
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
+        dailySummaryRepository.getForDate(today)?.let {
+            return it
         }
+
+        val macroTarget = macroTargetRepository.getCurrentTarget()
+            ?: throw IllegalStateException(
+                "No MacroTarget found. Complete user setup before logging food."
+            )
+
+        val now = System.currentTimeMillis()
+
+        val summary = DailySummary(
+            date = today,
+            target = macroTarget.targets,
+            consumed = NutritionProgress(),
+            createdAt = now,
+            updatedAt = now
+        )
+
+        dailySummaryRepository.insert(summary)
+
+        return summary
     }
 }

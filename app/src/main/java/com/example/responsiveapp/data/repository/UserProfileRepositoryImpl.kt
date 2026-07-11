@@ -20,13 +20,11 @@ class UserProfileRepositoryImpl @Inject constructor(
     private val sessionManager: SessionManager
 ) : UserProfileRepository {
 
-    override suspend fun saveUserProfile(
-        profile: UserProfile
-    ): Result<Unit> {
+    override suspend fun saveUserProfile(profile: UserProfile) {
 
         val dto = profile.toDto()
 
-        return try {
+        try {
 
             val uid = sessionManager.requireUserId()
 
@@ -36,15 +34,8 @@ class UserProfileRepositoryImpl @Inject constructor(
                 .set(dto)
                 .await()
 
+        } finally {
             saveToLocal(dto)
-
-            Result.success(Unit)
-
-        } catch (e: Exception) {
-
-            saveToLocal(dto)
-
-            Result.failure(e)
         }
     }
 

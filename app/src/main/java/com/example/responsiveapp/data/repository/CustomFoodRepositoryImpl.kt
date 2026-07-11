@@ -20,4 +20,8 @@ class CustomFoodRepositoryImpl @Inject constructor(
 
     override suspend fun delete(foodId: String) = dao.deleteById(foodId)
 
+    override suspend fun syncPending() {
+        TODO("Not yet implemented")
+    }
+
 }
