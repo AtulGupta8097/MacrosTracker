@@ -32,7 +32,7 @@ interface MacroTargetDao {
         WHERE syncStatus IN ('PENDING', 'FAILED')
         ORDER BY createdAt ASC
     """)
-    suspend fun getPendingTargets(): List<MacroTargetEntity>
+    suspend fun getPending(): List<MacroTargetEntity>
 
     @Query("""
         UPDATE macro_targets

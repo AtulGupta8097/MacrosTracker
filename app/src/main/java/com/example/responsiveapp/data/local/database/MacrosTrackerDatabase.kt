@@ -35,7 +35,7 @@ import com.example.responsiveapp.data.local.entity.SearchResultCrossRef
         SearchResultCrossRef::class,
         MacroTargetEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 @TypeConverters(

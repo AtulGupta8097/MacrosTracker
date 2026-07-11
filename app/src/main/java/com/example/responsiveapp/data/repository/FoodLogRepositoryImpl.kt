@@ -28,27 +28,9 @@ class FoodLogRepositoryImpl @Inject constructor(
     }
 
     override suspend fun syncPendingLogs(userId: String): Result<Int> {
-        return try {
-            val pendingLogs = foodLogDao.getPendingLogs()
-            var syncedCount = 0
-
-            for (entity in pendingLogs) {
-                try {
-                    val foodLog = entity.toDomain()
-                    syncLogToFirestore(foodLog)
-                    foodLogDao.updateSyncStatus(entity.id, SyncStatus.SYNCED)
-                    syncedCount++
-                } catch (e: Exception) {
-                    foodLogDao.updateSyncStatus(entity.id, SyncStatus.FAILED)
-                }
-            }
-
-            Result.success(syncedCount)
-
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        TODO("Not yet implemented")
     }
+
 
     private fun getFoodLogsCollection() = firestore
         .collection("users")

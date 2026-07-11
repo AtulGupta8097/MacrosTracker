@@ -12,17 +12,35 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FoodLogDao {
 
-    @Query("SELECT * FROM food_logs WHERE date = :date ORDER BY createdAt DESC")
+    @Query("""
+        SELECT *
+        FROM food_logs
+        WHERE date = :date
+        ORDER BY createdAt DESC
+    """)
     fun getFoodLogsForDate(date: Long): Flow<List<FoodLogEntity>>
 
-    @Query("SELECT * FROM food_logs WHERE id = :logId")
+    @Query("""
+        SELECT *
+        FROM food_logs
+        WHERE id = :logId
+    """)
     suspend fun getFoodLogById(logId: String): FoodLogEntity?
 
-    @Query("SELECT * FROM food_logs WHERE syncStatus = 'PENDING'")
-    suspend fun getPendingLogs(): List<FoodLogEntity>
+    @Query("""
+        SELECT *
+        FROM food_logs
+        WHERE syncStatus IN ('PENDING', 'FAILED')
+        ORDER BY createdAt ASC
+    """)
+    suspend fun getPending(): List<FoodLogEntity>
 
-    @Query("SELECT COUNT(*) FROM food_logs WHERE syncStatus = 'PENDING'")
-    suspend fun getPendingLogsCount(): Int
+    @Query("""
+        SELECT COUNT(*)
+        FROM food_logs
+        WHERE syncStatus = 'PENDING'
+    """)
+    suspend fun getPendingCount(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFoodLog(foodLog: FoodLogEntity)
@@ -30,12 +48,40 @@ interface FoodLogDao {
     @Update
     suspend fun updateFoodLog(foodLog: FoodLogEntity)
 
-    @Query("UPDATE food_logs SET syncStatus = :status WHERE id = :logId")
-    suspend fun updateSyncStatus(logId: String, status: SyncStatus)
+    @Query("""
+        UPDATE food_logs
+        SET
+            syncStatus = :status,
+            lastSyncAttempt = :lastSyncAttempt
+        WHERE id = :logId
+    """)
+    suspend fun updateSyncStatus(
+        logId: String,
+        status: SyncStatus,
+        lastSyncAttempt: Long
+    )
 
-    @Query("DELETE FROM food_logs WHERE id = :logId")
+    @Query("""
+        UPDATE food_logs
+        SET
+            retryCount = :retryCount,
+            lastSyncAttempt = :lastSyncAttempt
+        WHERE id = :logId
+    """)
+    suspend fun updateRetryInfo(
+        logId: String,
+        retryCount: Int,
+        lastSyncAttempt: Long
+    )
+
+    @Query("""
+        DELETE FROM food_logs
+        WHERE id = :logId
+    """)
     suspend fun deleteFoodLog(logId: String)
 
-    @Query("DELETE FROM food_logs")
+    @Query("""
+        DELETE FROM food_logs
+    """)
     suspend fun deleteAllLogs()
 }

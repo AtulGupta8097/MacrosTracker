@@ -28,7 +28,7 @@ class MacroTargetRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getPendingTargets(): List<MacroTarget> {
-        return dao.getPendingTargets().map { it.toDomain() }
+        return dao.getPending().map { it.toDomain() }
     }
 
     override suspend fun updateSyncStatus(targetId: String, status: SyncStatus) {
