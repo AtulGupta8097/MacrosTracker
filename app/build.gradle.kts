@@ -77,16 +77,16 @@ dependencies {
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.androidx.material3.adaptive.layout)
     implementation(libs.androidx.material3.adaptive.navigation)
-    // 🔥 Hilt
+    // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // 🌐 Retrofit
+    // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
 
-    // 🌐 OkHttp
+    // OkHttp
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
@@ -112,5 +112,9 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+
+    //WorkManager
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
 
 }
