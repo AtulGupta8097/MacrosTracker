@@ -73,13 +73,20 @@ object AppModule {
         return firestore
     }
 
-    // MacroCalculator is @Singleton with @Inject constructor — Hilt picks it up automatically.
-    // No manual @Provides needed.
-
     @Provides
     @Singleton
-    fun provideMacroTargetRepository(dao: MacroTargetDao): MacroTargetRepository =
-        MacroTargetRepositoryImpl(dao)
+    fun provideMacroTargetRepository(
+        dao: MacroTargetDao,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager,
+        syncScheduler: SyncScheduler
+    ): MacroTargetRepository =
+        MacroTargetRepositoryImpl(
+            dao,
+            firestore,
+            sessionManager,
+            syncScheduler
+        )
 
     @Provides
     @Singleton
@@ -115,8 +122,9 @@ object AppModule {
         foodLogDao: FoodLogDao,
         firestore: FirebaseFirestore,
         sessionManager: SessionManager,
+        syncScheduler: SyncScheduler
     ): FoodLogRepository =
-        FoodLogRepositoryImpl(foodLogDao, firestore, sessionManager)
+        FoodLogRepositoryImpl(foodLogDao, firestore, sessionManager,syncScheduler)
 
     @Singleton
     @Provides

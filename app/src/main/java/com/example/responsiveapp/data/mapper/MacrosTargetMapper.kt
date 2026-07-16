@@ -1,9 +1,11 @@
 package com.example.responsiveapp.data.mapper
 
 import com.example.responsiveapp.data.local.entity.MacroTargetEntity
+import com.example.responsiveapp.data.remote.dto.firebase.MacroTargetDto
 import com.example.responsiveapp.domain.model.macros.MacroTarget
 
-fun MacroTarget.toEntity() = MacroTargetEntity(
+fun MacroTarget.toEntity() =
+    MacroTargetEntity(
     id = id,
     targets = targets,
     bmr = bmr,
@@ -15,7 +17,8 @@ fun MacroTarget.toEntity() = MacroTargetEntity(
     lastSyncAttempt = lastSyncAttempt
 )
 
-fun MacroTargetEntity.toDomain() = MacroTarget(
+fun MacroTargetEntity.toDomain() =
+    MacroTarget(
     id = id,
     targets = targets,
     bmr = bmr,
@@ -26,3 +29,13 @@ fun MacroTargetEntity.toDomain() = MacroTarget(
     retryCount = retryCount,
     lastSyncAttempt = lastSyncAttempt
 )
+
+fun MacroTargetEntity.toFirestoreDto() =
+    MacroTargetDto(
+        id = id,
+        targets = targets,
+        bmr = bmr,
+        tdee = tdee,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
