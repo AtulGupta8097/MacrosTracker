@@ -1,4 +1,4 @@
-package com.example.responsiveapp.data.remote.dto
+package com.example.responsiveapp.data.remote.dto.firebase
 
 data class UserProfileDto(
     val gender: String? = null,

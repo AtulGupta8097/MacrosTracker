@@ -117,6 +117,7 @@ private fun PrevMyFoodCard() {
                     fat = 7f,
                 ),
                 createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
             ),
             onClick = {},
         )

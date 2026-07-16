@@ -27,6 +27,8 @@ import com.example.responsiveapp.domain.repository.MyMealRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.example.responsiveapp.domain.session.SessionManager
 import com.example.responsiveapp.domain.session.SessionManagerImpl
+import com.example.responsiveapp.sync.SyncScheduler
+import com.example.responsiveapp.sync.SyncSchedulerImpl
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -123,8 +125,13 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideCustomFoodRepository(dao: CustomFoodDao): CustomFoodRepository =
-        CustomFoodRepositoryImpl(dao)
+    fun provideCustomFoodRepository(
+        dao: CustomFoodDao,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager,
+        scheduler: SyncScheduler,
+    ): CustomFoodRepository =
+        CustomFoodRepositoryImpl(dao, firestore, sessionManager, scheduler)
 
     @IoDispatcher
     @Provides

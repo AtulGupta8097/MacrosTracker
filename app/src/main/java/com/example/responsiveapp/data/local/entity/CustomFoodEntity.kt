@@ -20,6 +20,7 @@ data class CustomFoodEntity(
     // Nutrition
     val nutrition: NutritionInfo,
     val createdAt: Long,
+    val updatedAt: Long,
     val syncStatus: SyncStatus = SyncStatus.PENDING,
     val retryCount: Int = 0,
     val lastSyncAttempt: Long? = null,

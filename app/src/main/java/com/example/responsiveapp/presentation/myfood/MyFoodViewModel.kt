@@ -217,6 +217,7 @@ class MyFoodViewModel @Inject constructor(
 
                 createdAt =
                     s.editingFood?.createdAt ?: System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
             )
 
             saveCustomFood(food)

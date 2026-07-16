@@ -16,4 +16,9 @@ abstract class RepositoryModule {
         impl: SyncSchedulerImpl
     ): SyncScheduler
 
+//    @Binds
+//    abstract fun bindSyncManager(
+//        impl: SyncManagerImpl
+//    ): SyncManager
+
 }

@@ -5,7 +5,7 @@ import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
 import com.example.responsiveapp.data.datastore.UserPreferencesKeys
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toDto
-import com.example.responsiveapp.data.remote.dto.UserProfileDto
+import com.example.responsiveapp.data.remote.dto.firebase.UserProfileDto
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.example.responsiveapp.domain.session.SessionManager

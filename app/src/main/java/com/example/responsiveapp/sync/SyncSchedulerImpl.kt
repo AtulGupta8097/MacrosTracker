@@ -14,7 +14,7 @@ import javax.inject.Singleton
 @Singleton
 class SyncSchedulerImpl @Inject constructor(
     @field:ApplicationContext
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : SyncScheduler {
 
     override fun schedule(syncType: SyncType) {

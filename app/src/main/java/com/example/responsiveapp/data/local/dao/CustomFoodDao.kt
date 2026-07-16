@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface CustomFoodDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(food: CustomFoodEntity)
+    suspend fun insert(food: CustomFoodEntity)
 
     @Query("""
         SELECT *

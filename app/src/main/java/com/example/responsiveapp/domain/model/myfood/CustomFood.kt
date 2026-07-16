@@ -15,5 +15,6 @@ data class CustomFood(
     // Nutrition
     val nutrition: NutritionInfo,
 
-    val createdAt: Long
+    val createdAt: Long,
+    val updatedAt: Long
 )
