@@ -1,6 +1,7 @@
 package com.example.responsiveapp.data.mapper
 
 import com.example.responsiveapp.data.local.entity.DailySummaryEntity
+import com.example.responsiveapp.data.remote.dto.firebase.DailySummaryDto
 import com.example.responsiveapp.domain.model.DailySummary
 import com.example.responsiveapp.domain.model.SyncStatus
 
@@ -26,3 +27,12 @@ fun DailySummary.toEntity(
     retryCount = retryCount,
     lastSyncAttempt = lastSyncAttempt
 )
+
+fun DailySummaryEntity.toFirestoreDto() =
+    DailySummaryDto(
+        date = date,
+        target = target,
+        consumed = consumed,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
