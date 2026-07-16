@@ -9,4 +9,5 @@ data class MyMeal(
     val ingredients: List<MealIngredient>,
     val totalNutritionInfo: NutritionInfo,
     val createAt: Long,
+    val updatedAt: Long,
 )

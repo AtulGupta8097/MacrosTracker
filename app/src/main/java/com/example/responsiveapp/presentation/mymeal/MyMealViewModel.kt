@@ -290,7 +290,8 @@ class MyMealViewModel @Inject constructor(
                 name = current.mealName,
                 ingredients = current.ingredient.values.toList(),
                 totalNutritionInfo = totalNutrition,
-                createAt = System.currentTimeMillis()
+                createAt = current.editingMeal?.createAt ?: System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             )
 
             saveMyMeal(myMeal)

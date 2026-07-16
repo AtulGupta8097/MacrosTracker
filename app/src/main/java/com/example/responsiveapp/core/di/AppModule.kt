@@ -128,8 +128,18 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideMyMealRepository(myMealDao: MyMealsDao): MyMealRepository =
-        MyMealRepositoryImpl(myMealDao)
+    fun provideMyMealRepository(
+        myMealDao: MyMealsDao,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager,
+        scheduler: SyncScheduler
+    ): MyMealRepository =
+        MyMealRepositoryImpl(
+            myMealDao,
+            firestore,
+            sessionManager,
+            scheduler
+        )
 
     @Singleton
     @Provides

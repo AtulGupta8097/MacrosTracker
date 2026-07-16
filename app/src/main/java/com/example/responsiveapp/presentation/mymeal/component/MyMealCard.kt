@@ -122,7 +122,8 @@ private fun PrevMyMealCard() {
                 name = "Pizza",
                 ingredients = emptyList(),
                 totalNutritionInfo = com.example.responsiveapp.domain.model.NutritionInfo(),
-                createAt = System.currentTimeMillis()
+                createAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             ),
             onEdit = {}
         )
