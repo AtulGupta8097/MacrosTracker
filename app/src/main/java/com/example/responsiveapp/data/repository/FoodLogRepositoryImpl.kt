@@ -1,13 +1,17 @@
 package com.example.responsiveapp.data.repository
 
+import android.util.Log
 import com.example.responsiveapp.data.local.dao.FoodLogDao
-import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
+import com.example.responsiveapp.data.mapper.toFirestoreDto
 import com.example.responsiveapp.domain.model.FoodLog
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.session.SessionManager
+import com.example.responsiveapp.sync.SyncScheduler
+import com.example.responsiveapp.sync.SyncType
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,23 +19,84 @@ import javax.inject.Singleton
 class FoodLogRepositoryImpl @Inject constructor(
     private val foodLogDao: FoodLogDao,
     private val firestore: FirebaseFirestore,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val scheduler: SyncScheduler,
 ) : FoodLogRepository {
 
     override suspend fun logFood(foodLog: FoodLog) {
         foodLogDao.insertFoodLog(foodLog.toEntity())
+        scheduler.schedule(SyncType.FOOD_LOG)
     }
 
     override suspend fun syncPending() {
-        TODO("Not yet implemented")
+
+        val pending = foodLogDao.getPending()
+
+        for (entity in pending) {
+
+            val now = System.currentTimeMillis()
+
+            foodLogDao.updateSyncStatus(
+                logId = entity.id,
+                status = SyncStatus.SYNCING,
+                lastSyncAttempt = now
+            )
+
+            try {
+
+                collection()
+                    .document(entity.id)
+                    .set(entity.toFirestoreDto())
+                    .await()
+
+            } catch (e: Exception) {
+
+                Log.e(
+                    TAG,
+                    "Failed to upload FoodLog: ${entity.id}",
+                    e
+                )
+
+                foodLogDao.updateRetryInfo(
+                    logId = entity.id,
+                    retryCount = entity.retryCount + 1,
+                    lastSyncAttempt = now
+                )
+
+                foodLogDao.updateSyncStatus(
+                    logId = entity.id,
+                    status = SyncStatus.FAILED,
+                    lastSyncAttempt = now
+                )
+
+                continue
+            }
+
+            try {
+
+                foodLogDao.updateSyncStatus(
+                    logId = entity.id,
+                    status = SyncStatus.SYNCED,
+                    lastSyncAttempt = now
+                )
+
+            } catch (e: Exception) {
+
+                Log.e(
+                    TAG,
+                    "Uploaded FoodLog ${entity.id} to Firestore but failed to update local sync status.",
+                    e
+                )
+            }
+        }
     }
 
-    private fun getFoodLogsCollection() = firestore
+    private fun collection() = firestore
         .collection("users")
         .document(sessionManager.requireUserId())
         .collection("food_logs")
 
-    private suspend fun syncLogToFirestore(foodLog: FoodLog) {
-
+    companion object {
+        private const val TAG = "FoodLogRepository"
     }
 }
