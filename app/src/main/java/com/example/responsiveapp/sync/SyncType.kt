@@ -5,6 +5,5 @@ enum class SyncType {
     CUSTOM_FOOD,
     MY_MEAL,
     MACRO_TARGET,
-    DAILY_SUMMARY,
-    ALL
+    DAILY_SUMMARY
 }

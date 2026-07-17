@@ -1,6 +1,7 @@
 package com.example.responsiveapp.core.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.example.responsiveapp.data.datastore.EncryptedTokenDataStore
 import com.example.responsiveapp.data.datastore.TokenDataStore
 import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
@@ -154,6 +155,14 @@ object AppModule {
     @IoDispatcher
     @Provides
     fun providesIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(
+        @ApplicationContext context: Context
+    ): WorkManager {
+        return WorkManager.getInstance(context)
+    }
 }
 
 @Qualifier

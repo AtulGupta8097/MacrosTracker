@@ -1,5 +1,7 @@
 package com.example.responsiveapp.core.di
 
+import com.example.responsiveapp.sync.SyncManager
+import com.example.responsiveapp.sync.SyncManagerImpl
 import com.example.responsiveapp.sync.SyncScheduler
 import com.example.responsiveapp.sync.SyncSchedulerImpl
 import dagger.Binds
@@ -16,9 +18,9 @@ abstract class RepositoryModule {
         impl: SyncSchedulerImpl
     ): SyncScheduler
 
-//    @Binds
-//    abstract fun bindSyncManager(
-//        impl: SyncManagerImpl
-//    ): SyncManager
+    @Binds
+    abstract fun bindSyncManager(
+        impl: SyncManagerImpl
+    ): SyncManager
 
 }
