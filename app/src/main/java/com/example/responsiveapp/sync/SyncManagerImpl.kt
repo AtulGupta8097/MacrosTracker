@@ -19,12 +19,11 @@ class SyncManagerImpl @Inject constructor(
 
     override suspend fun sync(syncType: SyncType) {
         when (syncType) {
-            SyncType.FOOD_LOG -> foodLogRepository.syncPending()
-            SyncType.CUSTOM_FOOD -> customFoodRepository.syncPending()
-            SyncType.MY_MEAL -> myMealRepository.syncPending()
-            SyncType.MACRO_TARGET -> macroTargetRepository.syncPending()
+            SyncType.FOOD_LOG      -> foodLogRepository.syncPending()
+            SyncType.CUSTOM_FOOD   -> customFoodRepository.syncPending()
+            SyncType.MY_MEAL       -> myMealRepository.syncPending()
+            SyncType.MACRO_TARGET  -> macroTargetRepository.syncPending()
             SyncType.DAILY_SUMMARY -> dailySummaryRepository.syncPending()
-            else -> Unit
         }
     }
 }

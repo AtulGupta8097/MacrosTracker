@@ -47,21 +47,20 @@ fun MyMealScreen(
             DeviceConfiguration.TABLET,
             DeviceConfiguration.DESKTOP -> {
                 MyMealTabletLayout(
-                    state              = state,
-                    totalMacros        = totalMacros,
-                    onMealCardClick    = viewModel::onMealCardClick,
-                    onCreateMealClick  = viewModel::onCreateMealClicked,
-                    onMealNameChange   = viewModel::onMealNameChange,
-                    onShowAddSheet     = viewModel::onShowAddSheet,
-                    onHideAddSheet     = viewModel::onHideAddSheet,
-                    onQueryChange      = viewModel::onQueryChange,
-                    onFoodAdd          = viewModel::onAddFoodToMeal,
+                    state = state,
+                    totalMacros = totalMacros,
+                    onMealCardClick = viewModel::onMealCardClick,
+                    onCreateMealClick = viewModel::onCreateMealClicked,
+                    onMealNameChange = viewModel::onMealNameChange,
+                    onShowAddSheet = viewModel::onShowAddSheet,
+                    onHideAddSheet = viewModel::onHideAddSheet,
+                    onQueryChange = viewModel::onQueryChange,
+                    onFoodAdd = viewModel::onAddFoodToMeal,
                     onIngredientRemove = viewModel::onRemoveFoodToMeal,
-                    onSave             = viewModel::onSaveMeal,
-                    onDelete           = viewModel::onDeleteMeal,
+                    onSave = viewModel::onSaveMeal,
+                    onDelete = viewModel::onDeleteMeal,
                 )
             }
-
 
         }
 

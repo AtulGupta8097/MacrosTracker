@@ -201,7 +201,7 @@ fun CreateMealScreen(
             enabled = saveEnabled,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 56.dp,max = 90.dp)
+                .heightIn(min = 80.dp,max = 90.dp)
                 .padding(
                     vertical = MaterialTheme.spacing.lg,
                     horizontal = MaterialTheme.spacing.md
