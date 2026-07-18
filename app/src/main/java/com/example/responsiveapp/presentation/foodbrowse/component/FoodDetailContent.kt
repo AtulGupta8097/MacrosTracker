@@ -39,7 +39,7 @@ fun FoodDetailContent(
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
     onBack: () -> Unit,
-    onLog: () -> Unit = {},
+    onLog: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,

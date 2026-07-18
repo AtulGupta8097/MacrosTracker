@@ -3,6 +3,7 @@ package com.example.responsiveapp.core.di
 import android.content.Context
 import androidx.room.Room
 import com.example.responsiveapp.data.local.dao.CustomFoodDao
+import com.example.responsiveapp.data.local.dao.DailySummaryDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
@@ -65,5 +66,11 @@ object DatabaseModule {
     ): MacroTargetDao =
         database.macroTargetDao()
 
+    @Provides
+    @Singleton
+    fun provideDailySummaryDao(
+        database: MacrosTrackerDatabase
+    ): DailySummaryDao =
+        database.dailySummaryDao()
 
 }

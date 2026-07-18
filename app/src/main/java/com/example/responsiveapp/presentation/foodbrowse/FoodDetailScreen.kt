@@ -26,6 +26,7 @@ fun FoodDetailScreen(
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
     modifier: Modifier = Modifier,
+
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (uiState) {
@@ -52,6 +53,7 @@ fun FoodDetailScreen(
 
             is FoodDetailUiState.Success -> {
                 FoodDetailContent(
+                    modifier = Modifier.fillMaxSize(),
                     foodName = uiState.foodName,
                     foodBrand = uiState.foodBrand,
                     foodServing = uiState.servings,
@@ -61,7 +63,7 @@ fun FoodDetailScreen(
                     onServingSelected = onServingSelected,
                     onQuantityChanged = onQuantityChanged,
                     onBack = onBack,
-                    modifier = Modifier.fillMaxSize(),
+                    onLog ={}
                 )
             }
         }

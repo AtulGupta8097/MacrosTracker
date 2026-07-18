@@ -8,8 +8,6 @@ import com.example.responsiveapp.domain.model.FoodLog
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.session.SessionManager
-import com.example.responsiveapp.sync.SyncScheduler
-import com.example.responsiveapp.sync.SyncType
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -20,12 +18,10 @@ class FoodLogRepositoryImpl @Inject constructor(
     private val foodLogDao: FoodLogDao,
     private val firestore: FirebaseFirestore,
     private val sessionManager: SessionManager,
-    private val scheduler: SyncScheduler,
 ) : FoodLogRepository {
 
     override suspend fun logFood(foodLog: FoodLog) {
         foodLogDao.insertFoodLog(foodLog.toEntity())
-        scheduler.schedule(SyncType.FOOD_LOG)
     }
 
     override suspend fun syncPending() {

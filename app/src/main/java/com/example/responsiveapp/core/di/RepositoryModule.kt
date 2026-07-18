@@ -1,5 +1,7 @@
 package com.example.responsiveapp.core.di
 
+import com.example.responsiveapp.data.coordinatior.LogFoodCoordinator
+import com.example.responsiveapp.data.coordinatior.LogFoodCoordinatorImpl
 import com.example.responsiveapp.sync.SyncManager
 import com.example.responsiveapp.sync.SyncManagerImpl
 import com.example.responsiveapp.sync.SyncScheduler
@@ -22,5 +24,10 @@ abstract class RepositoryModule {
     abstract fun bindSyncManager(
         impl: SyncManagerImpl
     ): SyncManager
+
+    @Binds
+    abstract fun bindLogFoodCoordinator(
+        impl: LogFoodCoordinatorImpl
+    ): LogFoodCoordinator
 
 }

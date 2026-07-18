@@ -9,8 +9,6 @@ import com.example.responsiveapp.domain.model.DailySummary
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.DailySummaryRepository
 import com.example.responsiveapp.domain.session.SessionManager
-import com.example.responsiveapp.sync.SyncScheduler
-import com.example.responsiveapp.sync.SyncType
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -23,17 +21,14 @@ class DailySummaryRepositoryImpl @Inject constructor(
     private val dao: DailySummaryDao,
     private val firestore: FirebaseFirestore,
     private val sessionManager: SessionManager,
-    private val scheduler: SyncScheduler,
 ) : DailySummaryRepository {
 
     override suspend fun insert(summary: DailySummary) {
         dao.insert(summary.toEntity())
-        scheduler.schedule(SyncType.DAILY_SUMMARY)
     }
 
     override suspend fun update(summary: DailySummary) {
         dao.update(summary.toEntity())
-        scheduler.schedule(SyncType.DAILY_SUMMARY)
     }
 
     override fun observeForDate(startOfDay: Long): Flow<DailySummary?> =

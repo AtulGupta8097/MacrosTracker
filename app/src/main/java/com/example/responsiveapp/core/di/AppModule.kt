@@ -6,6 +6,7 @@ import com.example.responsiveapp.data.datastore.EncryptedTokenDataStore
 import com.example.responsiveapp.data.datastore.TokenDataStore
 import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
 import com.example.responsiveapp.data.local.dao.CustomFoodDao
+import com.example.responsiveapp.data.local.dao.DailySummaryDao
 import com.example.responsiveapp.data.local.dao.FoodDetailDao
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
@@ -14,6 +15,7 @@ import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
 import com.example.responsiveapp.data.repository.CustomFoodRepositoryImpl
+import com.example.responsiveapp.data.repository.DailySummaryRepositoryImpl
 import com.example.responsiveapp.data.repository.FoodLogRepositoryImpl
 import com.example.responsiveapp.data.repository.FoodRepositoryImpl
 import com.example.responsiveapp.data.repository.MacroTargetRepositoryImpl
@@ -21,6 +23,7 @@ import com.example.responsiveapp.data.repository.MyMealRepositoryImpl
 import com.example.responsiveapp.data.repository.UserProfileRepositoryImpl
 import com.example.responsiveapp.domain.repository.AuthRepository
 import com.example.responsiveapp.domain.repository.CustomFoodRepository
+import com.example.responsiveapp.domain.repository.DailySummaryRepository
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.FoodRepository
 import com.example.responsiveapp.domain.repository.MacroTargetRepository
@@ -123,9 +126,17 @@ object AppModule {
         foodLogDao: FoodLogDao,
         firestore: FirebaseFirestore,
         sessionManager: SessionManager,
-        syncScheduler: SyncScheduler
     ): FoodLogRepository =
-        FoodLogRepositoryImpl(foodLogDao, firestore, sessionManager,syncScheduler)
+        FoodLogRepositoryImpl(foodLogDao, firestore, sessionManager)
+
+    @Provides
+    @Singleton
+    fun provideDailySummaryRepository(
+        dailySummaryDao: DailySummaryDao,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager,
+    ): DailySummaryRepository =
+        DailySummaryRepositoryImpl(dailySummaryDao, firestore, sessionManager)
 
     @Singleton
     @Provides
