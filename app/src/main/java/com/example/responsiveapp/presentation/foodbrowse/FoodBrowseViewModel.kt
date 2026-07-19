@@ -4,18 +4,27 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.Resource
+import com.example.responsiveapp.domain.calculator.ToastState
+import com.example.responsiveapp.domain.model.CustomToastProperty
 import com.example.responsiveapp.domain.model.Serving
+import com.example.responsiveapp.domain.model.foodlog.LogFoodRequest
 import com.example.responsiveapp.domain.model.scale
 import com.example.responsiveapp.domain.use_case.food.GetFoodByIdUseCase
 import com.example.responsiveapp.domain.use_case.food.SearchFoodsUseCase
+import com.example.responsiveapp.domain.use_case.foodlog.LogFoodUseCase
+import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
+import com.example.responsiveapp.presentation.commoncomponent.SuccessToast
+import com.example.responsiveapp.presentation.foodbrowse.component.FoodBrowseEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -33,10 +42,15 @@ private const val TAG = "FoodBrowseViewModel"
 class FoodBrowseViewModel @Inject constructor(
     private val searchFoods: SearchFoodsUseCase,
     private val getFoodById: GetFoodByIdUseCase,
+    private val foodLog: LogFoodUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FoodBrowseState())
     val state: StateFlow<FoodBrowseState> = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<FoodBrowseEvent>()
+
+    val events = _events.asSharedFlow()
 
     val foodDetailUiState: StateFlow<FoodDetailUiState> = _state
         .map { s ->
@@ -216,6 +230,93 @@ class FoodBrowseViewModel @Inject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    fun logFoodClicked() {
+
+        val detail =
+            foodDetailUiState.value as? FoodDetailUiState.Success
+                ?: return
+
+        viewModelScope.launch {
+
+            _state.update {
+                it.copy(isLogging = true)
+            }
+
+            try {
+
+                val request = LogFoodRequest(
+
+                    foodName = detail.foodName,
+
+                    servingDescription =
+                        detail.selectedServing.description,
+
+                    quantity = detail.quantity,
+
+                    nutrition = detail.scaledNutrition
+
+                )
+
+                when (val result = foodLog(request)) {
+
+                    is Resource.Success -> {
+
+                        showToast(
+                            message = "Food logged successfully.",
+                            type = SuccessToast()
+                        )
+
+                        _events.emit(
+                            FoodBrowseEvent.FoodLogged
+                        )
+                    }
+
+                    is Resource.Error -> {
+
+                        showToast(
+                            message = result.message ?: "Unable to log food.",
+                            type = ErrorToast()
+                        )
+                    }
+
+                    else -> Unit
+                }
+
+            } finally {
+
+                _state.update {
+                    it.copy(isLogging = false)
+                }
+            }
+        }
+    }
+
+
+    private fun showToast(
+        message: String,
+        type: CustomToastProperty = SuccessToast(),
+        duration: Long = 3000L,
+    ) {
+        _state.update {
+            it.copy(
+                toast = ToastState(
+                    visible = true,
+                    message = message,
+                    type = type,
+                    duration = duration,
+                )
+            )
+        }
+    }
+
+    fun hideToast() {
+        _state.update {
+            it.copy(
+                toast = ToastState()
+            )
         }
     }
 }

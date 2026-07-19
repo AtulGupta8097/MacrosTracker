@@ -33,8 +33,7 @@ class FoodRepositoryImpl @Inject constructor(
     private val foodSearchDao: FoodSearchDao,
     private val foodDetailDao: FoodDetailDao,
     private val api: FatSecretApiService,
-    @IoDispatcher
-    private val ioDispatcher: CoroutineDispatcher,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : FoodRepository {
 
     private val searchLocks = ConcurrentHashMap<String, Mutex>()

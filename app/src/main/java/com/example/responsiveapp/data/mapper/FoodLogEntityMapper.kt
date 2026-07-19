@@ -2,7 +2,7 @@ package com.example.responsiveapp.data.mapper
 
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
 import com.example.responsiveapp.data.remote.dto.firebase.FoodLogDto
-import com.example.responsiveapp.domain.model.FoodLog
+import com.example.responsiveapp.domain.model.foodlog.FoodLog
 import com.example.responsiveapp.domain.model.MealIngredient
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.google.gson.Gson

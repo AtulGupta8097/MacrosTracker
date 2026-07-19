@@ -1,4 +1,4 @@
-package com.example.responsiveapp.domain.model
+package com.example.responsiveapp.domain.model.foodlog
 
 enum class LogMethod(val displayName: String) {
     DATABASE("Food Database"),

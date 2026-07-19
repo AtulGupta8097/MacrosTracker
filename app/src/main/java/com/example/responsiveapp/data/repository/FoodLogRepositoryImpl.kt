@@ -4,7 +4,7 @@ import android.util.Log
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
-import com.example.responsiveapp.domain.model.FoodLog
+import com.example.responsiveapp.domain.model.foodlog.FoodLog
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.session.SessionManager

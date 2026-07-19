@@ -1,16 +1,19 @@
 package com.example.responsiveapp.data.coordinatior
 
 import androidx.room.withTransaction
+import com.example.responsiveapp.core.utils.todayStartOfDay
 import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import com.example.responsiveapp.domain.model.DailySummary
-import com.example.responsiveapp.domain.model.FoodLog
+import com.example.responsiveapp.domain.model.foodlog.FoodLog
 import com.example.responsiveapp.domain.model.NutritionProgress
+import com.example.responsiveapp.domain.model.foodlog.LogFoodRequest
 import com.example.responsiveapp.domain.model.plus
 import com.example.responsiveapp.domain.repository.DailySummaryRepository
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.MacroTargetRepository
 import com.example.responsiveapp.sync.SyncScheduler
 import com.example.responsiveapp.sync.SyncType
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,9 +26,31 @@ class LogFoodCoordinatorImpl @Inject constructor(
     private val scheduler: SyncScheduler,
 ) : LogFoodCoordinator {
 
-    override suspend fun logFood(foodLog: FoodLog) {
+    override suspend fun logFood(request: LogFoodRequest) {
 
         val now = System.currentTimeMillis()
+
+        val foodLog = FoodLog(
+
+            id = UUID.randomUUID().toString(),
+
+            date = todayStartOfDay(),
+
+            foodName = request.foodName,
+
+            servingDescription = request.servingDescription,
+
+            quantity = request.quantity,
+
+            nutrition = request.nutrition,
+
+            ingredients = request.ingredients,
+
+            createdAt = now,
+
+            updatedAt = now
+
+        )
 
         database.withTransaction {
 

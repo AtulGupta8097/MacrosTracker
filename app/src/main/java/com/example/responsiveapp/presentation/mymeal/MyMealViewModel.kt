@@ -3,6 +3,7 @@ package com.example.responsiveapp.presentation.mymeal
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.Resource
+import com.example.responsiveapp.domain.calculator.ToastState
 import com.example.responsiveapp.domain.model.CustomToastProperty
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.MealIngredient
@@ -317,18 +318,16 @@ class MyMealViewModel @Inject constructor(
     private fun showToast(
         message: String,
         type: CustomToastProperty = SuccessToast(),
-        duration: Long = 3000
+        duration: Long = 3000L
     ) {
         _state.update {
-            it.copy(showToast = false)
-        }
-
-        _state.update {
             it.copy(
-                showToast = true,
-                toastMessage = message,
-                toastType = type,
-                toastDuration = duration
+                toast = ToastState(
+                    visible = true,
+                    message = message,
+                    type = type,
+                    duration = duration
+                )
             )
         }
     }
@@ -336,8 +335,9 @@ class MyMealViewModel @Inject constructor(
     fun hideToast() {
         _state.update {
             it.copy(
-                showToast = false,
-                toastMessage = null
+                toast = it.toast.copy(
+                    visible = false
+                )
             )
         }
     }

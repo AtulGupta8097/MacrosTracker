@@ -65,11 +65,11 @@ fun MyMealScreen(
         }
 
         CustomToast(
-            message = state.toastMessage ?: "",
-            type = state.toastType,
-            durationMillis = state.toastDuration,
+            message = state.toast.message ?: "",
+            type = state.toast.type,
+            durationMillis = state.toast.duration,
             onDismiss = viewModel::hideToast,
-            visibility = state.showToast
+            visibility = state.toast.visible
         )
     }
 }

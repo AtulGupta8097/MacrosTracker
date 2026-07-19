@@ -1,6 +1,6 @@
 package com.example.responsiveapp.domain.repository
 
-import com.example.responsiveapp.domain.model.FoodLog
+import com.example.responsiveapp.domain.model.foodlog.FoodLog
 
 interface FoodLogRepository {
 

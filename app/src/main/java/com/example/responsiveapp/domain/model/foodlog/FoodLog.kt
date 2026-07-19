@@ -1,4 +1,8 @@
-package com.example.responsiveapp.domain.model
+package com.example.responsiveapp.domain.model.foodlog
+
+import com.example.responsiveapp.domain.model.MealIngredient
+import com.example.responsiveapp.domain.model.NutritionInfo
+import com.example.responsiveapp.domain.model.SyncStatus
 
 data class FoodLog(
     val id: String,

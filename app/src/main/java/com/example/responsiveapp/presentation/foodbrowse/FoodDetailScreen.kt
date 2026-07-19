@@ -21,11 +21,12 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FoodDetailScreen(
+    modifier: Modifier = Modifier,
     uiState: FoodDetailUiState,
     onBack: () -> Unit,
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
-    modifier: Modifier = Modifier,
+    onLog: () -> Unit,
 
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -63,7 +64,7 @@ fun FoodDetailScreen(
                     onServingSelected = onServingSelected,
                     onQuantityChanged = onQuantityChanged,
                     onBack = onBack,
-                    onLog ={}
+                    onLog = onLog
                 )
             }
         }

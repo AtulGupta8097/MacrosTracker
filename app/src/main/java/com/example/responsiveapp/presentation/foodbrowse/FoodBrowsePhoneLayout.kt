@@ -16,6 +16,7 @@ fun FoodBrowsePhoneLayout(
     onBack: () -> Unit,
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
+    onLog: () -> Unit,
 ) {
     val isOnList = state.destination is FoodBrowseDestination.List
 
@@ -41,6 +42,7 @@ fun FoodBrowsePhoneLayout(
                 onBack = onBack,
                 onServingSelected = onServingSelected,
                 onQuantityChanged = onQuantityChanged,
+                onLog = onLog,
             )
         }
     }

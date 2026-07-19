@@ -1,5 +1,6 @@
 package com.example.responsiveapp.presentation.mymeal
 
+import com.example.responsiveapp.domain.calculator.ToastState
 import com.example.responsiveapp.domain.model.CustomToastProperty
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.MealIngredient
@@ -18,10 +19,7 @@ data class MyMealUIState(
     val destination: MyMealDestination = MyMealDestination.MyMealList,
 
     // ToastUI
-    val showToast: Boolean = false,
-    val toastType: CustomToastProperty = SuccessToast(),
-    val toastMessage: String? = null,
-    val toastDuration: Long = 3000,
+    val toast: ToastState = ToastState(),
 
     // FoodBottomSheetUI
     val sheetSearchQuery: String= "",

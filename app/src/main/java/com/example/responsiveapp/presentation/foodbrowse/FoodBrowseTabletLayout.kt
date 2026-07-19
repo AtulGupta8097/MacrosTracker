@@ -28,6 +28,7 @@ fun FoodBrowseTabletLayout(
     onFirstVisibleFoodChanged: (String) -> Unit,
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
+    onLog: () -> Unit,
 ) {
     val listState = rememberLazyListState()
     val foods = remember(state.foods) { state.foods }
@@ -67,6 +68,7 @@ fun FoodBrowseTabletLayout(
             onBack = {},
             onServingSelected = onServingSelected,
             onQuantityChanged = onQuantityChanged,
+            onLog = onLog,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
