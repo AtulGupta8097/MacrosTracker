@@ -1,5 +1,6 @@
 package com.example.responsiveapp.sync
 
+import android.util.Log
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
@@ -15,6 +16,7 @@ class SyncSchedulerImpl @Inject constructor(
 ) : SyncScheduler {
 
     override fun schedule(syncType: SyncType) {
+        Log.d("schedule", "Scheduling sync for $syncType")
 
         val request = OneTimeWorkRequestBuilder<SyncWorker>()
             .setInputData(

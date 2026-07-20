@@ -63,6 +63,7 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version = "1.4.0" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version = "1.4.0" }
 
 
 

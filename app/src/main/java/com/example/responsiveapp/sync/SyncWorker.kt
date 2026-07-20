@@ -23,9 +23,16 @@ class SyncWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
 
+        Log.d(TAG, "SyncWorker started")
+
         val syncTypeName = inputData.getString(
             SyncConstants.KEY_SYNC_TYPE
-        ) ?: return Result.failure()
+        ) ?: run {
+            Log.e(TAG, "Sync type missing")
+            return Result.failure()
+        }
+
+        Log.d(TAG, "Received SyncType: $syncTypeName")
 
         val syncType = try {
             SyncType.valueOf(syncTypeName)
@@ -42,7 +49,11 @@ class SyncWorker @AssistedInject constructor(
 
         return try {
 
+            Log.d(TAG, "Starting sync for $syncType")
+
             syncManager.sync(syncType)
+
+            Log.d(TAG, "Sync completed successfully for $syncType")
 
             Result.success()
 
@@ -50,7 +61,7 @@ class SyncWorker @AssistedInject constructor(
 
             Log.e(
                 TAG,
-                "Unexpected error while syncing $syncType",
+                "Sync failed for $syncType",
                 e
             )
 
@@ -59,6 +70,6 @@ class SyncWorker @AssistedInject constructor(
     }
 
     companion object {
-        private const val TAG = "SyncWorker"
+        private const val TAG = "WorkManager"
     }
 }
