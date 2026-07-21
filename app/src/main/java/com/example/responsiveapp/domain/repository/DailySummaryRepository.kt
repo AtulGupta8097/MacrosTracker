@@ -15,4 +15,6 @@ interface DailySummaryRepository {
     suspend fun getForDate(date: Long): DailySummary?
 
     suspend fun syncPending()
+
+    suspend fun fetchAndCacheAll()
 }

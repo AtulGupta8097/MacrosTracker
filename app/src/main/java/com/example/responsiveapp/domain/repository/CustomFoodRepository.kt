@@ -12,4 +12,6 @@ interface CustomFoodRepository {
     suspend fun delete(foodId: String)
 
     suspend fun syncPending()
+
+    suspend fun fetchAndCacheAll()
 }

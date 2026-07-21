@@ -5,6 +5,7 @@ import com.example.responsiveapp.data.local.dao.DailySummaryDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
+import com.example.responsiveapp.data.remote.dto.firebase.DailySummaryDto
 import com.example.responsiveapp.domain.model.DailySummary
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.DailySummaryRepository
@@ -31,11 +32,11 @@ class DailySummaryRepositoryImpl @Inject constructor(
         dao.update(summary.toEntity())
     }
 
-    override fun observeForDate(startOfDay: Long): Flow<DailySummary?> =
-        dao.observeForDate(startOfDay).map { it?.toDomain() }
+    override fun observeForDate(date: Long): Flow<DailySummary?> =
+        dao.observeForDate(date).map { it?.toDomain() }
 
-    override suspend fun getForDate(startOfDay: Long): DailySummary? =
-        dao.getForDate(startOfDay)?.toDomain()
+    override suspend fun getForDate(date: Long): DailySummary? =
+        dao.getForDate(date)?.toDomain()
 
     override suspend fun syncPending() {
 
@@ -44,12 +45,6 @@ class DailySummaryRepositoryImpl @Inject constructor(
         for (entity in pending) {
 
             val now = System.currentTimeMillis()
-
-            dao.updateSyncStatus(
-                date = entity.date,
-                status = SyncStatus.SYNCING,
-                lastSyncAttempt = now
-            )
 
             try {
 
@@ -97,6 +92,23 @@ class DailySummaryRepositoryImpl @Inject constructor(
                     e
                 )
             }
+        }
+    }
+
+    override suspend fun fetchAndCacheAll() {
+
+        try {
+
+            val snapshot = collection().get().await()
+
+            val entities = snapshot.documents.mapNotNull {
+                it.toObject(DailySummaryDto::class.java)?.toEntity()
+            }
+
+            dao.insertAllFromRemote(entities)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch DailySummaries from Firestore", e)
         }
     }
 

@@ -5,6 +5,7 @@ import com.example.responsiveapp.core.utils.toLocalDateKey
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
+import com.example.responsiveapp.data.remote.dto.firebase.FoodLogDto
 import com.example.responsiveapp.domain.model.foodlog.FoodLog
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
@@ -33,14 +34,7 @@ class FoodLogRepositoryImpl @Inject constructor(
 
             val now = System.currentTimeMillis()
 
-            foodLogDao.updateSyncStatus(
-                logId = entity.id,
-                status = SyncStatus.SYNCING,
-                lastSyncAttempt = now
-            )
-
             try {
-
 
                 collection()
                     .document(entity.date.toLocalDateKey())
@@ -88,6 +82,31 @@ class FoodLogRepositoryImpl @Inject constructor(
                     e
                 )
             }
+        }
+    }
+
+
+    override suspend fun fetchAndCacheAll() {
+
+        try {
+
+            // food_logs/{dateKey} is a date-bucket document; the actual
+            // log entries live in its "logs" subcollection.
+            val dateDocs = collection().get().await()
+
+            val entities = dateDocs.documents.flatMap { dateDoc ->
+                dateDoc.reference
+                    .collection("logs")
+                    .get()
+                    .await()
+                    .documents
+                    .mapNotNull { it.toObject(FoodLogDto::class.java)?.toEntity() }
+            }
+
+            foodLogDao.insertAllFromRemote(entities)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch FoodLogs from Firestore", e)
         }
     }
 

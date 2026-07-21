@@ -5,6 +5,7 @@ import com.example.responsiveapp.data.local.dao.CustomFoodDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
+import com.example.responsiveapp.data.remote.dto.firebase.CustomFoodDto
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.model.myfood.CustomFood
 import com.example.responsiveapp.domain.repository.CustomFoodRepository
@@ -47,12 +48,6 @@ class CustomFoodRepositoryImpl @Inject constructor(
         for (entity in pending) {
 
             val now = System.currentTimeMillis()
-
-            dao.updateSyncStatus(
-                id = entity.id,
-                status = SyncStatus.SYNCING,
-                lastSyncAttempt = now
-            )
 
             try {
 
@@ -100,6 +95,22 @@ class CustomFoodRepositoryImpl @Inject constructor(
                     e
                 )
             }
+        }
+    }
+
+    override suspend fun fetchAndCacheAll() {
+        try {
+
+            val snapshot = collection().get().await()
+
+            val entities = snapshot.documents.mapNotNull {
+                it.toObject(CustomFoodDto::class.java)?.toEntity()
+            }
+
+            dao.insertAllFromRemote(entities)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch CustomFoods from Firestore", e)
         }
     }
 

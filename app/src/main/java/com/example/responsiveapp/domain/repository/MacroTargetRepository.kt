@@ -10,4 +10,6 @@ interface MacroTargetRepository {
     suspend fun getCurrentTarget(): MacroTarget?
 
     suspend fun syncPending()
+
+    suspend fun fetchAndCacheAll()
 }

@@ -5,6 +5,7 @@ import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
+import com.example.responsiveapp.data.remote.dto.firebase.MyMealDto
 import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.model.mymeals.MyMeal
 import com.example.responsiveapp.domain.repository.MyMealRepository
@@ -43,12 +44,6 @@ class MyMealRepositoryImpl @Inject constructor(
         for (entity in pending) {
 
             val now = System.currentTimeMillis()
-
-            myMealDao.updateSyncStatus(
-                id = entity.id,
-                status = SyncStatus.SYNCING,
-                lastSyncAttempt = now
-            )
 
             try {
 
@@ -101,6 +96,24 @@ class MyMealRepositoryImpl @Inject constructor(
 
     override suspend fun deleteMeal(myMealId: String) {
         myMealDao.deleteMyMealsById(myMealId)
+    }
+
+
+    override suspend fun fetchAndCacheAll() {
+
+        try {
+
+            val snapshot = collection().get().await()
+
+            val entities = snapshot.documents.mapNotNull {
+                it.toObject(MyMealDto::class.java)?.toEntity()
+            }
+
+            myMealDao.insertAllFromRemote(entities)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch MyMeals from Firestore", e)
+        }
     }
 
     private fun collection() = firestore

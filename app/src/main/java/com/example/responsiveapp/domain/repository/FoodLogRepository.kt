@@ -7,4 +7,6 @@ interface FoodLogRepository {
     suspend fun logFood(foodLog: FoodLog)
 
     suspend fun syncPending()
+
+    suspend fun fetchAndCacheAll()
 }

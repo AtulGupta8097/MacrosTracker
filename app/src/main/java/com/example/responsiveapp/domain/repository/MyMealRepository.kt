@@ -13,4 +13,6 @@ interface MyMealRepository {
     fun observeMeals(): Flow<List<MyMeal>>
 
     suspend fun syncPending()
+
+    suspend fun fetchAndCacheAll()
 }
