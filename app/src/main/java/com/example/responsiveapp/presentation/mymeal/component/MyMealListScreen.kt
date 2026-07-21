@@ -1,11 +1,5 @@
 package com.example.responsiveapp.presentation.mymeal.component
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,49 +43,38 @@ fun MyMealListScreen(
             modifier = Modifier.weight(1f)
         ) {
 
-            AnimatedContent(
-                targetState = meals.isEmpty(),
-                transitionSpec = {
-                    (fadeIn(tween(150)) +
-                            slideInVertically(tween(250)) { it / 8 })
-                        .togetherWith(
-                            fadeOut(tween(150))
-                        )
-                },
-                label = "MealsContent"
-            ) { isEmpty ->
-
-                if (isEmpty) {
-                    EmptyState(
-                        modifier = Modifier.align(Alignment.Center),
-                        title = "No meals yet",
-                        description = "Tap + to build your first\ncustom meal from real foods.",
-                        icon = Icons.Outlined.RestaurantMenu,
-                        tint = MaterialTheme.colorScheme.primary
+            if (meals.isEmpty()) {
+                EmptyState(
+                    modifier = Modifier.align(Alignment.Center),
+                    title = "No meals yet",
+                    description = "Tap + to build your first\ncustom meal from real foods.",
+                    icon = Icons.Outlined.RestaurantMenu,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = MaterialTheme.spacing.md,
+                        vertical = MaterialTheme.spacing.md
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(
+                        MaterialTheme.spacing.sm
                     )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(
-                            horizontal = MaterialTheme.spacing.md,
-                            vertical = MaterialTheme.spacing.md,
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(
-                            MaterialTheme.spacing.sm
-                        ),
-                    ) {
-                        items(
-                            items = meals,
-                            key = { it.id }
-                        ) { meal ->
+                ) {
+                    items(
+                        items = meals,
+                        key = { it.id }
+                    ) { meal ->
 
-                            MyMealCard(
-                                myMeal = meal,
-                                isSelected = meal.id == selectedMealId,
-                                onLog = { },
-                                onEdit = { onMealClicked(meal) }
-                            )
-                        }
+                        MyMealCard(
+                            myMeal = meal,
+                            isSelected = meal.id == selectedMealId,
+                            onLog = { },
+                            onEdit = {
+                                onMealClicked(meal)
+                            }
+                        )
                     }
                 }
             }
@@ -117,7 +100,7 @@ private fun CreateMealButton(
             .padding(MaterialTheme.spacing.md),
         buttonColors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
