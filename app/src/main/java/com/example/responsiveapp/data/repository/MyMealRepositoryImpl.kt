@@ -94,8 +94,8 @@ class MyMealRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteMeal(myMealId: String) {
-        myMealDao.deleteMyMealsById(myMealId)
+    override suspend fun deleteMeal(id: String) {
+        myMealDao.deleteMyMealsById(id)
     }
 
 
