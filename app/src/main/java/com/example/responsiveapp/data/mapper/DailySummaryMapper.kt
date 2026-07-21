@@ -28,6 +28,21 @@ fun DailySummary.toEntity(
     lastSyncAttempt = lastSyncAttempt
 )
 
+
+fun DailySummaryDto.toEntity(
+    syncStatus: SyncStatus = SyncStatus.SYNCED,
+    lastSyncAttempt: Long? = System.currentTimeMillis()
+) = DailySummaryEntity(
+    date = date,
+    target = target,
+    consumed = consumed,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    syncStatus = syncStatus,
+    retryCount = 0,
+    lastSyncAttempt = lastSyncAttempt
+)
+
 fun DailySummaryEntity.toFirestoreDto() =
     DailySummaryDto(
         date = date,

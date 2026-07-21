@@ -4,6 +4,7 @@ import com.example.responsiveapp.data.local.converter.IngredientConverters
 import com.example.responsiveapp.data.local.entity.MyMealsEntity
 import com.example.responsiveapp.data.remote.dto.firebase.MyMealDto
 import com.example.responsiveapp.domain.model.NutritionInfo
+import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.model.mymeals.MyMeal
 
 fun MyMeal.toEntity() = MyMealsEntity(
@@ -89,6 +90,39 @@ fun MyMealsEntity.toFirestoreDto() =
         createdAt = createdAt,
         updatedAt = updatedAt
     )
+
+fun MyMealDto.toEntity(
+    syncStatus: SyncStatus = SyncStatus.SYNCED,
+    lastSyncAttempt: Long? = System.currentTimeMillis()
+) = MyMealsEntity(
+    id = id,
+    name = name,
+    ingredientsJson = ingredientsJson,
+    calories = calories,
+    protein = protein,
+    carbs = carbs,
+    fat = fat,
+    fiber = fiber,
+    sugar = sugar,
+    sodium = sodium,
+    cholesterol = cholesterol,
+    saturatedFat = saturatedFat,
+    polyunsaturatedFat = polyunsaturatedFat,
+    monounsaturatedFat = monounsaturatedFat,
+    transFat = transFat,
+    potassium = potassium,
+    addedSugars = addedSugars,
+    vitaminA = vitaminA,
+    vitaminC = vitaminC,
+    vitaminD = vitaminD,
+    calcium = calcium,
+    iron = iron,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    syncStatus = syncStatus,
+    retryCount = 0,
+    lastSyncAttempt = lastSyncAttempt
+)
 
 fun List<MyMealsEntity>.toDomain(): List<MyMeal>  {
     return map{

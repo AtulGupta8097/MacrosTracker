@@ -50,6 +50,25 @@ fun FoodLog.toEntity(): FoodLogEntity {
     )
 }
 
+fun FoodLogDto.toEntity(
+    syncStatus: SyncStatus = SyncStatus.SYNCED,
+    lastSyncAttempt: Long? = System.currentTimeMillis()
+): FoodLogEntity =
+    FoodLogEntity(
+        id                  = id,
+        date                = date,
+        foodName            = foodName,
+        servingDescription  = servingDescription,
+        quantity            = quantity,
+        nutrition           = nutrition,
+        ingredientsJson     = if (ingredients.isNotEmpty()) Gson().toJson(ingredients) else null,
+        createdAt           = createdAt,
+        updatedAt           = updatedAt,
+        syncStatus          = syncStatus,
+        retryCount          = 0,
+        lastSyncAttempt     = lastSyncAttempt
+    )
+
 fun FoodLogEntity.toFirestoreDto(): FoodLogDto {
 
     val ingredients: List<MealIngredient> =
