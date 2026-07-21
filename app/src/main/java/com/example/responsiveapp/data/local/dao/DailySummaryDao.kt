@@ -15,6 +15,9 @@ interface DailySummaryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: DailySummaryEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllFromRemote(entities: List<DailySummaryEntity>)
+
     @Update
     suspend fun update(entity: DailySummaryEntity)
 

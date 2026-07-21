@@ -14,6 +14,9 @@ interface CustomFoodDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(food: CustomFoodEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllFromRemote(foods: List<CustomFoodEntity>)
+
     @Query("""
         SELECT *
         FROM custom_foods

@@ -45,6 +45,9 @@ interface FoodLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFoodLog(foodLog: FoodLogEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllFromRemote(foodLogs: List<FoodLogEntity>)
+
     @Update
     suspend fun updateFoodLog(foodLog: FoodLogEntity)
 

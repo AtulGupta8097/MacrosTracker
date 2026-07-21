@@ -14,6 +14,9 @@ interface MyMealsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMyMeal(meal: MyMealsEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllFromRemote(meals: List<MyMealsEntity>)
+
     @Query("""
         SELECT *
         FROM my_meals

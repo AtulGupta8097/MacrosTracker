@@ -20,6 +20,9 @@ interface MacroTargetDao {
     """)
     suspend fun getCurrentTarget(): MacroTargetEntity?
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllFromRemote(targets: List<MacroTargetEntity>)
+
     @Query("""
         SELECT * FROM macro_targets
         ORDER BY createdAt DESC
