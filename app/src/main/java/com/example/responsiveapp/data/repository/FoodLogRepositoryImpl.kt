@@ -1,7 +1,7 @@
 package com.example.responsiveapp.data.repository
 
 import android.util.Log
-import com.example.responsiveapp.core.utils.toLocalDateKey
+import com.example.responsiveapp.core.utils.DateUtils.toLocalDateKey
 import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
