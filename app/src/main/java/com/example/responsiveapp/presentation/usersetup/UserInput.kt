@@ -6,6 +6,7 @@ import com.example.responsiveapp.domain.model.Goal
 import com.example.responsiveapp.domain.model.UserProfile
 
 data class UserInput(
+    val name: String? = null,
     val gender: Gender? = null,
     val age: Int? = null,
     val weight: Float? = null,
@@ -16,6 +17,7 @@ data class UserInput(
 
 fun UserInput.toDomain(): UserProfile {
     return UserProfile(
+        name = requireNotNull(name).trim(),
         gender = requireNotNull(gender),
         age = requireNotNull(age),
         height = requireNotNull(height),

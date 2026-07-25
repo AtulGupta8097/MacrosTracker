@@ -6,6 +6,7 @@ import com.example.responsiveapp.data.datastore.AppPrefManager
 import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal
+import com.example.responsiveapp.domain.session.SessionManager
 import com.example.responsiveapp.domain.use_case.profile.SaveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -18,9 +19,14 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class UserSetupViewModel @Inject constructor(
     private val saveUserProfileUseCase: SaveUserProfileUseCase,
-    private val appPrefManager: AppPrefManager
+    private val appPrefManager: AppPrefManager,
+    private val sessionManager: SessionManager
 ): ViewModel() {
-    private val _state = MutableStateFlow(UserSetupState())
+    private val _state = MutableStateFlow(
+        UserSetupState(
+            userInput = UserInput(name = sessionManager.currentUserName())
+        )
+    )
     val state: StateFlow<UserSetupState> = _state.asStateFlow()
     private val screenFlow = listOf(
         UserSetupScreen.Gender,
