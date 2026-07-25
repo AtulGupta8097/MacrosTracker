@@ -2,6 +2,8 @@ package com.example.responsiveapp.core.di
 
 import com.example.responsiveapp.data.coordinatior.LogFoodCoordinator
 import com.example.responsiveapp.data.coordinatior.LogFoodCoordinatorImpl
+import com.example.responsiveapp.data.local.dao.UserProfileDao
+import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import com.example.responsiveapp.sync.SyncManager
 import com.example.responsiveapp.sync.SyncManagerImpl
 import com.example.responsiveapp.sync.SyncScheduler
@@ -10,6 +12,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,5 +32,6 @@ abstract class RepositoryModule {
     abstract fun bindLogFoodCoordinator(
         impl: LogFoodCoordinatorImpl
     ): LogFoodCoordinator
+
 
 }

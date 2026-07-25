@@ -1,47 +1,52 @@
 package com.example.responsiveapp.data.repository
 
-import androidx.datastore.preferences.core.edit
-import com.example.responsiveapp.data.datastore.UserPreferencesDataStore
-import com.example.responsiveapp.data.datastore.UserPreferencesKeys
+import android.util.Log
+import com.example.responsiveapp.data.local.dao.UserProfileDao
 import com.example.responsiveapp.data.mapper.toDomain
-import com.example.responsiveapp.data.mapper.toDto
+import com.example.responsiveapp.data.mapper.toEntity
+import com.example.responsiveapp.data.mapper.toFirestoreDto
 import com.example.responsiveapp.data.remote.dto.firebase.UserProfileDto
+import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.example.responsiveapp.domain.session.SessionManager
+import com.example.responsiveapp.sync.SyncScheduler
+import com.example.responsiveapp.sync.SyncType
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class UserProfileRepositoryImpl @Inject constructor(
+    private val dao: UserProfileDao,
     private val firestore: FirebaseFirestore,
-    private val preferences: UserPreferencesDataStore,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val scheduler: SyncScheduler,
 ) : UserProfileRepository {
+
+    override fun observeUserProfile(): Flow<UserProfile?> =
+        dao.observeProfile().map { it?.toDomain() }
 
     override suspend fun saveUserProfile(profile: UserProfile) {
 
-        val dto = profile.toDto()
+        val uid = sessionManager.requireUserId()
 
-        try {
+        val stamped = profile.copy(
+            id = uid,
+            updatedAt = System.currentTimeMillis()
+        )
 
-            val uid = sessionManager.requireUserId()
+        dao.insert(stamped.toEntity())
 
-            firestore
-                .collection("users")
-                .document(uid)
-                .set(dto)
-                .await()
-
-        } finally {
-            saveToLocal(dto)
-        }
+        scheduler.schedule(SyncType.USER_PROFILE)
     }
 
     override suspend fun getUserProfile(): UserProfile? {
 
-        getLocalProfile()?.let {
+        dao.getProfile()?.let {
             return it.toDomain()
         }
 
@@ -56,49 +61,73 @@ class UserProfileRepositoryImpl @Inject constructor(
             .toObject(UserProfileDto::class.java)
             ?: return null
 
-        saveToLocal(remoteDto)
+        val domain = remoteDto.toDomain(id = uid)
+            ?: return null
 
-        return remoteDto.toDomain()
+        dao.insert(domain.toEntity(syncStatus = SyncStatus.SYNCED))
+
+        return domain
     }
 
-    private suspend fun saveToLocal(dto: UserProfileDto) {
-        preferences.dataStore.edit { prefs ->
+    override suspend fun syncPending() {
 
-            dto.gender?.let {
-                prefs[UserPreferencesKeys.GENDER] = it
+        val pending = dao.getPending()
+
+        for (entity in pending) {
+
+            val now = System.currentTimeMillis()
+
+            try {
+
+                firestore
+                    .collection("users")
+                    .document(entity.id)
+                    .set(entity.toFirestoreDto())
+                    .await()
+
+            } catch (e: Exception) {
+
+                Log.e(
+                    TAG,
+                    "Failed to upload UserProfile: ${entity.id}",
+                    e
+                )
+
+                dao.updateRetryInfo(
+                    id = entity.id,
+                    retryCount = entity.retryCount + 1,
+                    lastSyncAttempt = now
+                )
+
+                dao.updateSyncStatus(
+                    id = entity.id,
+                    status = SyncStatus.FAILED,
+                    lastSyncAttempt = now
+                )
+
+                continue
             }
-            dto.age?.let {
-                prefs[UserPreferencesKeys.AGE] = it
-            }
-            dto.weight?.let {
-                prefs[UserPreferencesKeys.WEIGHT] = it
-            }
-            dto.height?.let {
-                prefs[UserPreferencesKeys.HEIGHT] = it
-            }
-            dto.activityLevel?.let {
-                prefs[UserPreferencesKeys.ACTIVITY] = it
-            }
-            dto.goal?.let {
-                prefs[UserPreferencesKeys.GOAL] = it
+
+            try {
+
+                dao.updateSyncStatus(
+                    id = entity.id,
+                    status = SyncStatus.SYNCED,
+                    lastSyncAttempt = now
+                )
+
+            } catch (e: Exception) {
+
+                Log.e(
+                    TAG,
+                    "Uploaded UserProfile ${entity.id} to Firestore but failed to update local sync status.",
+                    e
+                )
             }
         }
     }
 
-    private suspend fun getLocalProfile(): UserProfileDto? {
-
-        val prefs = preferences.dataStore.data.first()
-
-        val gender = prefs[UserPreferencesKeys.GENDER]
-            ?: return null
-
-        return UserProfileDto(
-            gender = gender,
-            age = prefs[UserPreferencesKeys.AGE],
-            weight = prefs[UserPreferencesKeys.WEIGHT],
-            height = prefs[UserPreferencesKeys.HEIGHT],
-            activityLevel = prefs[UserPreferencesKeys.ACTIVITY],
-            goal = prefs[UserPreferencesKeys.GOAL]
-        )
+    companion object {
+        private const val TAG = "UserProfileRepository"
     }
 }

@@ -12,6 +12,7 @@ import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
+import com.example.responsiveapp.data.local.dao.UserProfileDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
 import com.example.responsiveapp.data.repository.CustomFoodRepositoryImpl
@@ -95,14 +96,16 @@ object AppModule {
     @Provides
     @Singleton
     fun provideUserProfileRepository(
+        dao: UserProfileDao,
         firestore: FirebaseFirestore,
         sessionManager: SessionManager,
-        preferences: UserPreferencesDataStore,
+        syncScheduler: SyncScheduler,
     ): UserProfileRepository =
         UserProfileRepositoryImpl(
-            firestore      = firestore,
+            dao = dao,
+            firestore = firestore,
             sessionManager = sessionManager,
-            preferences    = preferences
+            scheduler = syncScheduler
         )
 
     @Provides
