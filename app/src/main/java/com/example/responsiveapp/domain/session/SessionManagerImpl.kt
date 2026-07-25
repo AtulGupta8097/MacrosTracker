@@ -17,4 +17,8 @@ class SessionManagerImpl @Inject constructor(
     override fun currentUserId(): String? {
         return auth.currentUser?.uid
     }
+
+    override fun currentUserName(): String? {
+        return auth.currentUser?.displayName?.takeIf { it.isNotBlank() }
+    }
 }

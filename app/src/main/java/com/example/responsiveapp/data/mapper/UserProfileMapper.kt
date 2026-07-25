@@ -1,7 +1,6 @@
 @file:JvmName("UserProfileMapperKt")
 
 package com.example.responsiveapp.data.mapper
-
 import com.example.responsiveapp.data.local.entity.UserProfileEntity
 import com.example.responsiveapp.data.remote.dto.firebase.UserProfileDto
 import com.example.responsiveapp.domain.model.ActivityLevel

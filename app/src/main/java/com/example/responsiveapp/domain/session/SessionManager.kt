@@ -5,4 +5,6 @@ interface SessionManager {
     fun requireUserId(): String
 
     fun currentUserId(): String?
+
+    fun currentUserName(): String?
 }

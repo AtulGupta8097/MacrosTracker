@@ -3,8 +3,6 @@ package com.example.responsiveapp.data.local.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.responsiveapp.data.local.converter.IngredientConverters
 import com.example.responsiveapp.data.local.converter.NutritionInfoConverter
 import com.example.responsiveapp.data.local.converter.ServingConverter

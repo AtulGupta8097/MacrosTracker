@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SignUpViewmodel @Inject constructor(
-    private val SignUpUseCase: SignUpUseCase,
+    private val signUpUseCase: SignUpUseCase,
     private val appPrefManager: AppPrefManager
 ) : ViewModel() {
     private val _state = MutableStateFlow<SignUpState>(SignUpState.SignOut)
@@ -75,7 +75,7 @@ class SignUpViewmodel @Inject constructor(
 
         _state.value = SignUpState.Loading
         viewModelScope.launch {
-            SignUpUseCase(currentUiState.email, currentUiState.password).collect { result ->
+            signUpUseCase(currentUiState.email, currentUiState.password, currentUiState.username).collect { result ->
 
                 result.onSuccess { authResult ->
                     authResult.user?.let {
