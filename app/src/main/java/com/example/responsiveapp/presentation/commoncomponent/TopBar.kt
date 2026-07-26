@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -59,6 +61,18 @@ fun TopBar(
             modifier = Modifier.align(Alignment.CenterEnd),
             verticalAlignment = Alignment.CenterVertically,
             content = actions
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PrevTopbar() {
+    ResponsiveAppTheme {
+        TopBar(
+            heading = "Home",
+            onBack = {},
+
         )
     }
 }

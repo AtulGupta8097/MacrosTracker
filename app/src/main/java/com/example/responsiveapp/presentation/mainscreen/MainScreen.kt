@@ -43,6 +43,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
 import com.example.responsiveapp.presentation.fooddatabase.FoodDatabaseScreen
+import com.example.responsiveapp.presentation.home.HomeScreen
 import com.example.responsiveapp.presentation.mainscreen.component.AddFoodBottomSheet
 import com.example.responsiveapp.presentation.mainscreen.component.BottomNav
 import com.example.responsiveapp.presentation.mainscreen.component.Navbar
@@ -198,7 +199,15 @@ private fun MainContent(
                     backStack = navBackStack,
                     entryProvider = entryProvider {
 
-                        entry<Routes.HomeScreen> { HomeScreen() }
+                        entry<Routes.HomeScreen> {
+                            HomeScreen(
+                                onEditProfile = {
+
+                                },
+                                onSeeMoreProfile = {
+                                }
+                            )
+                        }
                         entry<Routes.ProgressScreen> { ProgressScreen() }
                         entry<Routes.GoalsScreen> { GoalScreen() }
                         entry<Routes.SettingsScreen> { SettingsScreen() }
@@ -221,14 +230,6 @@ private fun MainContent(
         }
     }
 }
-
-@Composable
-fun HomeScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text("Home Screen", modifier = Modifier.align(Alignment.Center))
-    }
-}
-
 @Composable
 fun ProgressScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
