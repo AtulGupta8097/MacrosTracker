@@ -2,14 +2,12 @@ package com.example.responsiveapp.presentation.home.componet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,14 +43,15 @@ fun HomeAppBar(
         mutableStateOf(false)
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
+        val containerMacWidth = maxWidth
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .statusBarsPadding()
                 .padding(
                     horizontal = MaterialTheme.spacing.md,
@@ -63,7 +62,7 @@ fun HomeAppBar(
 
             Image(
                 painter = painterResource(R.drawable.logo),
-                contentDescription = stringResource(R.string.app_name),
+                contentDescription = "App Logo",
                 modifier = Modifier
                     .size(32.dp)
                     .clip(
@@ -83,6 +82,8 @@ fun HomeAppBar(
 
             ProfileAvatar(
                 name = userProfile?.name.orEmpty(),
+                size = 40.dp,
+                showBorder = true,
                 onClick = {
                     showProfilePopup = true
                 }
@@ -93,6 +94,7 @@ fun HomeAppBar(
 
             ProfilePopup(
                 userProfile = userProfile,
+                containerMaxWidth = containerMacWidth,
                 onDismiss = {
                     showProfilePopup = false
                 },
@@ -109,37 +111,6 @@ fun HomeAppBar(
     }
 }
 
-@Composable
-private fun ProfileAvatar(
-    name: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val initial = remember(name) {
-        name.trim()
-            .firstOrNull()
-            ?.uppercaseChar()
-            ?.toString()
-            ?: "?"
-    }
-
-    Box(
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-
-        Text(
-            text = initial,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

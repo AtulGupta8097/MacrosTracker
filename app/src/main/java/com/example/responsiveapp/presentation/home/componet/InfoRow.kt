@@ -10,15 +10,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
-private val ActionIconSize = 16.dp
+private val IconContainerSize = 36.dp
+private val IconSize = 18.dp
+
 
 @Composable
 fun InfoRow(
     icon: ImageVector,
     label: String,
+    value: String,
     modifier: Modifier = Modifier,
 ) {
 
@@ -30,17 +34,24 @@ fun InfoRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(ActionIconSize)
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(IconSize)
         )
 
         Text(
             text = label,
-            modifier = Modifier.padding(
-                start = MaterialTheme.spacing.xs
-            ),
-            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = MaterialTheme.spacing.sm),
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall
+                .copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

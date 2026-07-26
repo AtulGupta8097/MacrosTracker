@@ -1,4 +1,5 @@
 package com.example.responsiveapp.presentation.home.componet
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -24,12 +25,14 @@ fun ProfileHeader(
 
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.md)
     ) {
 
         ProfileAvatar(
             name = userProfile?.name,
-            size = AvatarSize
+            size = AvatarSize,
+            showBorder = true
         )
 
         Column(
@@ -42,17 +45,15 @@ fun ProfileHeader(
                 text = displayName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 maxLines = 1
             )
 
-            userProfile?.let { profile ->
-
-                Text(
-                    text = "${profile.age} yrs · ${profile.height.toInt()} cm · ${profile.weight.toInt()} kg",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                text = "Personal Profile",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
