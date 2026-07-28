@@ -11,80 +11,80 @@ import java.util.Locale
 object DateUtils {
 
     private val zone: ZoneId = ZoneId.systemDefault()
+    private const val DAYS_PER_WEEK = 7
 
-    fun todayEpochMillis(): Long =
-        LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli()
+    private val DATE_KEY_FORMATTER: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    fun getStartOfWeek(epochMillis: Long): Long {
-        val date = epochMillis.toLocalDate()
-        val startOfWeek = date.with(DayOfWeek.MONDAY)
-        return startOfWeek.toEpochMillis()
+    fun today(): Long =
+        LocalDate.now(zone).toEpochMillis()
+
+    fun getWeekStart(date: Long): Long =
+        date.toLocalDate().with(DayOfWeek.MONDAY).toEpochMillis()
+
+    fun getCurrentWeekDates(weekStart: Long): List<Long> {
+        val start = weekStart.toLocalDate()
+        return (0 until DAYS_PER_WEEK).map { offset -> start.plusDays(offset.toLong()).toEpochMillis() }
     }
 
-    fun getWeekDates(weekStartEpochMillis: Long): List<Long> {
-        val start = weekStartEpochMillis.toLocalDate()
-        return (0..6).map { offset -> start.plusDays(offset.toLong()).toEpochMillis() }
+    fun getPreviousWeek(weekStart: Long): Long =
+        weekStart.toLocalDate().minusWeeks(1).toEpochMillis()
+
+    fun getNextWeek(weekStart: Long): Long =
+        weekStart.toLocalDate().plusWeeks(1).toEpochMillis()
+
+    fun getSelectedWeekdayIndex(date: Long, weekStart: Long): Int {
+        val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(weekStart.toLocalDate(), date.toLocalDate())
+        return daysBetween.toInt().coerceIn(0, DAYS_PER_WEEK - 1)
     }
 
-    fun getPreviousWeekStart(currentWeekStartEpochMillis: Long): Long =
-        currentWeekStartEpochMillis.toLocalDate().minusWeeks(1).toEpochMillis()
+    fun getDateForWeekday(weekStart: Long, weekdayIndex: Int): Long =
+        weekStart.toLocalDate().plusDays(weekdayIndex.toLong()).toEpochMillis()
 
-    fun getNextWeekStart(currentWeekStartEpochMillis: Long): Long =
-        currentWeekStartEpochMillis.toLocalDate().plusWeeks(1).toEpochMillis()
-
-    fun formatMonthTitle(epochMillis: Long): String {
-        val date = epochMillis.toLocalDate()
-        val month = date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
-        return "$month ${date.year}"
+    fun formatMonthTitle(date: Long): String {
+        val localDate = date.toLocalDate()
+        val month = localDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+        return "$month ${localDate.year}"
     }
 
-    fun formatDayName(epochMillis: Long): String =
-        epochMillis.toLocalDate().dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+    fun formatWeekdayLabel(date: Long): String =
+        date.toLocalDate().dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
-    fun formatDayNumber(epochMillis: Long): String =
-        epochMillis.toLocalDate().dayOfMonth.toString()
+    fun formatDayOfMonth(date: Long): String =
+        date.toLocalDate().dayOfMonth.toString()
 
-    fun formatFullDate(epochMillis: Long): String {
-        val date = epochMillis.toLocalDate()
-        val weekday = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
-        val month = date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
-        return "$weekday, ${date.dayOfMonth} $month"
+    fun formatFullDate(date: Long): String {
+        val localDate = date.toLocalDate()
+        val weekday = localDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+        val month = localDate.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+        return "$weekday, ${localDate.dayOfMonth} $month"
     }
 
-    fun isCurrentWeek(weekStartEpochMillis: Long): Boolean =
-        weekStartEpochMillis == getStartOfWeek(todayEpochMillis())
+    fun isCurrentWeek(weekStart: Long): Boolean =
+        weekStart == getWeekStart(today())
 
-    fun isDateInWeek(dateEpochMillis: Long, weekStartEpochMillis: Long): Boolean {
-        val date = dateEpochMillis.toLocalDate()
-        val start = weekStartEpochMillis.toLocalDate()
-        val end = start.plusDays(6)
-        return !date.isBefore(start) && !date.isAfter(end)
+    fun isDateInWeek(date: Long, weekStart: Long): Boolean {
+        val localDate = date.toLocalDate()
+        val start = weekStart.toLocalDate()
+        val end = start.plusDays((DAYS_PER_WEEK - 1).toLong())
+        return !localDate.isBefore(start) && !localDate.isAfter(end)
     }
 
-    fun isToday(epochMillis: Long): Boolean =
-        epochMillis.toLocalDate() == LocalDate.now(zone)
+    fun isToday(date: Long): Boolean =
+        date.toLocalDate() == LocalDate.now(zone)
+
+    fun isFutureDate(date: Long): Boolean =
+        date.toLocalDate().isAfter(LocalDate.now(zone))
 
     fun isSameDay(a: Long, b: Long): Boolean =
         a.toLocalDate() == b.toLocalDate()
+
+    fun Long.toLocalDateKey(zoneId: ZoneId = zone): String =
+        Instant.ofEpochMilli(this).atZone(zoneId).toLocalDate().format(DATE_KEY_FORMATTER)
 
     private fun Long.toLocalDate(): LocalDate =
         Instant.ofEpochMilli(this).atZone(zone).toLocalDate()
 
     private fun LocalDate.toEpochMillis(): Long =
         atStartOfDay(zone).toInstant().toEpochMilli()
-
-
-    private val DATE_KEY_FORMATTER =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    fun Long.toLocalDateKey(
-        zoneId: ZoneId = ZoneId.systemDefault()
-    ): String {
-
-        return Instant
-            .ofEpochMilli(this)
-            .atZone(zoneId)
-            .toLocalDate()
-            .format(DATE_KEY_FORMATTER)
-    }
 }
