@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
+import com.example.responsiveapp.presentation.home.componet.WeeklyDatePicker
 
 @Composable
 fun HomeScreen(
@@ -33,6 +34,16 @@ fun HomeScreen(
                 userProfile = state.userProfile,
                 onEditProfile = onEditProfile,
                 onSeeMoreProfile = onSeeMoreProfile
+            )
+
+            WeeklyDatePicker(
+                weekStartDate = state.weekStartDate,
+                weekDays = state.weekDays,
+                selectedDate = state.selectedDate,
+                onDateSelected = viewModel::onDateSelected,
+                onPreviousWeek = viewModel::onPreviousWeek,
+                onNextWeek = viewModel::onNextWeek,
+                onGoToToday = viewModel::onGoToToday,
             )
         }
     }
