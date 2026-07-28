@@ -57,7 +57,7 @@ fun DateItem(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.primary
         } else {
-            MaterialTheme.colorScheme.surfaceContainer
+            MaterialTheme.colorScheme.background
         },
         animationSpec = tween(220),
         label = "dateItemBackground",

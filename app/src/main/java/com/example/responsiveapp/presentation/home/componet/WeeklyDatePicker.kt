@@ -83,10 +83,7 @@ fun WeeklyDatePicker(
 
         BoxWithConstraints(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        vertical = MaterialTheme.spacing.sm,
-                    ),
+                    .fillMaxWidth(),
             contentAlignment = Alignment.Center
             ) {
 

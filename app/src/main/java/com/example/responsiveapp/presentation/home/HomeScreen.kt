@@ -1,5 +1,6 @@
 package com.example.responsiveapp.presentation.home
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
 import com.example.responsiveapp.presentation.home.componet.WeeklyDatePicker
+import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun HomeScreen(
@@ -27,7 +29,10 @@ fun HomeScreen(
     ) {
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(
+                MaterialTheme.spacing.md
+            )
         ) {
 
             HomeAppBar(

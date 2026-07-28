@@ -142,11 +142,17 @@ class HomeViewModel @Inject constructor(
                 weekStart = weekStartDate,
             )
 
-        return copy(
-            selectedDate = DateUtils.getDateForWeekday(
+        val candidateDate =
+            DateUtils.getDateForWeekday(
                 weekStart = newWeekStart,
                 weekdayIndex = weekdayIndex,
-            ),
+            )
+
+        val resolvedDate =
+            if (DateUtils.isFutureDate(candidateDate)) today else candidateDate
+
+        return copy(
+            selectedDate = resolvedDate,
             weekStartDate = newWeekStart,
             weekDays = DateUtils.getCurrentWeekDates(newWeekStart),
         )
