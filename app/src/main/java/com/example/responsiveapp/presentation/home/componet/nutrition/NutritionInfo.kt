@@ -15,13 +15,14 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 import kotlin.math.roundToInt
 
 @Composable
-fun CaloriesInfo(
-    consumedCalories: Float,
-    targetCalories: Int,
+fun NutritionInfo(
+    consumed: Float,
+    target: Int,
+    unit: String,
     modifier: Modifier = Modifier,
 ) {
     val remaining =
-        (targetCalories - consumedCalories)
+        (target - consumed)
             .roundToInt()
 
     Column(
@@ -33,14 +34,16 @@ fun CaloriesInfo(
         ) {
 
             Text(
-                text = consumedCalories.roundToInt().toString(),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                text = consumed.roundToInt().toString(),
+                style = MaterialTheme.typography.headlineMedium
+                    .copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
             Text(
-                text = " / $targetCalories kcal",
+                text = " / $target $unit",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(
@@ -52,9 +55,9 @@ fun CaloriesInfo(
         Text(
             text =
                 if (remaining >= 0) {
-                    "$remaining kcal left"
+                    "$remaining $unit left"
                 } else {
-                    "${-remaining} kcal over"
+                    "${-remaining} $unit over"
                 },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -65,13 +68,14 @@ fun CaloriesInfo(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun PrevCaloriesInfo() {
+private fun NutritionInfoPreview() {
     ResponsiveAppTheme {
-        CaloriesInfo(
-            consumedCalories = 320f,
-            targetCalories = 300,
+        NutritionInfo(
+            consumed = 1_850f,
+            target = 2_400,
+            unit = "kcal",
         )
     }
 }

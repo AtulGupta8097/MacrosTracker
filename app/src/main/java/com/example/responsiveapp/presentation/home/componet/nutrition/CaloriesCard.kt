@@ -77,10 +77,10 @@ fun CaloriesCard(
                             onLogFoodClick = onLogFoodClick,
                             modifier = Modifier.weight(1f),
                         )
-//
-//                        CaloriesProgressRing(
-//                            progress = progress,
-//                        )
+
+                        CaloriesProgressRing(
+                            progress = progress,
+                        )
                     }
 
                 } else {
@@ -93,17 +93,17 @@ fun CaloriesCard(
                         ),
                     ) {
 
-//                        CaloriesProgressRing(
-//                            progress = progress,
-//                        )
-//
-//                        CaloriesDetails(
-//                            consumedCalories = consumedCalories,
-//                            targetCalories = targetCalories,
-//                            progress = progress,
-//                            onLogFoodClick = onLogFoodClick,
-//                            modifier = Modifier.fillMaxWidth(),
-//                        )
+                        CaloriesProgressRing(
+                            progress = progress,
+                        )
+
+                        CaloriesDetails(
+                            consumedCalories = consumedCalories,
+                            targetCalories = targetCalories,
+                            progress = progress,
+                            onLogFoodClick = onLogFoodClick,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
             }

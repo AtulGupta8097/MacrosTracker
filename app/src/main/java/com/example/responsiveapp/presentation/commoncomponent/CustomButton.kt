@@ -69,7 +69,7 @@ fun CustomButton(
 
 @Preview
 @Composable
-private fun CustomButtonPRev() {
+private fun CustomButtonPrev() {
     ResponsiveAppTheme { 
         CustomButton(text = "Button", onClick = { /*TODO*/ })
     }

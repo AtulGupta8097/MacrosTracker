@@ -26,9 +26,10 @@ fun CaloriesDetails(
         ),
     ) {
 
-        CaloriesInfo(
-            consumedCalories = consumedCalories,
-            targetCalories = targetCalories,
+        NutritionInfo(
+            consumed = consumedCalories,
+            target = targetCalories,
+            unit = "kcal",
         )
 
         LinearProgress(
