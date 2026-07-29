@@ -70,13 +70,13 @@ fun CaloriesCard(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
 
-//                        CaloriesDetails(
-//                            consumedCalories = consumedCalories,
-//                            targetCalories = targetCalories,
-//                            progress = progress,
-//                            onLogFoodClick = onLogFoodClick,
-//                            modifier = Modifier.weight(1f),
-//                        )
+                        CaloriesDetails(
+                            consumedCalories = consumedCalories,
+                            targetCalories = targetCalories,
+                            progress = progress,
+                            onLogFoodClick = onLogFoodClick,
+                            modifier = Modifier.weight(1f),
+                        )
 //
 //                        CaloriesProgressRing(
 //                            progress = progress,
