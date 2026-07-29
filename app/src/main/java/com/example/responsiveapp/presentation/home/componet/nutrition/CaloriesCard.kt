@@ -1,0 +1,112 @@
+package com.example.responsiveapp.presentation.home.componet.nutrition
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.responsiveapp.presentation.ui.theme.spacing
+
+@Composable
+fun CaloriesCard(
+    consumedCalories: Float,
+    targetCalories: Int,
+    onLogFoodClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val progress = remember(
+        consumedCalories,
+        targetCalories,
+    ) {
+        if (targetCalories > 0) {
+            (consumedCalories / targetCalories).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                MaterialTheme.spacing.md,
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                MaterialTheme.spacing.sm,
+            ),
+        ) {
+
+            CaloriesHeader()
+
+            BoxWithConstraints {
+
+                val isWideLayout =
+                    maxWidth >= 260.dp
+
+                if (isWideLayout) {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            MaterialTheme.spacing.md,
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+//                        CaloriesDetails(
+//                            consumedCalories = consumedCalories,
+//                            targetCalories = targetCalories,
+//                            progress = progress,
+//                            onLogFoodClick = onLogFoodClick,
+//                            modifier = Modifier.weight(1f),
+//                        )
+//
+//                        CaloriesProgressRing(
+//                            progress = progress,
+//                        )
+                    }
+
+                } else {
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(
+                            MaterialTheme.spacing.md,
+                        ),
+                    ) {
+
+//                        CaloriesProgressRing(
+//                            progress = progress,
+//                        )
+//
+//                        CaloriesDetails(
+//                            consumedCalories = consumedCalories,
+//                            targetCalories = targetCalories,
+//                            progress = progress,
+//                            onLogFoodClick = onLogFoodClick,
+//                            modifier = Modifier.fillMaxWidth(),
+//                        )
+                    }
+                }
+            }
+        }
+    }
+}
