@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,14 +33,18 @@ fun CaloriesDetails(
             unit = "kcal",
         )
 
-        LinearProgress(
-            progress = progress,
-        )
+//        LinearProgress(
+//            progress = progress,
+//        )
 
         CustomButton(
             modifier = Modifier.fillMaxWidth(),
             text = "Log Food",
             imageVector = Icons.Default.Add,
+            buttonColors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
             onClick = onLogFoodClick,
 
         )

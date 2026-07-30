@@ -127,7 +127,7 @@ fun CaloriesProgressRing(
 
         Text(
             text = percentageLabel,
-            style = MaterialTheme.typography.headlineLarge
+            style = MaterialTheme.typography.titleMedium
                 .copy(
                     fontWeight = FontWeight.Bold,
                 ),

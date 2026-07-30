@@ -1,6 +1,7 @@
 package com.example.responsiveapp.presentation.home.componet.nutrition
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -77,10 +80,14 @@ fun CaloriesCard(
                             onLogFoodClick = onLogFoodClick,
                             modifier = Modifier.weight(1f),
                         )
+                        Box(
+                            modifier = Modifier.weight(0.6f),
+                        ) {
+                            CaloriesProgressRing(
+                                progress = progress,
+                            )
 
-                        CaloriesProgressRing(
-                            progress = progress,
-                        )
+                        }
                     }
 
                 } else {
@@ -108,5 +115,17 @@ fun CaloriesCard(
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewCaloriesCard() {
+    ResponsiveAppTheme {
+        CaloriesCard(
+            consumedCalories = 1_340f,
+            targetCalories = 1_863,
+            onLogFoodClick = {},
+        )
     }
 }
