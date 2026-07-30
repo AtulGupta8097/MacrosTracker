@@ -33,9 +33,9 @@ fun CaloriesDetails(
             unit = "kcal",
         )
 
-//        LinearProgress(
-//            progress = progress,
-//        )
+        LinearProgress(
+            progress = progress,
+        )
 
         CustomButton(
             modifier = Modifier.fillMaxWidth(),
