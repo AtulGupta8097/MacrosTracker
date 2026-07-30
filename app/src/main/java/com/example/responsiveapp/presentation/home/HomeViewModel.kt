@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummaryForDateUseCase
+import com.example.responsiveapp.domain.use_case.foodlog.ObserveFoodLogsForDateUseCase
 import com.example.responsiveapp.domain.use_case.profile.ObserveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val observeDailySummaryForDateUseCase: ObserveDailySummaryForDateUseCase,
+    private val observeFoodLogsForDateUseCase: ObserveFoodLogsForDateUseCase,
 ) : ViewModel() {
 
     private val today = DateUtils.today()
@@ -49,6 +51,7 @@ class HomeViewModel @Inject constructor(
     init {
         observeUserProfile()
         observeDailySummary()
+        observeFoodLogs()
     }
 
     private fun observeUserProfile() {
@@ -71,6 +74,21 @@ class HomeViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         dailySummary = summary
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun observeFoodLogs() {
+        selectedDateFlow
+            .flatMapLatest { date ->
+                observeFoodLogsForDateUseCase(date)
+            }
+            .onEach { foodLogs ->
+                _state.update { state ->
+                    state.copy(
+                        foodLogs = foodLogs
                     )
                 }
             }
