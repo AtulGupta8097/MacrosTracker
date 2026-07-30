@@ -37,16 +37,16 @@ fun NutritionProgressSection(
         ),
     ) {
 
-//        CaloriesCard(
-//            consumedCalories = consumed.calories,
-//            targetCalories = target.calories,
-//            onLogFoodClick = onLogFoodClick,
-//        )
-//
-//        MacroProgressGrid(
-//            target = target,
-//            consumed = consumed,
-//        )
+        CaloriesCard(
+            consumedCalories = consumed.calories,
+            targetCalories = target.calories,
+            onLogFoodClick = onLogFoodClick,
+        )
+
+        MacroProgressGrid(
+            target = target,
+            consumed = consumed,
+        )
     }
 }
 
