@@ -47,3 +47,5 @@ val ProteinColor = Color(0xFF4A90D9)
 val CarbsColor   = Color(0xFFF5A623)
 val FatColor     = Color(0xFFE8526A)
 val CaloriesColor = Color(0xFF6FCF97)
+val FiberColor   = Color(0xFF22C55E)
+

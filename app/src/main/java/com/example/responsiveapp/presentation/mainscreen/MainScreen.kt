@@ -205,6 +205,9 @@ private fun MainContent(
 
                                 },
                                 onSeeMoreProfile = {
+                                },
+                                onLogFoodClick = {
+                                    navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
                                 }
                             )
                         }
