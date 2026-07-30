@@ -3,6 +3,7 @@ package com.example.responsiveapp.data.repository
 import android.util.Log
 import com.example.responsiveapp.core.utils.DateUtils.toLocalDateKey
 import com.example.responsiveapp.data.local.dao.FoodLogDao
+import com.example.responsiveapp.data.mapper.toDomain
 import com.example.responsiveapp.data.mapper.toEntity
 import com.example.responsiveapp.data.mapper.toFirestoreDto
 import com.example.responsiveapp.data.remote.dto.firebase.FoodLogDto
@@ -11,6 +12,8 @@ import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.session.SessionManager
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +28,15 @@ class FoodLogRepositoryImpl @Inject constructor(
     override suspend fun logFood(foodLog: FoodLog) {
         foodLogDao.insertFoodLog(foodLog.toEntity())
     }
+
+    override fun observeFoodLogsForDate(date: Long): Flow<List<FoodLog>> =
+        foodLogDao
+            .getFoodLogsForDate(date)
+            .map { entities ->
+                entities.map { entity ->
+                    entity.toDomain()
+                }
+            }
 
     override suspend fun syncPending() {
 
