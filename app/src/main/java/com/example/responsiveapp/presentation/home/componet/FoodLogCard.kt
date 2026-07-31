@@ -1,7 +1,7 @@
 package com.example.responsiveapp.presentation.home.componet
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Grain
+import androidx.compose.material.icons.filled.Opacity
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -18,6 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,9 +31,12 @@ import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.core.utils.formatMacroValue
 import com.example.responsiveapp.domain.model.NutritionInfo
 import com.example.responsiveapp.domain.model.foodlog.FoodLog
+import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
+import com.example.responsiveapp.presentation.ui.theme.CarbsColor
+import com.example.responsiveapp.presentation.ui.theme.FatColor
+import com.example.responsiveapp.presentation.ui.theme.ProteinColor
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
-
 @Composable
 fun FoodLogCard(
     foodLog: FoodLog,
@@ -37,113 +45,127 @@ fun FoodLogCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        ),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp,
+            defaultElevation = 0.dp,
         ),
     ) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    MaterialTheme.spacing.sm,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.padding(
+                MaterialTheme.spacing.md,
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                MaterialTheme.spacing.sm,
+            ),
         ) {
 
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.12f,
-                        ),
-                        shape = RoundedCornerShape(
-                            MaterialTheme.spacing.xs,
-                        ),
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-
-                Icon(
-                    imageVector = Icons.Default.Restaurant,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(
-                        horizontal = MaterialTheme.spacing.sm,
-                    ),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
 
                 Text(
                     text = foodLog.foodName,
-                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
 
                 Text(
-                    text = "${DateUtils.formatTimeOfDay(foodLog.createdAt)} · ${foodLog.macroSummary()}",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = DateUtils.formatTimeOfDay(
+                        foodLog.createdAt,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
 
-            Column(
-                horizontalAlignment = Alignment.End,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    MaterialTheme.spacing.xs,
+                ),
             ) {
 
-                Text(
-                    text = foodLog.nutrition.calories.toInt().toString(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
+                Icon(
+                    imageVector = Icons.Default.Bolt,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = CaloriesColor,
                 )
 
                 Text(
-                    text = "kcal",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = "${foodLog.nutrition.calories.toInt()} kcal",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(
+                    MaterialTheme.spacing.lg,
+                ),
+            ) {
+
+                MacroItem(
+                    icon = Icons.Default.FitnessCenter,
+                    value = formatMacroValue(foodLog.nutrition.protein),
+                    tint = ProteinColor,
+                )
+
+                MacroItem(
+                    icon = Icons.Default.Grain,
+                    value = formatMacroValue(foodLog.nutrition.carbs),
+                    tint = CarbsColor,
+                )
+
+                MacroItem(
+                    icon = Icons.Default.Opacity,
+                    value = formatMacroValue(foodLog.nutrition.fat),
+                    tint = FatColor,
                 )
             }
         }
     }
 }
 
-private fun FoodLog.macroSummary(): String {
+@Composable
+private fun MacroItem(
+    icon: ImageVector,
+    value: String,
+    tint: Color,
+) {
 
-    val nutrition = nutrition
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(
+            4.dp,
+        ),
+    ) {
 
-    return buildString {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = tint,
+        )
 
-        append("P ")
-        append(formatMacroValue(nutrition.protein))
-        append("g")
-
-        append(" · ")
-
-        append("C ")
-        append(formatMacroValue(nutrition.carbs))
-        append("g")
-
-        append(" · ")
-
-        append("F ")
-        append(formatMacroValue(nutrition.fat))
-        append("g")
+        Text(
+            text = "${value}g",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = tint,
+        )
     }
 }
 
@@ -156,12 +178,12 @@ private fun FoodLogCardPreview() {
         FoodLogCard(
             foodLog = FoodLog(
                 id = "1",
-                foodName = "Grilled Chicken Breast",
+                foodName = "Chicken Thigh",
                 nutrition = NutritionInfo(
-                    calories = 248f,
-                    protein = 46.5f,
+                    calories = 209f,
+                    protein = 26f,
                     carbs = 0f,
-                    fat = 5.4f,
+                    fat = 11f,
                 ),
                 createdAt = System.currentTimeMillis(),
             ),

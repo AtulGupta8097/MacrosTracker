@@ -55,6 +55,7 @@ class HomeViewModel @Inject constructor(
         observeUserProfile()
         observeDailySummary()
         observeFoodLogs()
+        loadMacroTarget()
     }
 
     private fun observeUserProfile() {

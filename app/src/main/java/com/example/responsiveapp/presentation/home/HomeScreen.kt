@@ -2,6 +2,7 @@ package com.example.responsiveapp.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.responsiveapp.presentation.home.componet.FoodLogsSection
+import com.example.responsiveapp.presentation.home.componet.HealthMetricsSection
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
 import com.example.responsiveapp.presentation.home.componet.WeeklyDatePicker
 import com.example.responsiveapp.presentation.home.componet.nutrition.NutritionProgressSection
@@ -39,9 +41,6 @@ fun HomeScreen(
 
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(
-                MaterialTheme.spacing.md
-            )
         ) {
 
             HomeAppBar(
@@ -53,6 +52,9 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize(),
                 state = listState,
+                contentPadding = PaddingValues(
+                    vertical = MaterialTheme.spacing.md
+                ),
                 verticalArrangement = Arrangement.spacedBy(
                     MaterialTheme.spacing.md,
                 ),
@@ -82,6 +84,12 @@ fun HomeScreen(
                 item {
                     FoodLogsSection(
                         foodLogs = state.foodLogs,
+                    )
+                }
+                
+                item {
+                    HealthMetricsSection(
+                        macroTarget = state.macroTarget,
                     )
                 }
             }
