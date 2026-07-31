@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummaryForDateUseCase
 import com.example.responsiveapp.domain.use_case.foodlog.ObserveFoodLogsForDateUseCase
+import com.example.responsiveapp.domain.use_case.macrostarget.GetCurrentMacroTargetUseCase
 import com.example.responsiveapp.domain.use_case.profile.ObserveUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -24,6 +26,7 @@ class HomeViewModel @Inject constructor(
     private val observeUserProfileUseCase: ObserveUserProfileUseCase,
     private val observeDailySummaryForDateUseCase: ObserveDailySummaryForDateUseCase,
     private val observeFoodLogsForDateUseCase: ObserveFoodLogsForDateUseCase,
+    private val getCurrentMacroTargetUseCase: GetCurrentMacroTargetUseCase,
 ) : ViewModel() {
 
     private val today = DateUtils.today()
@@ -93,6 +96,18 @@ class HomeViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun loadMacroTarget() {
+        viewModelScope.launch {
+            val target = getCurrentMacroTargetUseCase()
+
+            _state.update { state ->
+                state.copy(
+                    macroTarget = target,
+                )
+            }
+        }
     }
 
     fun onDateSelected(date: Long) {
