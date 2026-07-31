@@ -16,8 +16,14 @@ object DateUtils {
     private val DATE_KEY_FORMATTER: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+    private val TIME_OF_DAY_FORMATTER: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("h:mm a")
+
     fun today(): Long =
         LocalDate.now(zone).toEpochMillis()
+
+    fun formatTimeOfDay(epochMillis: Long): String =
+        Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalTime().format(TIME_OF_DAY_FORMATTER)
 
     fun getWeekStart(date: Long): Long =
         date.toLocalDate().with(DayOfWeek.MONDAY).toEpochMillis()
