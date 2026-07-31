@@ -37,7 +37,7 @@ fun FoodLogsSection(
         )
 
         if (foodLogs.isEmpty()) {
-//            EmptyFoodLogsState()
+            EmptyFoodLogsState()
         } else {
             foodLogs.forEach { foodLog ->
 //                FoodLogCard(

@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.responsiveapp.presentation.home.componet.FoodLogsSection
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
 import com.example.responsiveapp.presentation.home.componet.WeeklyDatePicker
 import com.example.responsiveapp.presentation.home.componet.nutrition.NutritionProgressSection
@@ -75,6 +76,12 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         dailySummary = state.dailySummary,
                         onLogFoodClick = onLogFoodClick,
+                    )
+                }
+
+                item {
+                    FoodLogsSection(
+                        foodLogs = state.foodLogs,
                     )
                 }
             }
