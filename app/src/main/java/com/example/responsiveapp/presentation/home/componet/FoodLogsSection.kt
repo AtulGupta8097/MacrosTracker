@@ -40,9 +40,9 @@ fun FoodLogsSection(
             EmptyFoodLogsState()
         } else {
             foodLogs.forEach { foodLog ->
-//                FoodLogCard(
-//                    foodLog = foodLog,
-//                )
+                FoodLogCard(
+                    foodLog = foodLog,
+                )
             }
         }
     }
