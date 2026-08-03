@@ -12,8 +12,13 @@ data class DateItemUiModel(
     val isFuture: Boolean,
 )
 
+data class WeekUiState(
+    val weekStartDate: Long = 0L,
+    val days: List<DateItemUiModel> = emptyList(),
+)
+
 @Immutable
 data class DatePickerUiState(
-    val days: List<DateItemUiModel> = emptyList(),
+    val week: WeekUiState,
     val isCurrentWeek: Boolean = true,
 )

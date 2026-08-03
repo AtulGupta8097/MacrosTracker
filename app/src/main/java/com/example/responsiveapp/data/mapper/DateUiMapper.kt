@@ -3,6 +3,7 @@ package com.example.responsiveapp.data.mapper
 import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.presentation.home.model.DateItemUiModel
 import com.example.responsiveapp.presentation.home.model.DatePickerUiState
+import com.example.responsiveapp.presentation.home.model.WeekUiState
 
 data class DateSelectionState(
     val selectedDate: Long,
@@ -24,7 +25,10 @@ fun DateSelectionState.toDatePickerUiState(): DatePickerUiState {
     }
 
     return DatePickerUiState(
-        days = days,
+        week = WeekUiState(
+            weekStartDate = weekStartDate,
+            days = days,
+        ),
         isCurrentWeek = DateUtils.isCurrentWeek(weekStartDate),
     )
 }
