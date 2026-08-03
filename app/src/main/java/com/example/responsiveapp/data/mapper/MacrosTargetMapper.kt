@@ -7,15 +7,16 @@ import com.example.responsiveapp.domain.model.macros.MacroTarget
 
 fun MacroTarget.toEntity() =
     MacroTargetEntity(
-    id = id,
-    targets = targets,
-    bmr = bmr,
-    tdee = tdee,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    syncStatus = syncStatus,
-    retryCount = retryCount,
-    lastSyncAttempt = lastSyncAttempt
+        id = id,
+        targets = targets,
+        bmr = bmr,
+        tdee = tdee,
+        bmi = bmi,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        syncStatus = syncStatus,
+        retryCount = retryCount,
+        lastSyncAttempt = lastSyncAttempt
 )
 
 fun MacroTargetEntity.toDomain() =
@@ -24,6 +25,7 @@ fun MacroTargetEntity.toDomain() =
     targets = targets,
     bmr = bmr,
     tdee = tdee,
+        bmi = bmi,
     createdAt = createdAt,
     updatedAt = updatedAt,
     syncStatus = syncStatus,
@@ -40,6 +42,7 @@ fun MacroTargetDto.toEntity(
         targets = targets,
         bmr = bmr,
         tdee = tdee,
+        bmi = bmi,
         createdAt = createdAt,
         updatedAt = updatedAt,
         syncStatus = syncStatus,
@@ -53,6 +56,7 @@ fun MacroTargetEntity.toFirestoreDto() =
         targets = targets,
         bmr = bmr,
         tdee = tdee,
+        bmi = bmi,
         createdAt = createdAt,
         updatedAt = updatedAt
     )

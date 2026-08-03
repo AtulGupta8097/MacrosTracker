@@ -8,6 +8,7 @@ data class MacroTarget(
     val targets: NutritionTargets,
     val bmr: Int,
     val tdee: Int,
+    val bmi: Float,
     val createdAt: Long,
     val updatedAt: Long,
     val syncStatus: SyncStatus = SyncStatus.PENDING,

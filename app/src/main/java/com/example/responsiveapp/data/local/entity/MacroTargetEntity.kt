@@ -19,6 +19,8 @@ data class MacroTargetEntity(
 
     val tdee: Int,
 
+    val bmi: Float,
+
     val createdAt: Long,
 
     val syncStatus: SyncStatus = SyncStatus.PENDING,

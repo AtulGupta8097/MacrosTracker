@@ -1,19 +1,20 @@
 package com.example.responsiveapp.presentation.home
 
 import androidx.compose.runtime.Immutable
-import com.example.responsiveapp.domain.model.DailySummary
-import com.example.responsiveapp.domain.model.UserProfile
-import com.example.responsiveapp.domain.model.foodlog.FoodLog
-import com.example.responsiveapp.domain.model.macros.MacroTarget
+import com.example.responsiveapp.presentation.home.model.AppBarUiState
+import com.example.responsiveapp.presentation.home.model.DatePickerUiState
+import com.example.responsiveapp.presentation.home.model.HealthMetricsUiState
+import com.example.responsiveapp.presentation.home.model.InsightsUiState
+import com.example.responsiveapp.presentation.home.model.NutritionUiState
+import com.example.responsiveapp.presentation.home.model.RecentMealsUiState
 
 @Immutable
 data class HomeUiState(
-    val userProfile: UserProfile? = null,
-    val selectedDate: Long = 0L,
-    val weekStartDate: Long = 0L,
-    val weekDays: List<Long> = emptyList(),
-    val dailySummary: DailySummary? = null,
-    val foodLogs: List<FoodLog> = emptyList(),
-    val macroTarget: MacroTarget? = null,
     val isLoading: Boolean = true,
+    val appBar: AppBarUiState = AppBarUiState(),
+    val datePicker: DatePickerUiState = DatePickerUiState(),
+    val nutrition: NutritionUiState = NutritionUiState(),
+    val healthMetrics: HealthMetricsUiState = HealthMetricsUiState(),
+    val recentMeals: RecentMealsUiState = RecentMealsUiState(),
+    val insights: InsightsUiState = InsightsUiState(),
 )

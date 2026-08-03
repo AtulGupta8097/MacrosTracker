@@ -26,26 +26,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Grain
+import com.example.responsiveapp.presentation.home.model.MacroProgressUiModel
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun MacroProgressCard(
-    icon: ImageVector,
-    label: String,
-    consumedGrams: Float,
-    targetGrams: Int,
-    accentColor: Color,
+    macro: MacroProgressUiModel,
     modifier: Modifier = Modifier,
 ) {
-
-    val progress =
-        if (targetGrams > 0) {
-            (consumedGrams / targetGrams).coerceIn(0f, 1f)
-        } else {
-            0f
-        }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -68,20 +58,20 @@ fun MacroProgressCard(
         ) {
 
             MacroHeader(
-                icon = icon,
-                label = label,
-                accentColor = accentColor,
+                icon = macro.icon,
+                label = macro.label,
+                accentColor = macro.accentColor,
             )
 
             NutritionInfo(
-                consumed = consumedGrams,
-                target = targetGrams,
-                unit = "g",
+                consumedText = macro.consumedText,
+                targetText = macro.targetText,
+                remainingText = macro.remainingText,
             )
 
             LinearProgress(
-                progress = progress,
-                progressColor = accentColor,
+                progress = macro.progress,
+                progressColor = macro.accentColor,
             )
         }
     }
@@ -131,11 +121,16 @@ private fun MacroHeader(
 private fun MacroProgressCardPreview() {
     ResponsiveAppTheme {
         MacroProgressCard(
-            icon = Icons.Default.Grain,
-            label = "Carbs",
-            consumedGrams = 145f,
-            targetGrams = 220,
-            accentColor = CarbsColor,
+            macro = MacroProgressUiModel(
+                key = "carbs",
+                icon = Icons.Default.Grain,
+                label = "Carbs",
+                consumedText = "145",
+                targetText = " / 220 g",
+                remainingText = "75 g left",
+                progress = 0.66f,
+                accentColor = CarbsColor,
+            )
         )
     }
 }

@@ -12,6 +12,8 @@ data class MacroTargetDto(
 
     val tdee: Int = 0,
 
+    val bmi: Float = 0f,
+
     val createdAt: Long = 0L,
 
     val updatedAt: Long = 0L

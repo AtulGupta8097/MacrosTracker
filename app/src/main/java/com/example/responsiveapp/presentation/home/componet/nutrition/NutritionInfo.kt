@@ -12,18 +12,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
-import kotlin.math.roundToInt
 
 @Composable
 fun NutritionInfo(
-    consumed: Float,
-    target: Int,
-    unit: String,
     modifier: Modifier = Modifier,
+    consumedText: String,
+    targetText: String,
+    remainingText: String,
 ) {
-    val remaining =
-        (target - consumed)
-            .roundToInt()
 
     Column(
         modifier = modifier,
@@ -34,7 +30,7 @@ fun NutritionInfo(
         ) {
 
             Text(
-                text = consumed.roundToInt().toString(),
+                text = consumedText,
                 style = MaterialTheme.typography.headlineMedium
                     .copy(
                         fontWeight = FontWeight.Bold,
@@ -43,7 +39,7 @@ fun NutritionInfo(
             )
 
             Text(
-                text = " / $target $unit",
+                text = targetText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(
@@ -53,12 +49,7 @@ fun NutritionInfo(
         }
 
         Text(
-            text =
-                if (remaining >= 0) {
-                    "$remaining $unit left"
-                } else {
-                    "${-remaining} $unit over"
-                },
+            text = remainingText,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(
@@ -73,9 +64,9 @@ fun NutritionInfo(
 private fun NutritionInfoPreview() {
     ResponsiveAppTheme {
         NutritionInfo(
-            consumed = 1_850f,
-            target = 2_400,
-            unit = "kcal",
+            consumedText = "1850",
+            targetText = " / 2400 kcal",
+            remainingText = "550 kcal left",
         )
     }
 }

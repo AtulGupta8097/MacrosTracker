@@ -3,21 +3,28 @@ package com.example.responsiveapp.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.DateUtils
+import com.example.responsiveapp.data.mapper.DateSelectionState
+import com.example.responsiveapp.data.mapper.toDatePickerUiState
+import kotlinx.coroutines.flow.combine
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummaryForDateUseCase
+import com.example.responsiveapp.presentation.home.mapper.toHealthMetricsUiState
+import com.example.responsiveapp.presentation.home.mapper.toNutritionUiState
+import com.example.responsiveapp.presentation.home.mapper.toRecentMealsUiState
 import com.example.responsiveapp.domain.use_case.foodlog.ObserveFoodLogsForDateUseCase
 import com.example.responsiveapp.domain.use_case.macrostarget.GetCurrentMacroTargetUseCase
 import com.example.responsiveapp.domain.use_case.profile.ObserveUserProfileUseCase
+import com.example.responsiveapp.presentation.home.mapper.toAppBarUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -31,8 +38,8 @@ class HomeViewModel @Inject constructor(
 
     private val today = DateUtils.today()
 
-    private val _state = MutableStateFlow(
-        HomeUiState(
+    private val _dateState = MutableStateFlow(
+        DateSelectionState(
             selectedDate = today,
             weekStartDate = DateUtils.getWeekStart(today),
             weekDays = DateUtils.getCurrentWeekDates(
@@ -40,6 +47,8 @@ class HomeViewModel @Inject constructor(
             ),
         )
     )
+
+    private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
     /**
@@ -47,72 +56,53 @@ class HomeViewModel @Inject constructor(
      * should observe this flow.
      */
     private val selectedDateFlow =
-        state
+        _dateState
             .map { it.selectedDate }
             .distinctUntilChanged()
 
-    init {
-        observeUserProfile()
-        observeDailySummary()
-        observeFoodLogs()
-        loadMacroTarget()
-    }
+    private val foodLogsFlow =
+        selectedDateFlow.flatMapLatest(observeFoodLogsForDateUseCase::invoke)
 
-    private fun observeUserProfile() {
-        observeUserProfileUseCase()
-            .onEach { profile ->
-                _state.update {
-                    it.copy(
-                        userProfile = profile,
-                        isLoading = false,
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-    }
+    private val dailySummaryFlow =
+        selectedDateFlow.flatMapLatest(observeDailySummaryForDateUseCase::invoke)
 
-    private fun observeDailySummary() {
-        selectedDateFlow
-            .flatMapLatest(observeDailySummaryForDateUseCase::invoke)
-            .onEach { summary ->
-                _state.update {
-                    it.copy(
-                        dailySummary = summary
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    private fun observeFoodLogs() {
-        selectedDateFlow
-            .flatMapLatest { date ->
-                observeFoodLogsForDateUseCase(date)
-            }
-            .onEach { foodLogs ->
-                _state.update { state ->
-                    state.copy(
-                        foodLogs = foodLogs
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    private fun loadMacroTarget() {
-        viewModelScope.launch {
-            val target = getCurrentMacroTargetUseCase()
-
-            _state.update { state ->
-                state.copy(
-                    macroTarget = target,
-                )
-            }
+    private val macroTargetFlow =
+        flow {
+            emit(getCurrentMacroTargetUseCase())
         }
+
+    init {
+      observeHomeState()
     }
+
+    private fun observeHomeState() {
+        combine(
+            _dateState,
+            observeUserProfileUseCase(),
+            foodLogsFlow,
+            dailySummaryFlow,
+            macroTargetFlow,
+        ) { dateNav, profile, foodLogs, dailySummary, macroTarget ->
+
+            HomeUiState(
+                isLoading = false,
+                appBar = profile.toAppBarUiState(),
+                datePicker = dateNav.toDatePickerUiState(),
+                nutrition = dailySummary.toNutritionUiState(),
+                healthMetrics = macroTarget.toHealthMetricsUiState(),
+                recentMeals = foodLogs.toRecentMealsUiState(),
+            )
+        }
+            .onEach { newState ->
+                _state.value = newState
+            }
+            .launchIn(viewModelScope)
+    }
+
+
 
     fun onDateSelected(date: Long) {
-        _state.update { current ->
+        _dateState.update { current ->
 
             val weekStart =
                 if (DateUtils.isDateInWeek(date, current.weekStartDate)) {
@@ -130,7 +120,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onPreviousWeek() {
-        _state.update { current ->
+        _dateState.update { current ->
             current.copyForWeek(
                 DateUtils.getPreviousWeek(current.weekStartDate)
             )
@@ -138,7 +128,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onNextWeek() {
-        _state.update { current ->
+        _dateState.update { current ->
 
             if (DateUtils.isCurrentWeek(current.weekStartDate)) {
                 return@update current
@@ -150,25 +140,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onGoToToday() {
-        val currentWeekStart = DateUtils.getWeekStart(today)
-
-        _state.update {
-            it.copy(
-                selectedDate = today,
-                weekStartDate = currentWeekStart,
-                weekDays = DateUtils.getCurrentWeekDates(currentWeekStart),
-            )
-        }
-    }
 
     /**
      * Creates a new state for another week while preserving
      * the currently selected weekday.
      */
-    private fun HomeUiState.copyForWeek(
+    private fun DateSelectionState.copyForWeek(
         newWeekStart: Long,
-    ): HomeUiState {
+    ): DateSelectionState {
 
         val weekdayIndex =
             DateUtils.getSelectedWeekdayIndex(

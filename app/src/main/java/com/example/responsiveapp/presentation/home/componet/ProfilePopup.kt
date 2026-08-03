@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.example.responsiveapp.domain.model.UserProfile
+import com.example.responsiveapp.presentation.home.model.ProfileUiModel
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 private val PopupMaxWidth = 340.dp
@@ -50,7 +50,7 @@ private const val PopupTargetScale = 0.85f
 
 @Composable
 fun ProfilePopup(
-    userProfile: UserProfile?,
+    profile: ProfileUiModel?,
     containerMaxWidth: Dp,
     onDismiss: () -> Unit,
     onEditProfile: () -> Unit,
@@ -108,7 +108,7 @@ fun ProfilePopup(
                 ) {
 
                     ProfileHeader(
-                        userProfile = userProfile
+                        profile = profile
                     )
 
                     HorizontalDivider(
@@ -117,7 +117,7 @@ fun ProfilePopup(
                         )
                     )
 
-                    userProfile?.let { profile ->
+                    profile?.let { profile ->
 
                         Column(
                             verticalArrangement = Arrangement.spacedBy(
@@ -128,37 +128,37 @@ fun ProfilePopup(
                             InfoRow(
                                 icon = Icons.Default.CalendarToday,
                                 label = "Age",
-                                value = "${profile.age} years"
+                                value = profile.ageText
                             )
 
                             InfoRow(
                                 icon = Icons.Default.Height,
                                 label = "Height",
-                                value = "${profile.height.toInt()} cm"
+                                value = profile.heightText
                             )
 
                             InfoRow(
                                 icon = Icons.Default.MonitorWeight,
                                 label = "Weight",
-                                value = "${profile.weight} kg"
+                                value = profile.weightText
                             )
 
                             InfoRow(
                                 icon = Icons.Default.TrackChanges,
                                 label = "Target Weight",
-                                value = "${profile.targetWeight} kg"
+                                value = profile.targetWeightText
                             )
 
                             InfoRow(
                                 icon = Icons.Default.Bolt,
                                 label = "Work Intensity",
-                                value = profile.activityLevel.label
+                                value = profile.activityLabel
                             )
 
                             InfoRow(
                                 icon = Icons.Default.Flag,
                                 label = "Goal",
-                                value = profile.goal.label
+                                value = profile.goalLabel
                             )
                         }
                     }

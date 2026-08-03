@@ -5,5 +5,6 @@ import com.example.responsiveapp.domain.model.NutritionTargets
 data class CalculationResult(
     val targets: NutritionTargets,
     val bmr: Int,
-    val tdee: Int
+    val tdee: Int,
+    val bmi: Float
 )

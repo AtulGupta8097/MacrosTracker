@@ -27,19 +27,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.responsiveapp.core.utils.DateUtils
-import com.example.responsiveapp.core.utils.formatMacroValue
-import com.example.responsiveapp.domain.model.NutritionInfo
-import com.example.responsiveapp.domain.model.foodlog.FoodLog
+import com.example.responsiveapp.presentation.home.model.FoodLogUiModel
 import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
 import com.example.responsiveapp.presentation.ui.theme.ProteinColor
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
+
 @Composable
 fun FoodLogCard(
-    foodLog: FoodLog,
+    meal: FoodLogUiModel,
     modifier: Modifier = Modifier,
 ) {
 
@@ -73,7 +71,7 @@ fun FoodLogCard(
             ) {
 
                 Text(
-                    text = foodLog.foodName,
+                    text =meal.name,
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -82,9 +80,7 @@ fun FoodLogCard(
                 )
 
                 Text(
-                    text = DateUtils.formatTimeOfDay(
-                        foodLog.createdAt,
-                    ),
+                    text =  meal.timeText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -105,7 +101,7 @@ fun FoodLogCard(
                 )
 
                 Text(
-                    text = "${foodLog.nutrition.calories.toInt()} kcal",
+                    text = meal.caloriesText,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                 )
@@ -119,19 +115,19 @@ fun FoodLogCard(
 
                 MacroItem(
                     icon = Icons.Default.FitnessCenter,
-                    value = formatMacroValue(foodLog.nutrition.protein),
+                    value = meal.proteinText,
                     tint = ProteinColor,
                 )
 
                 MacroItem(
                     icon = Icons.Default.Grain,
-                    value = formatMacroValue(foodLog.nutrition.carbs),
+                    value = meal.carbsText,
                     tint = CarbsColor,
                 )
 
                 MacroItem(
                     icon = Icons.Default.Opacity,
-                    value = formatMacroValue(foodLog.nutrition.fat),
+                    value = meal.fatText,
                     tint = FatColor,
                 )
             }
@@ -174,18 +170,15 @@ private fun MacroItem(
 private fun FoodLogCardPreview() {
 
     ResponsiveAppTheme {
-
         FoodLogCard(
-            foodLog = FoodLog(
+            meal = FoodLogUiModel(
                 id = "1",
-                foodName = "Chicken Thigh",
-                nutrition = NutritionInfo(
-                    calories = 209f,
-                    protein = 26f,
-                    carbs = 0f,
-                    fat = 11f,
-                ),
-                createdAt = System.currentTimeMillis(),
+                name = "Chicken Thigh",
+                timeText = "12:40 PM",
+                caloriesText = "209 kcal",
+                proteinText = "26g",
+                carbsText = "0g",
+                fatText = "11g",
             ),
         )
     }

@@ -9,12 +9,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.responsiveapp.core.utils.DateUtils
+import com.example.responsiveapp.presentation.home.model.DateItemUiModel
 
 @Composable
 fun WeeklyDateRow(
-    weekDays: List<Long>,
-    selectedDate: Long,
+    days: List<DateItemUiModel>,
     dimensions: DatePickerDimensions,
     onDateSelected: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -32,16 +31,10 @@ fun WeeklyDateRow(
             ),
         ) {
 
-            weekDays.forEach { date ->
+            days.forEach { day ->
 
                 DateItem(
-                    date = date,
-                    isSelected = DateUtils.isSameDay(
-                        date,
-                        selectedDate,
-                    ),
-                    isToday = DateUtils.isToday(date),
-                    isFuture = DateUtils.isFutureDate(date),
+                    day = day,
                     dimensions = dimensions,
                     onClick = onDateSelected,
                 )

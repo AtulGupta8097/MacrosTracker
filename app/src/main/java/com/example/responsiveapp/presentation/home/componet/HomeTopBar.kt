@@ -25,17 +25,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.R
-import com.example.responsiveapp.domain.model.ActivityLevel
-import com.example.responsiveapp.domain.model.Gender
-import com.example.responsiveapp.domain.model.Goal
-import com.example.responsiveapp.domain.model.UserProfile
+import com.example.responsiveapp.presentation.home.model.AppBarUiState
+import com.example.responsiveapp.presentation.home.model.ProfileUiModel
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun HomeAppBar(
     modifier: Modifier = Modifier,
-    userProfile: UserProfile?,
+    appBarUiState: AppBarUiState,
     onEditProfile: () -> Unit = {},
     onSeeMoreProfile: () -> Unit = {},
 ) {
@@ -81,7 +79,7 @@ fun HomeAppBar(
             )
 
             ProfileAvatar(
-                name = userProfile?.name.orEmpty(),
+                initial = appBarUiState.avatarInitial,
                 size = 40.dp,
                 showBorder = true,
                 onClick = {
@@ -93,7 +91,7 @@ fun HomeAppBar(
         if (showProfilePopup) {
 
             ProfilePopup(
-                userProfile = userProfile,
+                profile = appBarUiState.profile,
                 containerMaxWidth = containerMacWidth,
                 onDismiss = {
                     showProfilePopup = false
@@ -116,16 +114,20 @@ fun HomeAppBar(
 @Composable
 private fun HomeAppBarPreview() {
     ResponsiveAppTheme {
-
         HomeAppBar(
-            userProfile = UserProfile(
-                name = "Atul",
-                gender = Gender.MALE,
-                age = 24,
-                height = 175f,
-                weight = 70f,
-                activityLevel = ActivityLevel.MODERATE,
-                goal = Goal.MAINTAIN
+            appBarUiState = AppBarUiState(
+                avatarInitial = "A",
+                profile = ProfileUiModel(
+                    name = "Atul",
+                    ageText = "24 years",
+                    heightText = "175 cm",
+                    weightText = "70.0 kg",
+                    targetWeightText = "75.0 kg",
+                    activityLabel = "Moderately Active",
+                    goalLabel = "Maintain Weight",
+                    avatarInitial = "A",
+
+                )
             )
         )
     }

@@ -10,14 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.responsiveapp.domain.model.NutritionInfo
-import com.example.responsiveapp.domain.model.foodlog.FoodLog
+import com.example.responsiveapp.presentation.home.model.FoodLogUiModel
+import com.example.responsiveapp.presentation.home.model.RecentMealsUiState
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun FoodLogsSection(
-    foodLogs: List<FoodLog>,
+    recentMealsUiState: RecentMealsUiState,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -36,12 +36,12 @@ fun FoodLogsSection(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        if (foodLogs.isEmpty()) {
+        if (recentMealsUiState.isEmpty) {
             EmptyFoodLogsState()
         } else {
-            foodLogs.forEach { foodLog ->
+            recentMealsUiState.meals.forEach { meal ->
                 FoodLogCard(
-                    foodLog = foodLog,
+                    meal = meal,
                 )
             }
         }
@@ -53,28 +53,26 @@ fun FoodLogsSection(
 private fun PrevFoodLogsSection() {
     ResponsiveAppTheme {
         FoodLogsSection(
-            foodLogs = listOf(
-                FoodLog(
-                    id = "1",
-                    foodName = "Grilled chicken breast",
-                    nutrition = NutritionInfo(
-                        calories = 248f,
-                        protein = 46.5f,
-                        carbs = 0f,
-                        fat = 5.4f,
+            recentMealsUiState = RecentMealsUiState(
+                meals = listOf(
+                    FoodLogUiModel(
+                        id = "1",
+                        name = "Grilled chicken breast",
+                        timeText = "1:15 PM",
+                        caloriesText = "248 kcal",
+                        proteinText = "46.5g",
+                        carbsText = "0g",
+                        fatText = "5.4g",
                     ),
-                    createdAt = System.currentTimeMillis(),
-                ),
-                FoodLog(
-                    id = "2",
-                    foodName = "Brown rice bowl",
-                    nutrition = NutritionInfo(
-                        calories = 320f,
-                        protein = 8f,
-                        carbs = 62f,
-                        fat = 4f,
+                    FoodLogUiModel(
+                        id = "2",
+                        name = "Brown rice bowl",
+                        timeText = "2:05 PM",
+                        caloriesText = "320 kcal",
+                        proteinText = "8g",
+                        carbsText = "62g",
+                        fatText = "4g",
                     ),
-                    createdAt = System.currentTimeMillis(),
                 ),
             ),
         )

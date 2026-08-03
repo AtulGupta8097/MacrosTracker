@@ -10,14 +10,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.responsiveapp.presentation.commoncomponent.CustomButton
+import com.example.responsiveapp.presentation.home.model.CaloriesUiModel
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun CaloriesDetails(
     modifier: Modifier = Modifier,
-    consumedCalories: Float,
-    targetCalories: Int,
-    progress: Float,
+    calories: CaloriesUiModel,
     onLogFoodClick: () -> Unit,
 ) {
     Column(
@@ -28,13 +27,13 @@ fun CaloriesDetails(
     ) {
 
         NutritionInfo(
-            consumed = consumedCalories,
-            target = targetCalories,
-            unit = "kcal",
+            consumedText = calories.consumedText,
+            targetText = calories.targetText,
+            remainingText = calories.remainingText,
         )
 
         LinearProgress(
-            progress = progress,
+            progress = calories.progress,
         )
 
         CustomButton(

@@ -11,31 +11,20 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.responsiveapp.presentation.home.model.CaloriesUiModel
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun CaloriesCard(
-    consumedCalories: Float,
-    targetCalories: Int,
-    onLogFoodClick: () -> Unit,
     modifier: Modifier = Modifier,
+    calories: CaloriesUiModel,
+    onLogFoodClick: () -> Unit,
 ) {
-    val progress = remember(
-        consumedCalories,
-        targetCalories,
-    ) {
-        if (targetCalories > 0) {
-            (consumedCalories / targetCalories).coerceIn(0f, 1f)
-        } else {
-            0f
-        }
-    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -74,9 +63,7 @@ fun CaloriesCard(
                     ) {
 
                         CaloriesDetails(
-                            consumedCalories = consumedCalories,
-                            targetCalories = targetCalories,
-                            progress = progress,
+                            calories = calories,
                             onLogFoodClick = onLogFoodClick,
                             modifier = Modifier.weight(1f),
                         )
@@ -84,7 +71,7 @@ fun CaloriesCard(
                             modifier = Modifier.weight(0.6f),
                         ) {
                             CaloriesProgressRing(
-                                progress = progress,
+                                progress = calories.progress,
                             )
 
                         }
@@ -101,13 +88,11 @@ fun CaloriesCard(
                     ) {
 
                         CaloriesProgressRing(
-                            progress = progress,
+                            progress = calories.progress,
                         )
 
                         CaloriesDetails(
-                            consumedCalories = consumedCalories,
-                            targetCalories = targetCalories,
-                            progress = progress,
+                            calories = calories,
                             onLogFoodClick = onLogFoodClick,
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -123,8 +108,12 @@ fun CaloriesCard(
 private fun PreviewCaloriesCard() {
     ResponsiveAppTheme {
         CaloriesCard(
-            consumedCalories = 1_340f,
-            targetCalories = 1_863,
+            calories = CaloriesUiModel(
+                consumedText = "1340",
+                targetText = " / 1863 kcal",
+                remainingText = "523 kcal left",
+                progress = 0.72f,
+            ),
             onLogFoodClick = {},
         )
     }

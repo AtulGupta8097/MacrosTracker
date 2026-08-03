@@ -10,11 +10,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.responsiveapp.presentation.home.componet.FoodLogsSection
 import com.example.responsiveapp.presentation.home.componet.HealthMetricsSection
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
@@ -31,7 +31,7 @@ fun HomeScreen(
     onLogFoodClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     Surface(
@@ -44,7 +44,7 @@ fun HomeScreen(
         ) {
 
             HomeAppBar(
-                userProfile = state.userProfile,
+                appBarUiState = state.appBar,
                 onEditProfile = onEditProfile,
                 onSeeMoreProfile = onSeeMoreProfile
             )
@@ -63,33 +63,30 @@ fun HomeScreen(
                 item {
                     WeeklyDatePicker(
                         modifier = Modifier.fillMaxWidth(),
-                        weekStartDate = state.weekStartDate,
-                        weekDays = state.weekDays,
-                        selectedDate = state.selectedDate,
+                        datePickerUiState = state.datePicker,
                         onDateSelected = viewModel::onDateSelected,
                         onPreviousWeek = viewModel::onPreviousWeek,
                         onNextWeek = viewModel::onNextWeek,
-                        onGoToToday = viewModel::onGoToToday,
                     )
                 }
 
                 item {
                     NutritionProgressSection(
                         modifier = Modifier.fillMaxWidth(),
-                        dailySummary = state.dailySummary,
+                        nutritionUiState = state.nutrition,
                         onLogFoodClick = onLogFoodClick,
                     )
                 }
 
                 item {
                     FoodLogsSection(
-                        foodLogs = state.foodLogs,
+                        recentMealsUiState = state.recentMeals,
                     )
                 }
-                
+
                 item {
                     HealthMetricsSection(
-                        macroTarget = state.macroTarget,
+                        healthMetricsUiState = state.healthMetrics,
                     )
                 }
             }

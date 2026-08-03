@@ -39,7 +39,7 @@ import com.example.responsiveapp.data.local.entity.UserProfileEntity
         MacroTargetEntity::class,
         UserProfileEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false,
 )
 @TypeConverters(

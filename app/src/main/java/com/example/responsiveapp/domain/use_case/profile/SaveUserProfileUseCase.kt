@@ -29,6 +29,7 @@ class SaveUserProfileUseCase @Inject constructor(
                 targets = result.targets,
                 bmr = result.bmr,
                 tdee = result.tdee,
+                bmi = result.bmi,
                 createdAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis()
             )

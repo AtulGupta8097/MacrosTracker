@@ -10,18 +10,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.responsiveapp.domain.model.UserProfile
+import com.example.responsiveapp.presentation.home.model.ProfileUiModel
 import com.example.responsiveapp.presentation.ui.theme.spacing
 private val AvatarSize = 52.dp
 
 @Composable
 fun ProfileHeader(
-    userProfile: UserProfile?,
+    profile: ProfileUiModel?,
     modifier: Modifier = Modifier,
 ) {
     val displayName =
-        userProfile?.name?.ifBlank { null }
+        profile?.name?.ifBlank { null }
             ?: "Your Profile"
+    val avatarInitial = profile?.avatarInitial ?: "?"
+
 
     Row(
         modifier = modifier,
@@ -30,7 +32,7 @@ fun ProfileHeader(
     ) {
 
         ProfileAvatar(
-            name = userProfile?.name,
+            initial = avatarInitial,
             size = AvatarSize,
             showBorder = true
         )

@@ -1,5 +1,6 @@
 package com.example.responsiveapp.domain.calculator
 
+import com.example.responsiveapp.core.utils.HealthMetricsUtils
 import com.example.responsiveapp.domain.model.ActivityLevel
 import com.example.responsiveapp.domain.model.Gender
 import com.example.responsiveapp.domain.model.Goal
@@ -78,6 +79,8 @@ class MacroCalculator @Inject constructor() {
             sodiumLimit = sodiumLimit
         )
 
-        return CalculationResult(targets = targets, bmr = bmr, tdee = tdee)
+        val bmi = HealthMetricsUtils.calculateBmi(profile.height, profile.weight) ?: 0f
+
+        return CalculationResult(targets = targets, bmr = bmr, tdee = tdee,bmi = bmi)
     }
 }

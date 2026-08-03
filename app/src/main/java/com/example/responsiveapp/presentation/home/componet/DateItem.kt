@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -26,9 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.responsiveapp.core.utils.DateUtils
+import com.example.responsiveapp.presentation.home.model.DateItemUiModel
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
-import com.example.responsiveapp.presentation.ui.theme.spacing
 
 private val SelectedElevation = 6.dp
 private val ContentVerticalPadding = 8.dp
@@ -36,25 +34,14 @@ private val WeekdayFontSize = 11.sp
 
 @Composable
 fun DateItem(
-    date: Long,
-    isSelected: Boolean,
-    isToday: Boolean,
-    isFuture: Boolean,
+    day: DateItemUiModel,
     dimensions: DatePickerDimensions,
     onClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
-    val weekday = remember(date) {
-        DateUtils.formatWeekdayLabel(date)
-    }
-
-    val day = remember(date) {
-        DateUtils.formatDayOfMonth(date)
-    }
-
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) {
+        targetValue = if (day.isSelected) {
             MaterialTheme.colorScheme.primary
         } else {
             MaterialTheme.colorScheme.background
@@ -64,7 +51,7 @@ fun DateItem(
     )
 
     val contentColor =
-        if (isSelected) {
+        if (day.isSelected) {
             MaterialTheme.colorScheme.onPrimary
         } else {
             MaterialTheme.colorScheme.onSurface
@@ -84,15 +71,15 @@ fun DateItem(
                     height = dimensions.itemHeight,
                 )
                 .alpha(
-                    if (isFuture) 0.35f else 1f
+                    if (day.isFuture) 0.35f else 1f
                 )
                 .shadow(
-                    elevation = if (isSelected) SelectedElevation else 0.dp,
+                    elevation = if (day.isSelected) SelectedElevation else 0.dp,
                     shape = shape,
                 )
                 .border(
-                    width = if (isToday && !isSelected) 1.dp else 0.dp,
-                    color = if (isToday && !isSelected) {
+                    width = if (day.isToday && !day.isSelected) 1.dp else 0.dp,
+                    color = if (day.isToday && !day.isSelected) {
                         MaterialTheme.colorScheme.primary.copy(
                             alpha = 0.85f
                         )
@@ -103,7 +90,7 @@ fun DateItem(
                 )
                 .clip(shape)
                 .background(
-                    if (isSelected) {
+                    if (day.isSelected) {
                         Brush.verticalGradient(
                             listOf(
                                 MaterialTheme.colorScheme.primary,
@@ -120,8 +107,8 @@ fun DateItem(
                     }
                 )
                 .clickable(
-                    enabled = !isFuture,
-                    onClick = { onClick(date) },
+                    enabled = !day.isFuture,
+                    onClick = { onClick(day.epochMillis) },
                 )
                 .padding(
                     horizontal = dimensions.contentPadding,
@@ -132,17 +119,17 @@ fun DateItem(
         ) {
 
             Text(
-                text = weekday,
+                text = day.weekdayLabel,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = WeekdayFontSize,
                 ),
                 color = contentColor.copy(
-                    alpha = if (isSelected) 0.85f else 0.55f,
+                    alpha = if (day.isSelected) 0.85f else 0.55f,
                 ),
             )
 
             Text(
-                text = day,
+                text = day.dayLabel,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = contentColor,
@@ -157,10 +144,14 @@ fun DateItem(
 private fun PrevDateIem() {
     ResponsiveAppTheme {
         DateItem(
-            date = System.currentTimeMillis(),
-            isSelected = false,
-            isToday = true,
-            isFuture = false,
+            day = DateItemUiModel(
+                epochMillis = System.currentTimeMillis(),
+                weekdayLabel = "Mon",
+                dayLabel = "20",
+                isSelected = false,
+                isToday = true,
+                isFuture = false,
+            ),
             dimensions = calculateDatePickerDimensions(
                 availableWidth = 360.dp
             ),
