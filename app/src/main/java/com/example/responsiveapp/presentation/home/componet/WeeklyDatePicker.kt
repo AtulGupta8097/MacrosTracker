@@ -44,7 +44,7 @@ fun WeeklyDatePicker(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = MaterialTheme.spacing.md)
-            .pointerInput(Unit) {
+            .pointerInput(datePickerUiState.isCurrentWeek) {
 
                 var dragAccumulator = 0f
 
@@ -89,7 +89,7 @@ fun WeeklyDatePicker(
             val dimension = calculateDatePickerDimensions(maxWidth)
 
             AnimatedContent(
-                targetState = datePickerUiState.week,
+                targetState = datePickerUiState.week.weekStartDate,
                 transitionSpec = {
                     (slideInHorizontally { it / 2 } + fadeIn())
                         .togetherWith(
@@ -97,10 +97,10 @@ fun WeeklyDatePicker(
                         )
                 },
                 label = "WeekAnimation",
-            ) { dateState ->
+            ) { _ ->
 
                 WeeklyDateRow(
-                    days = dateState.days,
+                    days = datePickerUiState.week.days,
                     dimensions = dimension,
                     onDateSelected = onDateSelected,
                 )

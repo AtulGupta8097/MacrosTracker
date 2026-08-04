@@ -17,7 +17,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +29,9 @@ import com.example.responsiveapp.presentation.ui.theme.FitnessOrange
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
+private const val ContentWeight = 0.72f
+private const val IllustrationWeight = 0.28f
+
 @Composable
 fun BmiCard(
     bmiText: String,
@@ -41,19 +43,27 @@ fun BmiCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp,
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(MaterialTheme.spacing.md),
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(ContentWeight),
+            ) {
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = "Body Mass Index",
                         style = MaterialTheme.typography.titleSmall,
@@ -65,10 +75,13 @@ fun BmiCard(
                         modifier = Modifier
                             .padding(start = MaterialTheme.spacing.xs)
                             .background(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                shape = RoundedCornerShape(50),
                             )
-                            .padding(horizontal = MaterialTheme.spacing.xs, vertical = 2.dp),
+                            .padding(
+                                horizontal = MaterialTheme.spacing.xs,
+                                vertical = 2.dp,
+                            ),
                     ) {
                         Text(
                             text = "BMI",
@@ -80,8 +93,8 @@ fun BmiCard(
                 }
 
                 Row(
-                    verticalAlignment = Alignment.Bottom,
                     modifier = Modifier.padding(top = MaterialTheme.spacing.sm),
+                    verticalAlignment = Alignment.Bottom,
                 ) {
                     Text(
                         text = bmiText,
@@ -89,41 +102,53 @@ fun BmiCard(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+
                     Text(
                         text = " kg/m²",
+                        modifier = Modifier.padding(
+                            bottom = MaterialTheme.spacing.xxs,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = MaterialTheme.spacing.xxs),
                     )
                 }
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(top = MaterialTheme.spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
 
                     Box(
-                        modifier = Modifier
-                            .background(statusColor.copy(alpha = 0.12f), RoundedCornerShape(50)),
+                        modifier = Modifier.background(
+                            color = statusColor.copy(alpha = 0.12f),
+                            shape = RoundedCornerShape(50),
+                        ),
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(
                                 horizontal = MaterialTheme.spacing.sm,
                                 vertical = MaterialTheme.spacing.xxs,
                             ),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
+
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
-                                    .background(statusColor, CircleShape)
+                                    .background(
+                                        color = statusColor,
+                                        shape = CircleShape,
+                                    ),
                             )
+
                             Text(
                                 text = bmiStatus.label,
+                                modifier = Modifier.padding(
+                                    start = MaterialTheme.spacing.xxs,
+                                ),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = statusColor,
                                 fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(start = MaterialTheme.spacing.xxs),
                             )
                         }
                     }
@@ -131,7 +156,10 @@ fun BmiCard(
                     VerticalDivider(
                         modifier = Modifier
                             .padding(horizontal = MaterialTheme.spacing.sm)
-                            .size(width = 1.dp, height = 24.dp)
+                            .size(
+                                width = 1.dp,
+                                height = 24.dp,
+                            ),
                     )
 
                     Column {
@@ -140,6 +168,7 @@ fun BmiCard(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+
                         Text(
                             text = "18.5 – 24.9",
                             style = MaterialTheme.typography.labelMedium,
@@ -150,19 +179,12 @@ fun BmiCard(
                 }
             }
 
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .blur(28.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f), CircleShape)
-                )
-                BodySilhouette(tint = MaterialTheme.colorScheme.primary, alpha = 0.28f)
-            }
+            BodyIllustration(
+                modifier = Modifier.weight(IllustrationWeight),
+            )
         }
     }
 }
-
 
 @Composable
 private fun BmiStatus.toColor(): Color = when (this) {
@@ -177,6 +199,23 @@ private fun BmiStatus.toColor(): Color = when (this) {
 @Composable
 private fun PrevBmiCard() {
     ResponsiveAppTheme {
-        BmiCard(bmiText = "24.2", bmiStatus = BmiStatus.HEALTHY)
+        BmiCard(
+            bmiText = "24.2",
+            bmiStatus = BmiStatus.HEALTHY,
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    widthDp = 700,
+)
+@Composable
+private fun PrevBmiCardTablet() {
+    ResponsiveAppTheme {
+        BmiCard(
+            bmiText = "24.2",
+            bmiStatus = BmiStatus.HEALTHY,
+        )
     }
 }
