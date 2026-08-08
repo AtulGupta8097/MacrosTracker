@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Grain
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.responsiveapp.presentation.home.model.MacroProgressUiModel
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
@@ -110,8 +111,11 @@ private fun MacroHeader(
 
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f, fill = false),
+            style = MaterialTheme.typography.titleMedium
+                .copy(fontWeight = FontWeight.Bold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
