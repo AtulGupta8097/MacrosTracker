@@ -10,6 +10,7 @@ import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.dao.UserProfileDao
+import com.example.responsiveapp.data.local.dao.WeightLogDao
 import com.example.responsiveapp.data.local.database.MacrosTrackerDatabase
 import dagger.Module
 import dagger.Provides
@@ -80,5 +81,12 @@ object DatabaseModule {
         database: MacrosTrackerDatabase
     ): UserProfileDao =
         database.userProfileDao()
+
+    @Provides
+    @Singleton
+    fun provideWeightLogDao(
+        database: MacrosTrackerDatabase
+    ): WeightLogDao =
+        database.weightLogDao()
 
 }

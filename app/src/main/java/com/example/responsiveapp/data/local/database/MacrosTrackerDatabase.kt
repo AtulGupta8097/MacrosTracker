@@ -15,6 +15,7 @@ import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.dao.UserProfileDao
+import com.example.responsiveapp.data.local.dao.WeightLogDao
 import com.example.responsiveapp.data.local.entity.CustomFoodEntity
 import com.example.responsiveapp.data.local.entity.DailySummaryEntity
 import com.example.responsiveapp.data.local.entity.FoodDetailEntity
@@ -25,6 +26,7 @@ import com.example.responsiveapp.data.local.entity.MyMealsEntity
 import com.example.responsiveapp.data.local.entity.SearchQueryEntity
 import com.example.responsiveapp.data.local.entity.SearchResultCrossRef
 import com.example.responsiveapp.data.local.entity.UserProfileEntity
+import com.example.responsiveapp.data.local.entity.WeightLogEntity
 
 @Database(
     entities = [
@@ -37,9 +39,10 @@ import com.example.responsiveapp.data.local.entity.UserProfileEntity
         SearchQueryEntity::class,
         SearchResultCrossRef::class,
         MacroTargetEntity::class,
-        UserProfileEntity::class
+        UserProfileEntity::class,
+        WeightLogEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = false,
 )
 @TypeConverters(
@@ -58,6 +61,9 @@ abstract class MacrosTrackerDatabase : RoomDatabase() {
     abstract fun macroTargetDao(): MacroTargetDao
     abstract fun dailySummaryDao(): DailySummaryDao
     abstract fun userProfileDao(): UserProfileDao
+
+    abstract fun weightLogDao(): WeightLogDao
+
 
     companion object {
         const val DATABASE_NAME = "macros_tracker_db"

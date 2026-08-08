@@ -21,6 +21,13 @@ interface FoodLogDao {
     fun getFoodLogsForDate(date: Long): Flow<List<FoodLogEntity>>
 
     @Query("""
+        SELECT DISTINCT date
+        FROM food_logs
+        ORDER BY date DESC
+    """)
+    fun observeLoggedDates(): Flow<List<Long>>
+
+    @Query("""
         SELECT *
         FROM food_logs
         WHERE id = :logId

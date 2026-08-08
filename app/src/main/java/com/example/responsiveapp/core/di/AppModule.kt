@@ -12,6 +12,7 @@ import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
 import com.example.responsiveapp.data.local.dao.UserProfileDao
+import com.example.responsiveapp.data.local.dao.WeightLogDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.data.repository.AuthRepositoryImp
 import com.example.responsiveapp.data.repository.CustomFoodRepositoryImpl
@@ -21,6 +22,7 @@ import com.example.responsiveapp.data.repository.FoodRepositoryImpl
 import com.example.responsiveapp.data.repository.MacroTargetRepositoryImpl
 import com.example.responsiveapp.data.repository.MyMealRepositoryImpl
 import com.example.responsiveapp.data.repository.UserProfileRepositoryImpl
+import com.example.responsiveapp.data.repository.WeightRepositoryImpl
 import com.example.responsiveapp.domain.repository.AuthRepository
 import com.example.responsiveapp.domain.repository.CustomFoodRepository
 import com.example.responsiveapp.domain.repository.DailySummaryRepository
@@ -29,6 +31,7 @@ import com.example.responsiveapp.domain.repository.FoodRepository
 import com.example.responsiveapp.domain.repository.MacroTargetRepository
 import com.example.responsiveapp.domain.repository.MyMealRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
+import com.example.responsiveapp.domain.repository.WeightRepository
 import com.example.responsiveapp.domain.session.SessionManager
 import com.example.responsiveapp.domain.session.SessionManagerImpl
 import com.example.responsiveapp.sync.SyncScheduler
@@ -176,7 +179,20 @@ object AppModule {
     ): WorkManager {
         return WorkManager.getInstance(context)
     }
+
+    @Singleton
+    @Provides
+    fun provideWeightRepository(
+        dao: WeightLogDao,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager,
+        scheduler: SyncScheduler,
+    ): WeightRepository =
+        WeightRepositoryImpl(dao, firestore, sessionManager, scheduler)
+
 }
+
+
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
