@@ -9,6 +9,8 @@ interface FoodLogRepository {
 
     fun observeFoodLogsForDate(date: Long): Flow<List<FoodLog>>
 
+    fun observeLoggedDates(): Flow<List<Long>>
+
     suspend fun syncPending()
 
     suspend fun fetchAndCacheAll()

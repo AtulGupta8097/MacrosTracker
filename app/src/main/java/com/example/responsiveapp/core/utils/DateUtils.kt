@@ -93,4 +93,10 @@ object DateUtils {
 
     private fun LocalDate.toEpochMillis(): Long =
         atStartOfDay(zone).toInstant().toEpochMilli()
+
+    fun minusDays(date: Long, days: Long): Long =
+
+        date.toLocalDate().minusDays(days).toEpochMillis()
+    fun daysBetween(start: Long, end: Long): Long =
+        java.time.temporal.ChronoUnit.DAYS.between(start.toLocalDate(), end.toLocalDate())
 }

@@ -38,6 +38,9 @@ class FoodLogRepositoryImpl @Inject constructor(
                 }
             }
 
+    override fun observeLoggedDates(): Flow<List<Long>> =
+        foodLogDao.observeLoggedDates()
+
     override suspend fun syncPending() {
 
         val pending = foodLogDao.getPending()
