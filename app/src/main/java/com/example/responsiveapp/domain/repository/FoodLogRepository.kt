@@ -11,6 +11,8 @@ interface FoodLogRepository {
 
     fun observeLoggedDates(): Flow<List<Long>>
 
+    fun observeMealCountsBetweenDates(startDate: Long, endDate: Long): Flow<Map<Long, Int>>
+
     suspend fun syncPending()
 
     suspend fun fetchAndCacheAll()

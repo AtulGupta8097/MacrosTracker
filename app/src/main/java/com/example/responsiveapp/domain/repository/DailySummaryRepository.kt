@@ -11,6 +11,7 @@ interface DailySummaryRepository {
     suspend fun update(summary: DailySummary)
 
     fun observeForDate(date: Long): Flow<DailySummary?>
+    fun observeSummariesBetweenDates(startDate: Long, endDate: Long): Flow<List<DailySummary>>
 
     suspend fun getForDate(date: Long): DailySummary?
 

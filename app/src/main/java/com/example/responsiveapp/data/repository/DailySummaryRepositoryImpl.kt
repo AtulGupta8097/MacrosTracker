@@ -35,6 +35,14 @@ class DailySummaryRepositoryImpl @Inject constructor(
     override fun observeForDate(date: Long): Flow<DailySummary?> =
         dao.observeForDate(date).map { it?.toDomain() }
 
+    override fun observeSummariesBetweenDates(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<DailySummary>> =
+        dao.observeBetweenDates(startDate, endDate)
+            .map { entities -> entities.map { it.toDomain() } }
+
+
     override suspend fun getForDate(date: Long): DailySummary? =
         dao.getForDate(date)?.toDomain()
 

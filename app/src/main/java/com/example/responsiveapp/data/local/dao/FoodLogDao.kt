@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.responsiveapp.data.local.entity.DailyMealCount
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
 import com.example.responsiveapp.domain.model.SyncStatus
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,17 @@ interface FoodLogDao {
         ORDER BY createdAt DESC
     """)
     fun getFoodLogsForDate(date: Long): Flow<List<FoodLogEntity>>
+
+    @Query("""
+        SELECT date, COUNT(*) as count
+        FROM food_logs
+        WHERE date BETWEEN :startDate AND :endDate
+        GROUP BY date
+    """)
+    fun observeMealCountsBetweenDates(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<List<DailyMealCount>>
 
     @Query("""
         SELECT DISTINCT date

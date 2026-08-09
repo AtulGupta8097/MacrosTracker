@@ -41,6 +41,14 @@ class FoodLogRepositoryImpl @Inject constructor(
     override fun observeLoggedDates(): Flow<List<Long>> =
         foodLogDao.observeLoggedDates()
 
+    override fun observeMealCountsBetweenDates(
+        startDate: Long,
+        endDate: Long,
+    ): Flow<Map<Long, Int>> =
+        foodLogDao
+            .observeMealCountsBetweenDates(startDate, endDate)
+            .map { rows -> rows.associate { it.date to it.count } }
+
     override suspend fun syncPending() {
 
         val pending = foodLogDao.getPending()

@@ -18,6 +18,13 @@ interface DailySummaryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllFromRemote(entities: List<DailySummaryEntity>)
 
+    @Query("""
+    SELECT * FROM daily_summaries
+    WHERE date BETWEEN :startDate AND :endDate
+    ORDER BY date ASC
+""")
+    fun observeBetweenDates(startDate: Long, endDate: Long): Flow<List<DailySummaryEntity>>
+
     @Update
     suspend fun update(entity: DailySummaryEntity)
 
