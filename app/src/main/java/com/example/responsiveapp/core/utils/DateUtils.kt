@@ -16,6 +16,9 @@ object DateUtils {
     private val DATE_KEY_FORMATTER: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+    private val SHORT_DATE_FORMATTER: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("MMM d")
+
     private val TIME_OF_DAY_FORMATTER: DateTimeFormatter =
         DateTimeFormatter.ofPattern("h:mm a")
 
@@ -35,6 +38,10 @@ object DateUtils {
 
     fun getPreviousWeek(weekStart: Long): Long =
         weekStart.toLocalDate().minusWeeks(1).toEpochMillis()
+
+
+    fun formatShortDate(date: Long): String =
+        date.toLocalDate().format(SHORT_DATE_FORMATTER)
 
     fun getNextWeek(weekStart: Long): Long =
         weekStart.toLocalDate().plusWeeks(1).toEpochMillis()
