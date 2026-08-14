@@ -8,4 +8,5 @@ data class ProgressUiState(
     val range: ProgressRange = ProgressRange.WEEK,
     val selectedMacro: MacroType = MacroType.PROTEIN,
     val nutritionOverview: NutritionOverviewUiState = NutritionOverviewUiState(),
+    val macroDistribution: MacroDistributionUiState = MacroDistributionUiState(),
 )

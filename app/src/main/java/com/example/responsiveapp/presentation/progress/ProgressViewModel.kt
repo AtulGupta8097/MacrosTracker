@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummariesBetweenDatesUseCase
+import com.example.responsiveapp.presentation.progress.mapper.toMacroDistributionUiState
 import com.example.responsiveapp.presentation.progress.mapper.toNutritionOverviewUiState
 import com.example.responsiveapp.presentation.progress.model.MacroType
 import com.example.responsiveapp.presentation.progress.model.ProgressRange
@@ -92,6 +93,7 @@ class ProgressViewModel @Inject constructor(
                     currentState.copy(
                         isLoading = false,
                         nutritionOverview = nutritionOverview,
+                        macroDistribution = nutritionOverview.average.toMacroDistributionUiState(),
                     )
                 }
             }
