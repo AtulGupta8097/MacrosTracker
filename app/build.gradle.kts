@@ -118,4 +118,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
 
+    //YChart
+    implementation(libs.ycharts)
+
 }

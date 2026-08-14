@@ -13,6 +13,7 @@ hilt = "2.58"
 ksp = "2.1.0-1.0.29"
 retrofit = "3.0.0"
 okhttp = "5.3.2"
+ycharts = "2.1.0"
 googleGmsGoogleServices = "4.4.4"
 firebaseAuth = "24.0.1"
 kotlinxSerializationJson = "1.9.0"
@@ -64,6 +65,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version = "1.4.0" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version = "1.4.0" }
+ycharts = { module = "co.yml:ycharts", version.ref = "ycharts" }
 
 
 

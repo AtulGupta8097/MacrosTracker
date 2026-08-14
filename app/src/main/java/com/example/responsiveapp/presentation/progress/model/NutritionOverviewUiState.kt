@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class NutritionOverviewUiState(
-    val selectedMacro: MacroType = MacroType.PROTEIN,
     val average: NutritionAverageUiState = NutritionAverageUiState(),
     val chartData: List<MacroChartPointUi> = emptyList(),
 )

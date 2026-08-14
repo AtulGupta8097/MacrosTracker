@@ -11,6 +11,7 @@ import com.example.responsiveapp.presentation.progress.model.ProgressUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -44,21 +45,19 @@ class ProgressViewModel @Inject constructor(
 
     fun onMacroSelected(macroType: MacroType) {
         _state.update { currentState ->
-
             currentState.copy(
-                nutritionOverview =
-                    currentState.nutritionOverview.copy(
-                        selectedMacro = macroType,
-                    ),
+                selectedMacro = macroType,
             )
         }
     }
 
     private fun observeProgressState() {
 
-        _state
+        val rangeFlow = _state
             .map { it.range }
             .distinctUntilChanged()
+
+        val summariesFlow = rangeFlow
             .flatMapLatest { range ->
 
                 val startDate = DateUtils.minusDays(
@@ -71,19 +70,28 @@ class ProgressViewModel @Inject constructor(
                     endDate = today,
                 )
             }
-            .onEach { summaries ->
+
+        val selectedMacroFlow = _state
+            .map { it.selectedMacro }
+            .distinctUntilChanged()
+
+        combine(
+            rangeFlow,
+            selectedMacroFlow,
+            summariesFlow,
+        ) { range, selectedMacro, summaries ->
+
+            summaries.toNutritionOverviewUiState(
+                range = range,
+                selectedMacro = selectedMacro,
+            )
+        }
+            .onEach { nutritionOverview ->
 
                 _state.update { currentState ->
-
                     currentState.copy(
                         isLoading = false,
-                        nutritionOverview =
-                            summaries.toNutritionOverviewUiState(
-                                selectedMacro =
-                                    currentState
-                                        .nutritionOverview
-                                        .selectedMacro,
-                            ),
+                        nutritionOverview = nutritionOverview,
                     )
                 }
             }

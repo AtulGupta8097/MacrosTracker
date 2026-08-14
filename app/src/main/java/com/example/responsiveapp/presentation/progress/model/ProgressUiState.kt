@@ -6,5 +6,6 @@ import androidx.compose.runtime.Immutable
 data class ProgressUiState(
     val isLoading: Boolean = true,
     val range: ProgressRange = ProgressRange.WEEK,
+    val selectedMacro: MacroType = MacroType.PROTEIN,
     val nutritionOverview: NutritionOverviewUiState = NutritionOverviewUiState(),
 )

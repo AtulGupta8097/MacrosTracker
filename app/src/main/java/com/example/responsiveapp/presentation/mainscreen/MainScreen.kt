@@ -48,6 +48,7 @@ import com.example.responsiveapp.presentation.mainscreen.component.AddFoodBottom
 import com.example.responsiveapp.presentation.mainscreen.component.BottomNav
 import com.example.responsiveapp.presentation.mainscreen.component.Navbar
 import com.example.responsiveapp.presentation.mainscreen.component.SideNav
+import com.example.responsiveapp.presentation.progress.ProgressScreen
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
@@ -231,12 +232,6 @@ private fun MainContent(
                 )
             }
         }
-    }
-}
-@Composable
-fun ProgressScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text("Progress Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 
