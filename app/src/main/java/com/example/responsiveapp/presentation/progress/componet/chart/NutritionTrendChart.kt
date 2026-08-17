@@ -37,7 +37,7 @@ import kotlin.math.roundToInt
 
 private val ChartHeight = 220.dp
 private const val Y_AXIS_STEPS = 4
-private const val EnterAnimationDurationMs = 500
+private const val EnterAnimationDurationMs = 100
 
 @Composable
 fun NutritionTrendChart(

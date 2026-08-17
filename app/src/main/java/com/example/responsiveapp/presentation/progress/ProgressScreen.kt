@@ -15,6 +15,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.responsiveapp.presentation.progress.componet.NutritionOverviewSection
 import com.example.responsiveapp.presentation.progress.componet.ProgressHeader
 import com.example.responsiveapp.presentation.progress.componet.RangeSelector
+import com.example.responsiveapp.presentation.progress.componet.macrosdistribution.MacroDistributionSection
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -56,6 +57,13 @@ fun ProgressScreen(
                     range = state.range,
                     selectedMacro = state.selectedMacro,
                     onMacroSelected = viewModel::onMacroSelected,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item{
+                MacroDistributionSection(
+                    state = state.macroDistribution,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
