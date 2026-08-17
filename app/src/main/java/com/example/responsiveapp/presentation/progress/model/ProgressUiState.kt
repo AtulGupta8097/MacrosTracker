@@ -9,4 +9,6 @@ data class ProgressUiState(
     val selectedMacro: MacroType = MacroType.PROTEIN,
     val nutritionOverview: NutritionOverviewUiState = NutritionOverviewUiState(),
     val macroDistribution: MacroDistributionUiState = MacroDistributionUiState(),
+    val weightProgress: WeightProgressUiState = WeightProgressUiState(),
+    val isLogWeightDialogVisible: Boolean = false,
 )
