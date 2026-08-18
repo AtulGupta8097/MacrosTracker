@@ -4,11 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummariesBetweenDatesUseCase
+import com.example.responsiveapp.domain.use_case.weight.ObserveWeightBetweenDatesUseCase
+import com.example.responsiveapp.domain.use_case.weight.SaveWeightUseCase
 import com.example.responsiveapp.presentation.progress.mapper.toMacroDistributionUiState
 import com.example.responsiveapp.presentation.progress.mapper.toNutritionOverviewUiState
+import com.example.responsiveapp.presentation.progress.mapper.toWeightProgressUiState
+import com.example.responsiveapp.presentation.progress.model.MacroDistributionUiState
 import com.example.responsiveapp.presentation.progress.model.MacroType
+import com.example.responsiveapp.presentation.progress.model.NutritionOverviewUiState
 import com.example.responsiveapp.presentation.progress.model.ProgressRange
 import com.example.responsiveapp.presentation.progress.model.ProgressUiState
+import com.example.responsiveapp.presentation.progress.model.WeightProgressUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +25,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ProgressViewModel @Inject constructor(
-    private val observeDailySummariesBetweenDatesUseCase:
-    ObserveDailySummariesBetweenDatesUseCase,
+    private val observeDailySummariesBetweenDatesUseCase: ObserveDailySummariesBetweenDatesUseCase,
+    private val observeWeightBetweenDatesUseCase: ObserveWeightBetweenDatesUseCase,
+    private val saveWeightUseCase: SaveWeightUseCase,
 ) : ViewModel() {
 
     private val today = DateUtils.today()
@@ -52,6 +60,21 @@ class ProgressViewModel @Inject constructor(
         }
     }
 
+    fun onLogWeightClicked() {
+        _state.update { it.copy(isLogWeightDialogVisible = true) }
+    }
+
+    fun onDismissLogWeightDialog() {
+        _state.update { it.copy(isLogWeightDialogVisible = false) }
+    }
+
+    fun onLogWeight(weight: Float) {
+        viewModelScope.launch {
+            saveWeightUseCase(weight = weight, date = today)
+            _state.update { it.copy(isLogWeightDialogVisible = false) }
+        }
+    }
+
     private fun observeProgressState() {
 
         val rangeFlow = _state
@@ -72,6 +95,20 @@ class ProgressViewModel @Inject constructor(
                 )
             }
 
+        val weightLogsFlow = rangeFlow
+            .flatMapLatest { range ->
+
+                val startDate = DateUtils.minusDays(
+                    today,
+                    (range.days - 1).toLong(),
+                )
+
+                observeWeightBetweenDatesUseCase(
+                    startDate = startDate,
+                    endDate = today,
+                )
+            }
+
         val selectedMacroFlow = _state
             .map { it.selectedMacro }
             .distinctUntilChanged()
@@ -80,23 +117,37 @@ class ProgressViewModel @Inject constructor(
             rangeFlow,
             selectedMacroFlow,
             summariesFlow,
-        ) { range, selectedMacro, summaries ->
+            weightLogsFlow,
+        ) { range, selectedMacro, summaries, weightLogs->
 
-            summaries.toNutritionOverviewUiState(
+            val nutritionOverview = summaries.toNutritionOverviewUiState(
                 range = range,
                 selectedMacro = selectedMacro,
             )
+
+            ProgressSnapshot(
+                nutritionOverview = nutritionOverview,
+                macroDistribution = nutritionOverview.average.toMacroDistributionUiState(),
+                weightProgress = weightLogs.toWeightProgressUiState(),
+            )
         }
-            .onEach { nutritionOverview ->
+            .onEach { snapshot ->
 
                 _state.update { currentState ->
                     currentState.copy(
                         isLoading = false,
-                        nutritionOverview = nutritionOverview,
-                        macroDistribution = nutritionOverview.average.toMacroDistributionUiState(),
+                        nutritionOverview = snapshot.nutritionOverview,
+                        macroDistribution = snapshot.macroDistribution,
+                        weightProgress = snapshot.weightProgress,
                     )
                 }
             }
             .launchIn(viewModelScope)
     }
+
+    private data class ProgressSnapshot(
+        val nutritionOverview: NutritionOverviewUiState,
+        val macroDistribution: MacroDistributionUiState,
+        val weightProgress: WeightProgressUiState,
+    )
 }
