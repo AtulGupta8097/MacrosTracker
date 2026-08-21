@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 data class WeightProgressUiState(
     val hasData: Boolean = false,
     val points: List<WeightChartPointUi> = emptyList(),
-    val latestWeight: Float? = null,
+    val logCount: Int = 0,
 )
 
 @Immutable

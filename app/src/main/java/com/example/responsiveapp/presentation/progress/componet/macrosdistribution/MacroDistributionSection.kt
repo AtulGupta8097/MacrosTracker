@@ -1,11 +1,8 @@
 package com.example.responsiveapp.presentation.progress.componet.macrosdistribution
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,57 +31,29 @@ fun MacroDistributionSection(
             )
             .padding(MaterialTheme.spacing.md),
     ) {
-        val isCompact = maxWidth < 300.dp
+        val donutSize = (maxWidth * 0.6f).coerceIn(140.dp, 220.dp)
 
         Column {
             MacroDistributionHeader()
 
-            if (isCompact) {
-                // Very narrow screens
+            if (state.hasData) {
                 MacroDonutChart(
                     state = state,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(top = MaterialTheme.spacing.md)
-                        .size(170.dp),
+                        .size(donutSize),
                 )
 
-                MacroLegend(
-                    proteinGram = state.protein.grams,
-                    carbsGram = state.carbs.grams,
-                    fatGram = state.fats.grams,
-                    compact = true,
+                MacroStats(
+                    state = state,
                     modifier = Modifier.padding(top = MaterialTheme.spacing.md),
                 )
             } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = MaterialTheme.spacing.md),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.md),
-                ) {
-                    MacroDonutChart(
-                        state = state,
-                        modifier = Modifier
-                            .weight(1.2f)
-                            .aspectRatio(1f),
-                    )
-
-                    MacroLegend(
-                        proteinGram = state.protein.grams,
-                        carbsGram = state.carbs.grams,
-                        fatGram = state.fats.grams,
-                        compact = false,
-                        modifier = Modifier.weight(0.8f),
-                    )
-                }
+                MacroDistributionEmptyState(
+                    modifier = Modifier.padding(top = MaterialTheme.spacing.md),
+                )
             }
-
-            MacroStats(
-                state = state,
-                modifier = Modifier.padding(top = MaterialTheme.spacing.md),
-            )
         }
     }
 }
@@ -94,6 +63,7 @@ fun MacroDistributionSection(
 private fun MacroDistributionSectionPreview() {
     MacroDistributionSection(
         state = MacroDistributionUiState(
+            hasData = true,
             protein = MacroShareUiState(grams = 100, percentOfCalories = 10, calorieShare = 0.1f),
             carbs = MacroShareUiState(grams = 100, percentOfCalories = 80, calorieShare = 0.8f),
             fats = MacroShareUiState(grams = 100, percentOfCalories = 10, calorieShare = 0.1f),

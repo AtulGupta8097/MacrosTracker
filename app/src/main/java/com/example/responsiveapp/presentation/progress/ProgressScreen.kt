@@ -16,6 +16,8 @@ import com.example.responsiveapp.presentation.progress.componet.NutritionOvervie
 import com.example.responsiveapp.presentation.progress.componet.ProgressHeader
 import com.example.responsiveapp.presentation.progress.componet.RangeSelector
 import com.example.responsiveapp.presentation.progress.componet.macrosdistribution.MacroDistributionSection
+import com.example.responsiveapp.presentation.progress.componet.weight.LogWeightDialog
+import com.example.responsiveapp.presentation.progress.componet.weight.WeightProgressSection
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -67,6 +69,21 @@ fun ProgressScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+
+            item {
+                WeightProgressSection(
+                    state = state.weightProgress,
+                    onLogWeightClicked = viewModel::onLogWeightClicked,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
+        if (state.isLogWeightDialogVisible) {
+            LogWeightDialog(
+                onDismiss = viewModel::onDismissLogWeightDialog,
+                onConfirm = viewModel::onLogWeight,
+            )
         }
     }
 }

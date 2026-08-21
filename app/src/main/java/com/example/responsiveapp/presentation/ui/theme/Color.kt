@@ -49,3 +49,4 @@ val FatColor     = Color(0xFFE8526A)
 val CaloriesColor = Color(0xFF6FCF97)
 val FiberColor   = Color(0xFF22C55E)
 
+

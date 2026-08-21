@@ -16,6 +16,7 @@ fun NutritionAverageUiState.toMacroDistributionUiState(): MacroDistributionUiSta
     val totalCalories = proteinCalories + carbsCalories + fatCalories
 
     return MacroDistributionUiState(
+        hasData = totalCalories > 0,
         protein = macroShare(grams = protein, calories = proteinCalories, totalCalories = totalCalories),
         carbs = macroShare(grams = carbs, calories = carbsCalories, totalCalories = totalCalories),
         fats = macroShare(grams = fats, calories = fatCalories, totalCalories = totalCalories),

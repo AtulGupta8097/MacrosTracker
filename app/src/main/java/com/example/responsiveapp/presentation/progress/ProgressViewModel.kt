@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.DateUtils
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummariesBetweenDatesUseCase
-import com.example.responsiveapp.domain.use_case.weight.ObserveWeightBetweenDatesUseCase
+import com.example.responsiveapp.domain.use_case.weight.ObserveWeightHistoryUseCase
 import com.example.responsiveapp.domain.use_case.weight.SaveWeightUseCase
 import com.example.responsiveapp.presentation.progress.mapper.toMacroDistributionUiState
 import com.example.responsiveapp.presentation.progress.mapper.toNutritionOverviewUiState
@@ -31,7 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProgressViewModel @Inject constructor(
     private val observeDailySummariesBetweenDatesUseCase: ObserveDailySummariesBetweenDatesUseCase,
-    private val observeWeightBetweenDatesUseCase: ObserveWeightBetweenDatesUseCase,
+    private val observeWeightHistoryUseCase: ObserveWeightHistoryUseCase,
     private val saveWeightUseCase: SaveWeightUseCase,
 ) : ViewModel() {
 
@@ -95,19 +95,7 @@ class ProgressViewModel @Inject constructor(
                 )
             }
 
-        val weightLogsFlow = rangeFlow
-            .flatMapLatest { range ->
-
-                val startDate = DateUtils.minusDays(
-                    today,
-                    (range.days - 1).toLong(),
-                )
-
-                observeWeightBetweenDatesUseCase(
-                    startDate = startDate,
-                    endDate = today,
-                )
-            }
+        val weightLogsFlow = observeWeightHistoryUseCase()
 
         val selectedMacroFlow = _state
             .map { it.selectedMacro }
@@ -118,7 +106,7 @@ class ProgressViewModel @Inject constructor(
             selectedMacroFlow,
             summariesFlow,
             weightLogsFlow,
-        ) { range, selectedMacro, summaries, weightLogs->
+        ) { range, selectedMacro, summaries, weightLogs ->
 
             val nutritionOverview = summaries.toNutritionOverviewUiState(
                 range = range,

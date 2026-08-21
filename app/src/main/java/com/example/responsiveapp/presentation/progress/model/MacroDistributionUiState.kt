@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class MacroDistributionUiState(
+    val hasData: Boolean = false,
     val protein: MacroShareUiState = MacroShareUiState(),
     val carbs: MacroShareUiState = MacroShareUiState(),
     val fats: MacroShareUiState = MacroShareUiState(),

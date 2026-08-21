@@ -19,6 +19,6 @@ fun List<WeightLog>.toWeightProgressUiState(): WeightProgressUiState {
     return WeightProgressUiState(
         hasData = true,
         points = points,
-        latestWeight = sorted.last().weight,
+        logCount = points.size,
     )
 }

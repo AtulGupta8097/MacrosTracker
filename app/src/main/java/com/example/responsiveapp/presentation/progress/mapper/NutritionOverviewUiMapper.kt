@@ -37,7 +37,11 @@ fun List<DailySummary>.toNutritionOverviewUiState(
         summary.toMacroChartPointUi(date, selectedMacro)
     }
 
-    return NutritionOverviewUiState(average = average, chartData = chartData)
+    return NutritionOverviewUiState(
+        hasData = loggedSummaries.isNotEmpty(),
+        average = average,
+        chartData = chartData,
+    )
 }
 
 private fun List<DailySummary>.averageOf(selector: (DailySummary) -> Float): Int =

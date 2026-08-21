@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class NutritionOverviewUiState(
+    val hasData: Boolean = false,
     val average: NutritionAverageUiState = NutritionAverageUiState(),
     val chartData: List<MacroChartPointUi> = emptyList(),
 )
