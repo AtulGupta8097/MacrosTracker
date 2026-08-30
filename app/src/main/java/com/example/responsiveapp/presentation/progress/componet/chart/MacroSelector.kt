@@ -1,28 +1,50 @@
 package com.example.responsiveapp.presentation.progress.componet.chart
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Grain
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Opacity
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.progress.model.MacroType
+import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
 import com.example.responsiveapp.presentation.ui.theme.ProteinColor
 import com.example.responsiveapp.presentation.ui.theme.spacing
+
+private data class MacroChipSpec(
+    val type: MacroType,
+    val label: String,
+    val icon: ImageVector,
+    val color: Color,
+)
 
 @Composable
 fun MacroSelector(
@@ -30,64 +52,85 @@ fun MacroSelector(
     onMacroSelected: (MacroType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(50))
-            .padding(MaterialTheme.spacing.xxs),
+    val options = remember {
+        listOf(
+            MacroChipSpec(MacroType.CALORIES, "Calories", Icons.Filled.LocalFireDepartment, CaloriesColor),
+            MacroChipSpec(MacroType.PROTEIN, "Protein", Icons.Filled.FitnessCenter, ProteinColor),
+            MacroChipSpec(MacroType.CARBS, "Carbs", Icons.Filled.Grain, CarbsColor),
+            MacroChipSpec(MacroType.FATS, "Fat", Icons.Filled.Opacity, FatColor),
+        )
+    }
+
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(MaterialTheme.spacing.sm),
+        contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.xxs),
     ) {
-        MacroOption(
-            label = "Protein",
-            color = ProteinColor,
-            selected = selected == MacroType.PROTEIN,
-            onClick = { onMacroSelected(MacroType.PROTEIN) },
-            modifier = Modifier.weight(1f),
-        )
-        MacroOption(
-            label = "Carbs",
-            color = CarbsColor,
-            selected = selected == MacroType.CARBS,
-            onClick = { onMacroSelected(MacroType.CARBS) },
-            modifier = Modifier.weight(1f),
-        )
-        MacroOption(
-            label = "Fats",
-            color = FatColor,
-            selected = selected == MacroType.FATS,
-            onClick = { onMacroSelected(MacroType.FATS) },
-            modifier = Modifier.weight(1f),
-        )
+        items(options, key = { it.type }) { option ->
+            MacroChip(
+                spec = option,
+                selected = option.type == selected,
+                onClick = { onMacroSelected(option.type) },
+            )
+        }
     }
 }
 
 @Composable
-private fun MacroOption(
-    label: String,
-    color: Color,
+private fun MacroChip(
+    spec: MacroChipSpec,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    val background by animateColorAsState(
-        targetValue = if (selected) color else Color.Transparent,
-        label = "macroOptionBackground",
+    val backgroundColor by animateColorAsState(
+        targetValue = if (selected) spec.color else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        label = "chipBackground",
     )
-    val contentColor = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "chipContent",
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1f else 0.95f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "chipScale",
+    )
+    val elevation by animateDpAsState(
+        targetValue = if (selected) 6.dp else 0.dp,
+        label = "chipElevation",
+    )
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(background)
-            .clickable(onClick = onClick)
-            .padding(vertical = MaterialTheme.spacing.sm),
-        contentAlignment = Alignment.Center,
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
+        shape = RoundedCornerShape(50),
+        color = backgroundColor,
+        shadowElevation = elevation,
+        tonalElevation = if (selected) 2.dp else 0.dp,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = contentColor,
-            textAlign = TextAlign.Center,
-        )
+        Row(
+            modifier = Modifier.padding(
+                horizontal = MaterialTheme.spacing.md,
+                vertical = MaterialTheme.spacing.sm,
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = spec.icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(
+                text = spec.label,
+                modifier = Modifier.padding(start = MaterialTheme.spacing.xs),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = contentColor,
+            )
+        }
     }
 }

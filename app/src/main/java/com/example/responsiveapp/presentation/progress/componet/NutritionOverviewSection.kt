@@ -26,6 +26,7 @@ import com.example.responsiveapp.presentation.progress.componet.chart.NutritionT
 import com.example.responsiveapp.presentation.progress.model.MacroType
 import com.example.responsiveapp.presentation.progress.model.NutritionOverviewUiState
 import com.example.responsiveapp.presentation.progress.model.ProgressRange
+import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
 import com.example.responsiveapp.presentation.ui.theme.ProteinColor
@@ -97,7 +98,7 @@ fun NutritionOverviewSection(
                 points = state.chartData,
                 range = range,
                 macroColor = selectedMacro.chartColor(),
-                unit = "g",
+                unit = if (selectedMacro == MacroType.CALORIES) "kcal" else "g",
                 hasData = state.hasData,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -106,6 +107,7 @@ fun NutritionOverviewSection(
 }
 
 private fun MacroType.chartColor(): Color = when (this) {
+    MacroType.CALORIES -> CaloriesColor
     MacroType.PROTEIN -> ProteinColor
     MacroType.CARBS -> CarbsColor
     MacroType.FATS -> FatColor

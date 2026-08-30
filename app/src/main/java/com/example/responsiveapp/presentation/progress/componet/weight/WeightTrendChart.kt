@@ -36,10 +36,12 @@ import com.example.responsiveapp.presentation.progress.model.WeightChartPointUi
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import kotlin.math.roundToInt
 
-private val ChartHeight = 200.dp
-
+private val ChartHeight = 205.dp
 private const val Y_AXIS_STEPS = 4
-private const val EnterAnimationDurationMs = 500
+private const val EnterAnimationDurationMs = 400
+private val Y_AXIS_WIDTH = 36.dp
+private val CHART_END_PADDING = 16.dp
+private const val MIN_VISIBLE_WEIGHT_RANGE = 8f
 
 @Composable
 fun WeightTrendChart(
@@ -48,9 +50,12 @@ fun WeightTrendChart(
 ) {
     if (points.isEmpty()) return
 
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val accentColor = MaterialTheme.colorScheme.primary
-    val onAccentColor = MaterialTheme.colorScheme.onPrimary
+    val colorScheme = MaterialTheme.colorScheme
+
+    val surfaceColor = colorScheme.surface
+    val accentColor = colorScheme.primary
+    val onAccentColor = colorScheme.onPrimary
+    val axisLabelColor = colorScheme.onSurfaceVariant
 
     var isVisible by remember(points) {
         mutableStateOf(false)
@@ -74,7 +79,7 @@ fun WeightTrendChart(
                             easing = FastOutSlowInEasing,
                         ),
                         initialOffsetY = { fullHeight ->
-                            fullHeight / 3
+                            fullHeight / 5
                         },
                     ),
     ) {
@@ -82,89 +87,140 @@ fun WeightTrendChart(
             modifier = modifier
                 .fillMaxWidth()
                 .height(ChartHeight)
-                .padding(start = 4.dp),
+                .padding(
+                    start = 4.dp,
+                    end = 4.dp,
+                ),
         ) {
-            val availableWidth = maxWidth
+            val pointCount = points.size
+
+            /*
+             * Single entry gets a centered position.
+             */
+            val axisSteps = if (pointCount == 1) {
+                2
+            } else {
+                pointCount - 1
+            }
+
+            val availableWidth =
+                (maxWidth - Y_AXIS_WIDTH - CHART_END_PADDING)
+                    .coerceAtLeast(1.dp)
 
             val stepWidth = remember(
                 availableWidth,
-                points.size,
+                axisSteps,
             ) {
-                availableWidth /
-                        points.size.coerceAtLeast(1)
+                availableWidth / axisSteps
             }
 
-            val dotRadius = remember(points.size) {
+            val dotRadius = remember(pointCount) {
                 when {
-                    points.size <= 7 -> 4.dp
-                    points.size <= 15 -> 3.dp
+                    pointCount <= 7 -> 4.dp
+                    pointCount <= 15 -> 3.dp
                     else -> 2.dp
                 }
             }
 
-            val labelStep = remember(points.size) {
-                when {
-                    points.size <= 8 -> 1
-                    points.size <= 20 -> 3
-                    else -> 5
-                }
-            }
-
             val axisRange = remember(points) {
-                val lowest = points.minOf {
-                    it.weight
-                }
+                val lowest = points.minOf { it.weight }
+                val highest = points.maxOf { it.weight }
 
-                val highest = points.maxOf {
-                    it.weight
-                }
+                val actualRange = highest - lowest
 
-                val range = highest - lowest
+                val visibleRange = maxOf(
+                    actualRange * 1.5f,
+                    MIN_VISIBLE_WEIGHT_RANGE,
+                )
 
-                val headroom = (range * 0.2f)
-                    .coerceAtLeast(1f)
+                val center = (lowest + highest) / 2f
 
-                (lowest - headroom) to
-                        (highest + headroom)
+                val min = center - visibleRange / 2f
+                val max = center + visibleRange / 2f
+
+                min to max
             }
 
             val weightPoints = remember(points) {
-                points.mapIndexed { index, point ->
-                    Point(
-                        index.toFloat(),
-                        point.weight,
+                if (pointCount == 1) {
+                    listOf(
+                        Point(
+                            x = 1f,
+                            y = points[0].weight,
+                        ),
                     )
+                } else {
+                    points.mapIndexed { index, point ->
+                        Point(
+                            x = index.toFloat(),
+                            y = point.weight,
+                        )
+                    }
                 }
             }
 
             val xAxisData = remember(
-                points,
+                pointCount,
                 stepWidth,
-                labelStep,
+                axisSteps,
+                axisLabelColor,
             ) {
                 AxisData.Builder()
                     .axisStepSize(stepWidth)
-                    .steps(points.size - 1)
+                    .steps(axisSteps)
                     .indicatorLineWidth(0.dp)
+                    .bottomPadding(20.dp)
+                    .startDrawPadding(12.dp)
+                    .labelAndAxisLinePadding(8.dp)
+                    .axisLabelColor(axisLabelColor)
+                    .axisLineColor(
+                        axisLabelColor.copy(alpha = 0.35f),
+                    )
                     .labelData { index ->
-                        index.toString()
+
+                        if (pointCount == 1) {
+                            if (index == 1) {
+                                "1"
+                            } else {
+                                ""
+                            }
+                        } else if (index in 0 until pointCount) {
+                            (index + 1).toString()
+                        } else {
+                            ""
+                        }
                     }
-                    .labelAndAxisLinePadding(14.dp)
                     .build()
             }
 
-            val yAxisData = remember(axisRange) {
+            /*
+             * ---------------------------------------------------------
+             * Y AXIS
+             * ---------------------------------------------------------
+             */
+            val yAxisData = remember(
+                axisRange,
+                axisLabelColor,
+            ) {
                 val (min, max) = axisRange
 
                 AxisData.Builder()
                     .steps(Y_AXIS_STEPS)
                     .indicatorLineWidth(0.dp)
-                    .labelAndAxisLinePadding(20.dp)
-                    .axisOffset(24.dp)
+                    .axisOffset(Y_AXIS_WIDTH)
+                    .labelAndAxisLinePadding(8.dp)
+                    .axisLabelColor(axisLabelColor)
+                    .axisLineColor(
+                        axisLabelColor.copy(alpha = 0.35f),
+                    )
                     .labelData { index ->
-                        (min + index * ((max - min) / Y_AXIS_STEPS))
-                            .roundToInt()
-                            .toString()
+
+                        val value =
+                            min +
+                                    index *
+                                    ((max - min) / Y_AXIS_STEPS)
+
+                        formatWeightAxisLabel(value)
                     }
                     .build()
             }
@@ -203,7 +259,7 @@ fun WeightTrendChart(
                                 shadowUnderLine =
                                     ShadowUnderLine(
                                         color = accentColor,
-                                        alpha = 0.22f,
+                                        alpha = 0.08f,
                                     ),
 
                                 selectionHighlightPopUp =
@@ -219,7 +275,7 @@ fun WeightTrendChart(
                                                         points.lastIndex,
                                                     )
 
-                                            "${points[index].weight} kg"
+                                            "${formatWeight(points[index].weight)} kg"
                                         },
                                     ),
                             ),
@@ -232,6 +288,8 @@ fun WeightTrendChart(
                     gridLines = null,
 
                     backgroundColor = surfaceColor,
+
+                    bottomPadding = 8.dp,
                 )
             }
 
@@ -243,34 +301,39 @@ fun WeightTrendChart(
     }
 }
 
-@Preview
+private fun formatWeight(weight: Float, ): String {
+    return if (weight % 1f == 0f) {
+        weight.toInt().toString()
+    } else {
+        "%.1f".format(weight)
+    }
+}
+
+private fun formatWeightAxisLabel(
+    weight: Float,
+): String {
+    return if (weight % 1f == 0f) {
+        weight.roundToInt().toString()
+    } else {
+        "%.1f".format(weight)
+    }
+}
+
+
+@Preview(showBackground = true)
 @Composable
-private fun PrevWeightTrendChart() {
+private fun PrevWeightTrendChartSinglePoint() {
     ResponsiveAppTheme {
         WeightTrendChart(
             points = listOf(
                 WeightChartPointUi(
-                    "Jul 18",
-                    60f,
-                ),
-                WeightChartPointUi(
-                    "Jul 25",
-                    64f,
-                ),
-                WeightChartPointUi(
-                    "Aug 1",
-                    70f,
-                ),
-                WeightChartPointUi(
-                    "Aug 10",
-                    68f,
-                ),
-                WeightChartPointUi(
-                    "Aug 18",
-                    65f,
+                    "Aug 25",
+                    68.5f,
                 ),
             ),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
         )
     }
 }

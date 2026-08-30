@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,11 +30,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -48,12 +51,11 @@ fun LogWeightDialog(
 
     val parsedWeight = input.toFloatOrNull()
 
-    val isValid =
-        parsedWeight != null &&
-                parsedWeight > 0f
+    val isValid = parsedWeight != null && parsedWeight > 0f
 
-    val accentColor =
-        MaterialTheme.colorScheme.primary
+    val colorScheme = MaterialTheme.colorScheme
+    val spacing = MaterialTheme.spacing
+    val accentColor = colorScheme.primary
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -64,271 +66,229 @@ fun LogWeightDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = MaterialTheme.spacing.lg,
-                ),
-            shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 8.dp,
-            shadowElevation = 16.dp,
+                .padding(horizontal = spacing.lg),
+            shape = RoundedCornerShape(30.dp),
+            color = colorScheme.surface,
+            tonalElevation = 6.dp,
+            shadowElevation = 20.dp,
         ) {
             Column(
                 modifier = Modifier.padding(
-                    MaterialTheme.spacing.lg,
+                    horizontal = spacing.lg,
+                    vertical = spacing.xl,
                 ),
             ) {
 
-                // Icon
+                // ---------------------------------------------------------
+                // Hero
+                // ---------------------------------------------------------
+
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .size(64.dp)
+                        .size(88.dp)
                         .background(
-                            color = accentColor.copy(
-                                alpha = 0.14f,
-                            ),
+                            color = accentColor.copy(alpha = 0.06f),
                             shape = CircleShape,
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        imageVector =
-                            Icons.Outlined.MonitorWeight,
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(30.dp),
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(66.dp)
+                            .background(
+                                color = accentColor.copy(alpha = 0.13f),
+                                shape = CircleShape,
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.MonitorWeight,
+                            contentDescription = null,
+                            tint = accentColor,
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
                 }
 
-                // Title
+                Spacer(modifier = Modifier.size(spacing.lg))
+
                 Text(
-                    text = "Log Your Weight",
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(
-                            top = MaterialTheme.spacing.md,
-                        ),
-                    style =
-                        MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color =
-                        MaterialTheme.colorScheme.onSurface,
+                    text = "Log your weight",
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
                 )
 
-                // Description
+                Spacer(modifier = Modifier.size(spacing.xs))
+
                 Text(
-                    text =
-                        "Enter today's weight in kilograms",
+                    text = "Keep your progress up to date with today's measurement.",
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(
-                            top = MaterialTheme.spacing.xxs,
-                        ),
-                    style =
-                        MaterialTheme.typography.bodyMedium,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                        .fillMaxWidth()
+                        .alpha(0.85f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
 
+                Spacer(modifier = Modifier.size(spacing.lg))
+
+                // ---------------------------------------------------------
                 // Weight input
+                // ---------------------------------------------------------
+
                 OutlinedTextField(
                     value = input,
-
                     onValueChange = { newValue ->
-
                         if (
                             newValue.length <= 6 &&
                             newValue.matches(
-                                Regex(
-                                    "^\\d{0,3}(\\.\\d{0,2})?$",
-                                ),
+                                Regex("^\\d{0,3}(\\.\\d{0,2})?$")
                             )
                         ) {
                             input = newValue
                         }
                     },
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = MaterialTheme.spacing.lg,
-                        ),
-
-                    placeholder = {
-                        Text("e.g. 68.5")
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text("Weight")
                     },
-
+                    placeholder = {
+                        Text("68.5")
+                    },
                     suffix = {
                         Text(
                             text = "kg",
-                            fontWeight =
-                                FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isValid) {
+                                accentColor
+                            } else {
+                                colorScheme.onSurfaceVariant
+                            },
                         )
                     },
-
                     leadingIcon = {
                         Icon(
-                            imageVector =
-                                Icons.Outlined.MonitorWeight,
+                            imageVector = Icons.Outlined.MonitorWeight,
                             contentDescription = null,
-                            tint = accentColor,
                         )
                     },
-
                     singleLine = true,
-
-                    keyboardOptions =
-                        KeyboardOptions(
-                            keyboardType =
-                                KeyboardType.Decimal,
-                        ),
-
-                    shape =
-                        RoundedCornerShape(16.dp),
-
-                    colors =
-                        OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor =
-                                accentColor,
-
-                            focusedLabelColor =
-                                accentColor,
-
-                            cursorColor =
-                                accentColor,
-
-                            focusedLeadingIconColor =
-                                accentColor,
-
-                            unfocusedLeadingIconColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                        ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                    ),
+                    shape = RoundedCornerShape(18.dp),
+                    textStyle = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = accentColor,
+                        focusedLabelColor = accentColor,
+                        cursorColor = accentColor,
+                        focusedLeadingIconColor = accentColor,
+                        unfocusedLeadingIconColor =
+                            colorScheme.onSurfaceVariant,
+                    ),
                 )
 
-                // Current weight
+                // ---------------------------------------------------------
+                // Current weight context
+                // ---------------------------------------------------------
+
                 currentWeight?.let { weight ->
 
-                    Box(
-                        modifier = Modifier
-                            .align(
-                                Alignment.CenterHorizontally,
-                            )
-                            .padding(
-                                top = MaterialTheme.spacing.md,
-                            )
-                            .background(
-                                color = accentColor.copy(
-                                    alpha = 0.10f,
-                                ),
-                                shape =
-                                    RoundedCornerShape(50),
-                            )
-                            .padding(
-                                horizontal = 16.dp,
-                                vertical = 8.dp,
-                            ),
-                    ) {
-                        Row(
-                            verticalAlignment =
-                                Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Current: ",
-                                style =
-                                    MaterialTheme
-                                        .typography
-                                        .bodySmall,
-                                color =
-                                    MaterialTheme
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                            )
+                    Spacer(modifier = Modifier.size(spacing.sm))
 
-                            Text(
-                                text =
-                                    "${"%.1f".format(weight)} kg",
-                                style =
-                                    MaterialTheme
-                                        .typography
-                                        .bodySmall,
-                                fontWeight =
-                                    FontWeight.Bold,
-                                color = accentColor,
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = colorScheme.surfaceVariant.copy(
+                                    alpha = 0.55f
+                                ),
+                                shape = RoundedCornerShape(14.dp),
                             )
-                        }
+                            .padding(
+                                horizontal = spacing.md,
+                                vertical = spacing.sm,
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.MonitorWeight,
+                            contentDescription = null,
+                            tint = colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp),
+                        )
+
+                        Spacer(modifier = Modifier.size(spacing.sm))
+
+                        Text(
+                            text = "Previous measurement",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.onSurfaceVariant,
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Text(
+                            text = "${"%.1f".format(weight)} kg",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = colorScheme.onSurface,
+                        )
                     }
                 }
 
-                // Buttons
+                Spacer(modifier = Modifier.size(spacing.xl))
+
+                // ---------------------------------------------------------
+                // Actions
+                // ---------------------------------------------------------
+
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = MaterialTheme.spacing.lg,
-                        ),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(
-                            MaterialTheme.spacing.sm,
-                        ),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing.sm),
                 ) {
 
                     OutlinedButton(
                         onClick = onDismiss,
-                        modifier =
-                            Modifier.weight(1f),
-                        shape =
-                            RoundedCornerShape(50),
-                        colors =
-                            ButtonDefaults
-                                .outlinedButtonColors(
-                                    contentColor =
-                                        MaterialTheme
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                ),
+                        modifier = Modifier.weight(0.8f),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = colorScheme.onSurfaceVariant,
+                        ),
                     ) {
-                        Text("Cancel")
+                        Text(
+                            text = "Cancel",
+                            fontWeight = FontWeight.SemiBold,
+                        )
                     }
 
                     Button(
                         onClick = {
                             parsedWeight?.let(onConfirm)
                         },
-                        modifier =
-                            Modifier.weight(1f),
+                        modifier = Modifier.weight(1.2f),
                         enabled = isValid,
-                        shape =
-                            RoundedCornerShape(50),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor =
-                                    accentColor,
-
-                                contentColor =
-                                    MaterialTheme
-                                        .colorScheme
-                                        .onPrimary,
-
-                                disabledContainerColor =
-                                    accentColor.copy(
-                                        alpha = 0.25f,
-                                    ),
-
-                                disabledContentColor =
-                                    MaterialTheme
-                                        .colorScheme
-                                        .onPrimary
-                                        .copy(
-                                            alpha = 0.55f,
-                                        ),
-                            ),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = accentColor,
+                            contentColor = colorScheme.onPrimary,
+                            disabledContainerColor =
+                                accentColor.copy(alpha = 0.20f),
+                            disabledContentColor =
+                                colorScheme.onPrimary.copy(alpha = 0.55f),
+                        ),
                     ) {
                         Text(
                             text = "Log Weight",
-                            fontWeight =
-                                FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 }

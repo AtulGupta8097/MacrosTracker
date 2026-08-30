@@ -56,6 +56,7 @@ private fun DailySummary?.toMacroChartPointUi(date: Long, macroType: MacroType):
         )
     }
     val (consumedValue, targetValue) = when (macroType) {
+        MacroType.CALORIES -> consumed.calories to target.calories.toFloat()
         MacroType.PROTEIN -> consumed.protein to target.protein.toFloat()
         MacroType.CARBS -> consumed.carbs to target.carbs.toFloat()
         MacroType.FATS -> consumed.fats to target.fats.toFloat()
