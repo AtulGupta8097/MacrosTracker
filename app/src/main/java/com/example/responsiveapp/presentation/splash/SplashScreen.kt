@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -116,7 +117,9 @@ fun SplashScreen(
 
             AnimatedVisibility(isText) {
 
-                Text(text = "TrackMacros", style = MaterialTheme.typography.headlineLarge.copy(
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSecondary))
 

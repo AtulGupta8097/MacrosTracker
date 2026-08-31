@@ -7,4 +7,6 @@ interface SessionManager {
     fun currentUserId(): String?
 
     fun currentUserName(): String?
+
+    fun currentUserEmail(): String?
 }

@@ -1,5 +1,6 @@
 package com.example.responsiveapp.presentation.home.mapper
 
+import com.example.responsiveapp.core.utils.avatarInitial
 import com.example.responsiveapp.domain.model.UserProfile
 import com.example.responsiveapp.presentation.home.model.AppBarUiState
 import com.example.responsiveapp.presentation.home.model.ProfileUiModel
@@ -11,10 +12,10 @@ fun UserProfile?.toAppBarUiState(): AppBarUiState {
     }
 
     return AppBarUiState(
-        avatarInitial = avatarInitialOf(name),
+        avatarInitial = name.avatarInitial(),
         profile = ProfileUiModel(
             name = name.ifBlank { "Your Profile" },
-            avatarInitial = avatarInitialOf(name),
+            avatarInitial = name.avatarInitial(),
             ageText = "$age years",
             heightText = "${height.toInt()} cm",
             weightText = "$weight kg",
@@ -25,9 +26,3 @@ fun UserProfile?.toAppBarUiState(): AppBarUiState {
     )
 }
 
-private fun avatarInitialOf(name: String): String =
-    name.trim()
-        .firstOrNull()
-        ?.uppercaseChar()
-        ?.toString()
-        ?: "?"
