@@ -6,12 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
+import com.example.responsiveapp.domain.model.ThemeMode
 import com.example.responsiveapp.presentation.mainscreen.MainScreen
 import com.example.responsiveapp.presentation.signin.SignInScreen
 import com.example.responsiveapp.presentation.signup.SignUpScreen
@@ -29,7 +34,17 @@ class  MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            ResponsiveAppTheme {
+            val themeViewModel: AppThemeViewModel = hiltViewModel()
+            val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+
+            val darkTheme = when (themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                else -> {
+                    isSystemInDarkTheme()
+                }
+            }
+            ResponsiveAppTheme(darkTheme = darkTheme) {
 
                 val backStack = rememberNavBackStack(
                     Routes.SplashScreen
@@ -101,7 +116,16 @@ class  MainActivity : ComponentActivity() {
                             }
 
                             entry<Routes.MainScreen> {
-                                MainScreen()
+                                MainScreen(
+                                    onSignedOut = {
+                                        backStack.clear()
+                                        backStack.add(Routes.SignInScreen)
+                                    },
+                                    onAccountDeleted = {
+                                        backStack.clear()
+                                        backStack.add(Routes.SignInScreen)
+                                    },
+                                )
                             }
                         }
                     )

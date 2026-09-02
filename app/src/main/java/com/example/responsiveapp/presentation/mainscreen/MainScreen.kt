@@ -49,12 +49,16 @@ import com.example.responsiveapp.presentation.mainscreen.component.BottomNav
 import com.example.responsiveapp.presentation.mainscreen.component.Navbar
 import com.example.responsiveapp.presentation.mainscreen.component.SideNav
 import com.example.responsiveapp.presentation.progress.ProgressScreen
+import com.example.responsiveapp.presentation.settings.SettingsScreen
 import com.example.responsiveapp.presentation.ui.theme.DeviceConfiguration
 import com.example.responsiveapp.presentation.ui.theme.deviceConfiguration
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onSignedOut: () -> Unit,
+    onAccountDeleted: () -> Unit
+) {
 
     val deviceConfig = MaterialTheme.deviceConfiguration
     val navBackStack = rememberNavBackStack(Routes.HomeScreen)
@@ -113,12 +117,16 @@ fun MainScreen() {
                     MainContent(
                         modifier = Modifier.padding(padding),
                         navBackStack = navBackStack,
+                        onSignedOut = onSignedOut,
+                        onAccountDeleted = onAccountDeleted,
                     )
                 }
             } else {
                 MainContent(
                     modifier = Modifier.fillMaxSize(),
                     navBackStack = navBackStack,
+                    onSignedOut = onSignedOut,
+                    onAccountDeleted = onAccountDeleted,
                 )
             }
         }
@@ -147,6 +155,8 @@ fun MainScreen() {
                     MainContent(
                         modifier = Modifier.weight(1f),
                         navBackStack = navBackStack,
+                        onSignedOut = onSignedOut,
+                        onAccountDeleted = onAccountDeleted,
                     )
                 }
             }
@@ -171,6 +181,8 @@ fun MainScreen() {
 private fun MainContent(
     modifier: Modifier = Modifier,
     navBackStack: NavBackStack<NavKey>,
+    onSignedOut: () -> Unit,
+    onAccountDeleted: () -> Unit,
 ) {
 
     val currentEntry = navBackStack.lastOrNull() ?: return
@@ -214,7 +226,15 @@ private fun MainContent(
                         }
                         entry<Routes.ProgressScreen> { ProgressScreen() }
                         entry<Routes.GoalsScreen> { GoalScreen() }
-                        entry<Routes.SettingsScreen> { SettingsScreen() }
+                        entry<Routes.SettingsScreen> {
+                            SettingsScreen(
+                                onPrivacyPolicyClick = {},
+                                onTermsClick = {},
+                                onRateAppClick = {},
+                                onSignedOut = onSignedOut,
+                                onAccountDeleted = onAccountDeleted,
+                            )
+                        }
 
                         entry<Routes.FoodDatabaseScreen> {
                             FoodDatabaseScreen(
@@ -239,13 +259,6 @@ private fun MainContent(
 fun GoalScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         Text("Goal Screen", modifier = Modifier.align(Alignment.Center))
-    }
-}
-
-@Composable
-fun SettingsScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text("Settings Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
 

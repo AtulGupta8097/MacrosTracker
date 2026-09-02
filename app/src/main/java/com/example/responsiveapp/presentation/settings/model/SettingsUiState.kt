@@ -1,4 +1,4 @@
-package com.example.responsiveapp.presentation.settings
+package com.example.responsiveapp.presentation.settings.model
 
 import androidx.compose.runtime.Immutable
 import com.example.responsiveapp.domain.model.ActivityLevel
