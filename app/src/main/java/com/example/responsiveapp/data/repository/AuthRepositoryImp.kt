@@ -45,4 +45,25 @@ class AuthRepositoryImp(private val auth: FirebaseAuth) : AuthRepository {
         }
     }
 
+
+    override suspend fun sendPasswordResetEmail(email: String): Flow<Result<Unit>> = flow {
+        try {
+            auth.sendPasswordResetEmail(email).await()
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
+    override suspend fun deleteAccount(): Flow<Result<Unit>> = flow {
+        try {
+            val user = auth.currentUser
+                ?: throw IllegalStateException("No signed-in user")
+            user.delete().await()
+            emit(Result.success(Unit))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
 }
