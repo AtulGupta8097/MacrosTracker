@@ -9,4 +9,6 @@ interface SessionManager {
     fun currentUserName(): String?
 
     fun currentUserEmail(): String?
+
+    fun signOut()
 }

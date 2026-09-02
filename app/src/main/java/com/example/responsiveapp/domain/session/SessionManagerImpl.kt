@@ -25,4 +25,8 @@ class SessionManagerImpl @Inject constructor(
     override fun currentUserEmail(): String? {
         return auth.currentUser?.email
     }
+
+    override fun signOut() {
+        auth.signOut()
+    }
 }
