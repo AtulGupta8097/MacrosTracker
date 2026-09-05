@@ -1,5 +1,6 @@
 package com.example.responsiveapp.data.remote.api
 
+import com.example.responsiveapp.data.remote.dto.fatsecret.barcode.BarcodeResponseDto
 import com.example.responsiveapp.data.remote.dto.fatsecret.detail.FoodDetailResponseDto
 import com.example.responsiveapp.data.remote.dto.fatsecret.search.FoodSearchResponseDto
 import retrofit2.Response
@@ -23,4 +24,11 @@ interface FatSecretApiService {
         @Query("method") method: String = "food.get.v2",
         @Query("format") format: String = "json"
     ): Response<FoodDetailResponseDto>
+
+    @GET("rest/server.api")
+    suspend fun findFoodIdForBarcode(
+        @Query("barcode") barcode: String,
+        @Query("method") method: String = "food.find_id_for_barcode",
+        @Query("format") format: String = "json"
+    ): Response<BarcodeResponseDto>
 }

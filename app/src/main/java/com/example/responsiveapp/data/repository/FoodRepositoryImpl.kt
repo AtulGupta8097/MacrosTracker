@@ -1,5 +1,6 @@
 package com.example.responsiveapp.data.repository
 
+import android.util.Log
 import com.example.responsiveapp.core.di.IoDispatcher
 import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.data.local.CachePolicy.MAX_CACHED_QUERIES
@@ -39,11 +40,11 @@ class FoodRepositoryImpl @Inject constructor(
     private val searchLocks = ConcurrentHashMap<String, Mutex>()
 
     override fun searchFoods(
-        rawQuery: String,
+        query: String,
         limit: Int,
     ): Flow<Resource<List<FoodItem>>> = channelFlow {
 
-        val normalizedQuery = rawQuery.trim().lowercase()
+        val normalizedQuery = query.trim().lowercase()
 
         val roomJob = launch {
             foodSearchDao
@@ -84,7 +85,7 @@ class FoodRepositoryImpl @Inject constructor(
 
             runCatching {
                 api.searchFoods(
-                    searchExpression = rawQuery,
+                    searchExpression = query,
                     maxResults = limit,
                 )
             }.fold(
@@ -208,5 +209,36 @@ class FoodRepositoryImpl @Inject constructor(
 
             foodDetail
         }
+    }
+
+    override suspend fun getFoodDetailByBarcode(
+        barcode: String,
+    ): Result<FoodDetail> = withContext(ioDispatcher) {
+
+        runCatching {
+
+            val lookupResponse =
+                api.findFoodIdForBarcode(barcode)
+
+            Log.d("TAG", "getFoodDetailByBarcode: ${lookupResponse}")
+
+            if (!lookupResponse.isSuccessful) {
+                error("Barcode lookup failed: ${lookupResponse.code()}")
+            }
+
+            val foodId =
+                lookupResponse.body()?.foodId?.value
+                    ?: error("Empty barcode lookup response")
+
+            if (foodId == "0") {
+                throw NoSuchElementException(NO_BARCODE_MATCH)
+            }
+
+            getFoodDetail(foodId).getOrThrow()
+        }
+    }
+
+    private companion object {
+        const val NO_BARCODE_MATCH = "no_barcode_match"
     }
 }

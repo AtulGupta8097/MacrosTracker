@@ -12,6 +12,6 @@ interface FatSecretAuthApiService {
     @POST("connect/token")
     suspend fun getAccessToken(
         @Field("grant_type") grantType: String = "client_credentials",
-        @Field("scope") scope: String = "premier"
+        @Field("scope") scope: String = "premier barcode"
     ): Response<OAuthTokenResponseDto>
 }

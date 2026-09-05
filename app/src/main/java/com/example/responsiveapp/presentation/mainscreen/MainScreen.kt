@@ -42,6 +42,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
+import com.example.responsiveapp.presentation.barcode.BarcodeScanScreen
 import com.example.responsiveapp.presentation.fooddatabase.FoodDatabaseScreen
 import com.example.responsiveapp.presentation.home.HomeScreen
 import com.example.responsiveapp.presentation.mainscreen.component.AddFoodBottomSheet
@@ -172,6 +173,9 @@ fun MainScreen(
                 if (option == "Food Database") {
                     navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
                 }
+                else if (option == "Scan Barcode") {
+                    navBackStack.navigateSingleTop(Routes.BarcodeScanScreen)
+                }
             },
         )
     }
@@ -187,70 +191,72 @@ private fun MainContent(
     onAccountDeleted: () -> Unit,
 ) {
 
-    val currentEntry = navBackStack.lastOrNull() ?: return
-
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
 
-        AnimatedContent(
-            targetState = currentEntry,
+        NavDisplay(
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+            backStack = navBackStack,
             transitionSpec = {
                 slideInHorizontally { it } + fadeIn() togetherWith
                         slideOutHorizontally { -it } + fadeOut()
             },
-            label = "NavTransition",
-        ) { targetEntry ->
+            entryProvider = entryProvider {
 
-            key(targetEntry) {
+                entry<Routes.HomeScreen> {
+                    HomeScreen(
+                        onEditProfile = {
 
-                NavDisplay(
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                    backStack = navBackStack,
-                    entryProvider = entryProvider {
-
-                        entry<Routes.HomeScreen> {
-                            HomeScreen(
-                                onEditProfile = {
-
-                                },
-                                onSeeMoreProfile = {
-                                },
-                                onLogFoodClick = {
-                                    navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
-                                }
-                            )
+                        },
+                        onSeeMoreProfile = {
+                        },
+                        onLogFoodClick = {
+                            navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
                         }
-                        entry<Routes.ProgressScreen> { ProgressScreen() }
-                        entry<Routes.GoalsScreen> { GoalScreen() }
-                        entry<Routes.SettingsScreen> {
-                            SettingsScreen(
-                                onPrivacyPolicyClick = {},
-                                onTermsClick = {},
-                                onRateAppClick = {},
-                                onSignedOut = onSignedOut,
-                                onAccountDeleted = onAccountDeleted,
-                            )
-                        }
+                    )
+                }
+                entry<Routes.ProgressScreen> { ProgressScreen() }
+                entry<Routes.GoalsScreen> { GoalScreen() }
+                entry<Routes.SettingsScreen> {
+                    SettingsScreen(
+                        onPrivacyPolicyClick = {},
+                        onTermsClick = {},
+                        onRateAppClick = {},
+                        onSignedOut = onSignedOut,
+                        onAccountDeleted = onAccountDeleted,
+                    )
+                }
 
-                        entry<Routes.FoodDatabaseScreen> {
-                            FoodDatabaseScreen(
-                                onBack = {
-                                    navBackStack.removeLastOrNull()
-                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
-                                }
-                            )
+                entry<Routes.FoodDatabaseScreen> {
+                    FoodDatabaseScreen(
+                        onBack = {
+                            navBackStack.removeLastOrNull()
+                            navBackStack.navigateSingleTop(Routes.HomeScreen)
                         }
+                    )
+                }
 
-                    },
-                )
-            }
-        }
+                entry<Routes.BarcodeScanScreen> {
+                    BarcodeScanScreen(
+                        onBack = {
+                            navBackStack.removeLastOrNull()
+                            navBackStack.navigateSingleTop(Routes.HomeScreen)
+                        },
+                        onLogged = {
+                            navBackStack.removeLastOrNull()
+                            navBackStack.navigateSingleTop(Routes.HomeScreen)
+                        }
+                    )
+                }
+
+            },
+        )
     }
 }
 
@@ -260,4 +266,3 @@ fun GoalScreen() {
         Text("Goal Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
-

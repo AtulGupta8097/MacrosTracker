@@ -15,4 +15,8 @@ interface FoodRepository {
     suspend fun getFoodDetail(
         foodId: String,
     ): Result<FoodDetail>
+
+    suspend fun getFoodDetailByBarcode(
+        barcode: String,
+    ): Result<FoodDetail>
 }
