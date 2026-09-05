@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.responsiveapp.core.navigation.Routes
 
 @Composable
 fun SideNav(
@@ -41,10 +42,9 @@ fun SideNav(
                 label = {
                     Text(
                         text = when (item.title) {
-                            is com.example.responsiveapp.core.navigation.Routes.HomeScreen -> "Home"
-                            is com.example.responsiveapp.core.navigation.Routes.ProgressScreen -> "Progress"
-                            is com.example.responsiveapp.core.navigation.Routes.GoalsScreen -> "Goals"
-                            is com.example.responsiveapp.core.navigation.Routes.SettingsScreen -> "Settings"
+                            is Routes.ProgressScreen -> "Progress"
+                            is Routes.GoalsScreen -> "Goals"
+                            is Routes.SettingsScreen -> "Settings"
                             else -> ""
                         }
                     )

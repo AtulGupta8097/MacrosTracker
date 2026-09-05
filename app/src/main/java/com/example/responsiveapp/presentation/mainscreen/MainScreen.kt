@@ -134,7 +134,9 @@ fun MainScreen(
         DeviceConfiguration.TABLET,
         DeviceConfiguration.DESKTOP -> {
 
-            Scaffold { padding ->
+            Scaffold(
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            ) { padding ->
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -245,9 +247,6 @@ private fun MainContent(
                             )
                         }
 
-                        entry<Routes.FoodDetailScreen> { route ->
-                            FoodDetailScreen(route.foodId)
-                        }
                     },
                 )
             }
@@ -262,9 +261,3 @@ fun GoalScreen() {
     }
 }
 
-@Composable
-fun FoodDetailScreen(foodId: String) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text("Food Detail: $foodId", modifier = Modifier.align(Alignment.Center))
-    }
-}

@@ -1,6 +1,5 @@
 package com.example.responsiveapp.data.repository
 
-import android.R.attr.name
 import com.example.responsiveapp.domain.repository.AuthRepository
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
