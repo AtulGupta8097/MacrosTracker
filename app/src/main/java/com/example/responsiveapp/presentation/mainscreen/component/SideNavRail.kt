@@ -1,14 +1,15 @@
 package com.example.responsiveapp.presentation.mainscreen.component
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.responsiveapp.core.navigation.Routes
 
 @Composable
 fun SideNav(
@@ -22,54 +23,49 @@ fun SideNav(
         modifier = modifier.fillMaxHeight(),
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        header = {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // Navigation items
-        items.forEachIndexed { index, item ->
-            NavigationRailItem(
-                selected = selectedIndex == index,
-                onClick = { onItemSelected(index) },
-                icon = {
-                    Icon(
-                        imageVector = if (selectedIndex == index) item.activeIcon else item.inactiveIcon,
-                        contentDescription = null
-                    )
-                },
-                label = {
-                    Text(
-                        text = when (item.title) {
-                            is Routes.ProgressScreen -> "Progress"
-                            is Routes.GoalsScreen -> "Goals"
-                            is Routes.SettingsScreen -> "Settings"
-                            else -> ""
-                        }
-                    )
-                }
-            )
+            items.forEachIndexed { index, item ->
+                NavigationRailItem(
+                    selected = selectedIndex == index,
+                    onClick = { onItemSelected(index) },
+                    icon = {
+                        Icon(
+                            imageVector = if (selectedIndex == index) item.activeIcon else item.inactiveIcon,
+                            contentDescription = null
+                        )
+                    },
+                    label = {
+                        Text(text = item.title)
+                    }
+                )
 
-            // Add FAB after second item
-            if (index == 1) {
-                Spacer(modifier = Modifier.height(16.dp))
-                FloatingActionButton(
-                    onClick = onAddClick,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(56.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add",
-                        modifier = Modifier.size(24.dp)
-                    )
+                if (index == 0) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    FloatingActionButton(
+                        onClick = onAddClick,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .size(48.dp),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Add",
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

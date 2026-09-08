@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.LayoutDirection
 class BottomBarCutoutShape(
     private val fabRadius: Float,
     private val cutoutMargin: Float,
+    private val notchCenterX: Float,
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -18,28 +19,27 @@ class BottomBarCutoutShape(
     ): Outline {
         val path =
             Path().apply {
-                val centerX = size.width / 2
                 val cutoutRadius = fabRadius + cutoutMargin
 
                 moveTo(0f, 0f)
 
-                lineTo(centerX - cutoutRadius * 2, 0f)
+                lineTo(notchCenterX - cutoutRadius * 2, 0f)
 
                 cubicTo(
-                    centerX - cutoutRadius,
+                    notchCenterX - cutoutRadius,
                     0f,
-                    centerX - cutoutRadius,
+                    notchCenterX - cutoutRadius,
                     cutoutRadius,
-                    centerX,
+                    notchCenterX,
                     cutoutRadius,
                 )
 
                 cubicTo(
-                    centerX + cutoutRadius,
+                    notchCenterX + cutoutRadius,
                     cutoutRadius,
-                    centerX + cutoutRadius,
+                    notchCenterX + cutoutRadius,
                     0f,
-                    centerX + cutoutRadius * 2,
+                    notchCenterX + cutoutRadius * 2,
                     0f,
                 )
 

@@ -13,15 +13,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,7 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -65,14 +60,12 @@ fun MainScreen(
     val navBackStack = rememberNavBackStack(Routes.HomeScreen)
 
     var showBottomSheet by remember { mutableStateOf(false) }
-    var bottomBarHeight by remember { mutableStateOf(64.dp) }
 
     val currentRoute = navBackStack.lastOrNull()
 
     val routesWithBottomBar = listOf(
         Routes.HomeScreen,
         Routes.ProgressScreen,
-        Routes.GoalsScreen,
         Routes.SettingsScreen
     )
 
@@ -81,7 +74,6 @@ fun MainScreen(
     val navItems = listOf(
         Navbar.Home,
         Navbar.Progress,
-        Navbar.Goal,
         Navbar.Settings,
     )
 
@@ -101,19 +93,10 @@ fun MainScreen(
                             selectedTab = selectedTabIndex,
                             onTabSelected = { index ->
                                 navBackStack.navigateSingleTop(navItems[index].route)
-                            }
+                            },
+                            onAddClick = { showBottomSheet = true },
                         )
                     },
-                    floatingActionButton = {
-                        FloatingActionButton(
-                            onClick = { showBottomSheet = true },
-                            modifier = Modifier.offset(y = (bottomBarHeight / 2) + 12.dp),
-                            shape = CircleShape,
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                        }
-                    },
-                    floatingActionButtonPosition = FabPosition.Center,
                 ) { padding ->
                     MainContent(
                         modifier = Modifier.padding(padding),
@@ -222,7 +205,6 @@ private fun MainContent(
                     )
                 }
                 entry<Routes.ProgressScreen> { ProgressScreen() }
-                entry<Routes.GoalsScreen> { GoalScreen() }
                 entry<Routes.SettingsScreen> {
                     SettingsScreen(
                         onPrivacyPolicyClick = {},
@@ -257,12 +239,5 @@ private fun MainContent(
 
             },
         )
-    }
-}
-
-@Composable
-fun GoalScreen() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text("Goal Screen", modifier = Modifier.align(Alignment.Center))
     }
 }
