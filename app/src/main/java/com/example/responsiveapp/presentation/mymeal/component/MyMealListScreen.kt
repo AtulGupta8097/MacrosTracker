@@ -20,9 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.responsiveapp.core.utils.formatMacroValue
 import com.example.responsiveapp.domain.model.mymeals.MyMeal
+import com.example.responsiveapp.presentation.commoncomponent.CircularIconButton
 import com.example.responsiveapp.presentation.commoncomponent.CustomButton
 import com.example.responsiveapp.presentation.commoncomponent.EmptyState
+import com.example.responsiveapp.presentation.commoncomponent.FoodLogCard
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -67,13 +70,21 @@ fun MyMealListScreen(
                         key = { it.id }
                     ) { meal ->
 
-                        MyMealCard(
-                            myMeal = meal,
+                        FoodLogCard(
+                            name = meal.name,
+                            caloriesText = "${meal.totalNutritionInfo.calories.toInt()} kcal",
+                            proteinText = formatMacroValue(meal.totalNutritionInfo.protein),
+                            carbsText = formatMacroValue(meal.totalNutritionInfo.carbs),
+                            fatText = formatMacroValue(meal.totalNutritionInfo.fat),
                             isSelected = meal.id == selectedMealId,
-                            onLog = { },
-                            onEdit = {
-                                onMealClicked(meal)
-                            }
+                            onClick = { onMealClicked(meal) },
+                            trailingContent = {
+                                CircularIconButton(
+                                    icon = Icons.Default.Add,
+                                    contentDescription = "Log meal",
+                                    onClick = { },
+                                )
+                            },
                         )
                     }
                 }

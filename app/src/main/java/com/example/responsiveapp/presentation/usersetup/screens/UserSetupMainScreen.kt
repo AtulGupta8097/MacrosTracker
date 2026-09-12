@@ -33,6 +33,7 @@ private val SCREEN_FLOW = listOf(
     UserSetupScreen.Height,
     UserSetupScreen.Weight,
     UserSetupScreen.Activity,
+    UserSetupScreen.TargetWeight,
     UserSetupScreen.Goal
 )
 
@@ -125,6 +126,14 @@ fun UserSetupMainScreen(
                     ActivityLevelScreen(
                         selectedActivityLevel = state.userInput.activityLevel,
                         onActivityLevelSelected = viewModel::updateActivityLevel
+                    )
+                }
+
+                is UserSetupScreen.TargetWeight -> {
+                    TargetWeightScreen(
+                        currentWeight = state.userInput.weight,
+                        targetWeight = state.userInput.targetWeight,
+                        onTargetWeightChanged = viewModel::updateTargetWeight
                     )
                 }
                 is UserSetupScreen.Goal -> {

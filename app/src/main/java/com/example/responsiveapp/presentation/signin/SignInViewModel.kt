@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -108,8 +109,16 @@ class SignInViewModel @Inject constructor(
                         appPrefManager.setLoggedIn(true)
                         restoreUserDataUseCase()
 
+                        val isUserSetup = appPrefManager.isUserSetup.first()
+
                         _state.value = SignInState.SignOut
-                        _event.emit(SignInEvent.NavigateToMainScreen)
+                        _event.emit(
+                            if (isUserSetup) {
+                                SignInEvent.NavigateToMainScreen
+                            } else {
+                                SignInEvent.NavigateToUserSetup
+                            }
+                        )
                     } ?: run {
                         Log.d("LOG", result.isSuccess.toString())
 

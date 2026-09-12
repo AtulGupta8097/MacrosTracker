@@ -1,11 +1,15 @@
 package com.example.responsiveapp.presentation.usersetup
 
 sealed class UserSetupScreen {
+
     object Gender : UserSetupScreen()
     object Age : UserSetupScreen()
+
     object Weight : UserSetupScreen()
     object Height : UserSetupScreen()
     object Activity : UserSetupScreen()
+    object TargetWeight : UserSetupScreen()
+
     object Goal : UserSetupScreen()
     object Complete : UserSetupScreen()
 }

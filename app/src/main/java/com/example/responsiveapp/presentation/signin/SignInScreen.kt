@@ -49,7 +49,8 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 fun SignInScreen(
     viewmodel: SignInViewModel = hiltViewModel(),
     navigateToSignUp: () -> Unit,
-    navigateToMainScreen: () -> Unit
+    navigateToMainScreen: () -> Unit,
+    navigateToUserSetup: () -> Unit
 ) {
     val signUpState by viewmodel.state.collectAsState()
     val uiState by viewmodel.uiState.collectAsState()
@@ -64,6 +65,9 @@ fun SignInScreen(
             when (event) {
                 SignInEvent.NavigateToMainScreen -> {
                     navigateToMainScreen.invoke()
+                }
+                SignInEvent.NavigateToUserSetup -> {
+                    navigateToUserSetup.invoke()
                 }
                 SignInEvent.NavigateToSignUp -> {
                    navigateToSignUp.invoke()

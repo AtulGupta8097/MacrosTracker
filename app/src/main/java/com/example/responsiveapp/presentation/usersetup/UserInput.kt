@@ -12,6 +12,7 @@ data class UserInput(
     val weight: Float? = null,
     val height: Float? = null,
     val activityLevel: ActivityLevel? = null,
+    val targetWeight: Float? = null,
     val goal: Goal? = null
 )
 
@@ -23,6 +24,7 @@ fun UserInput.toDomain(): UserProfile {
         height = requireNotNull(height),
         weight = requireNotNull(weight),
         activityLevel = requireNotNull(activityLevel),
+        targetWeight = requireNotNull(targetWeight),
         goal = requireNotNull(goal)
     )
 }

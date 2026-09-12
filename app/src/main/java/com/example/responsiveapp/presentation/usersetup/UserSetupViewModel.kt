@@ -34,6 +34,7 @@ class UserSetupViewModel @Inject constructor(
         UserSetupScreen.Height,
         UserSetupScreen.Weight,
         UserSetupScreen.Activity,
+        UserSetupScreen.TargetWeight,
         UserSetupScreen.Goal,
         UserSetupScreen.Complete
     )
@@ -56,6 +57,10 @@ class UserSetupViewModel @Inject constructor(
 
     fun updateActivityLevel(level: ActivityLevel) {
         _state.update { it.copy(userInput = it.userInput.copy(activityLevel = level)) }
+    }
+
+    fun updateTargetWeight(targetWeight: Float?) {
+        _state.update { it.copy(userInput = it.userInput.copy(targetWeight = targetWeight)) }
     }
 
     fun updateGoal(goal: Goal) {
@@ -94,6 +99,7 @@ class UserSetupViewModel @Inject constructor(
             is UserSetupScreen.Height -> _state.value.userInput.height != null
             is UserSetupScreen.Weight -> _state.value.userInput.weight != null
             is UserSetupScreen.Activity -> _state.value.userInput.activityLevel != null
+            is UserSetupScreen.TargetWeight -> _state.value.userInput.targetWeight != null
             is UserSetupScreen.Goal -> _state.value.userInput.goal != null
             else -> false
         }

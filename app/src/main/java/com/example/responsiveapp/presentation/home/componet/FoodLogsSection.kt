@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.responsiveapp.presentation.commoncomponent.FoodLogCard
 import com.example.responsiveapp.presentation.home.model.FoodLogUiModel
 import com.example.responsiveapp.presentation.home.model.RecentMealsUiState
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
@@ -41,7 +42,18 @@ fun FoodLogsSection(
         } else {
             recentMealsUiState.meals.forEach { meal ->
                 FoodLogCard(
-                    meal = meal,
+                    name = meal.name,
+                    caloriesText = meal.caloriesText,
+                    proteinText = meal.proteinText,
+                    carbsText = meal.carbsText,
+                    fatText = meal.fatText,
+                    trailingContent = {
+                        Text(
+                            text = meal.timeText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
                 )
             }
         }

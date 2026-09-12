@@ -1,14 +1,15 @@
-package com.example.responsiveapp.presentation.home.componet
+package com.example.responsiveapp.presentation.commoncomponent
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Grain
@@ -27,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.responsiveapp.presentation.home.model.FoodLogUiModel
 import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
@@ -37,11 +37,20 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun FoodLogCard(
-    meal: FoodLogUiModel,
+    name: String,
+    caloriesText: String,
+    proteinText: String,
+    carbsText: String,
+    fatText: String,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    isSelected: Boolean = false,
+    onClick: () -> Unit = {},
+    trailingContent: @Composable () -> Unit = {},
 ) {
 
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         border = BorderStroke(
@@ -49,7 +58,11 @@ fun FoodLogCard(
             color = MaterialTheme.colorScheme.outlineVariant,
         ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp,
@@ -70,20 +83,27 @@ fun FoodLogCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
 
-                Text(
-                    text =meal.name,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
 
-                Text(
-                    text =  meal.timeText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                    if (!subtitle.isNullOrBlank()) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+
+                trailingContent()
             }
 
             Row(
@@ -101,7 +121,7 @@ fun FoodLogCard(
                 )
 
                 Text(
-                    text = meal.caloriesText,
+                    text = caloriesText,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                 )
@@ -115,26 +135,25 @@ fun FoodLogCard(
 
                 MacroItem(
                     icon = Icons.Default.FitnessCenter,
-                    value = meal.proteinText,
+                    value = proteinText,
                     tint = ProteinColor,
                 )
 
                 MacroItem(
                     icon = Icons.Default.Grain,
-                    value = meal.carbsText,
+                    value = carbsText,
                     tint = CarbsColor,
                 )
 
                 MacroItem(
                     icon = Icons.Default.Opacity,
-                    value = meal.fatText,
+                    value = fatText,
                     tint = FatColor,
                 )
             }
         }
     }
 }
-
 @Composable
 private fun MacroItem(
     icon: ImageVector,
@@ -167,19 +186,42 @@ private fun MacroItem(
 
 @Preview(showBackground = true)
 @Composable
-private fun FoodLogCardPreview() {
-
+private fun FoodLogCardTimePreview() {
     ResponsiveAppTheme {
         FoodLogCard(
-            meal = FoodLogUiModel(
-                id = "1",
-                name = "Chicken Thigh",
-                timeText = "12:40 PM",
-                caloriesText = "209 kcal",
-                proteinText = "26g",
-                carbsText = "0g",
-                fatText = "11g",
-            ),
+            name = "Chicken Thigh",
+            caloriesText = "209 kcal",
+            proteinText = "26",
+            carbsText = "0",
+            fatText = "11",
+            trailingContent = {
+                Text(
+                    text = "12:40 PM",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FoodLogCardAddButtonPreview() {
+    ResponsiveAppTheme {
+        FoodLogCard(
+            name = "Pizza",
+            caloriesText = "276 kcal",
+            proteinText = "12",
+            carbsText = "30",
+            fatText = "11",
+            trailingContent = {
+                CircularIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = "Log meal",
+                    onClick = {},
+                )
+            },
         )
     }
 }

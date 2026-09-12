@@ -83,6 +83,10 @@ class  MainActivity : ComponentActivity() {
                                     navigateToMainScreen = {
                                         backStack.clear()
                                         backStack.add(Routes.MainScreen)
+                                    },
+                                    navigateToUserSetup = {
+                                        backStack.clear()
+                                        backStack.add(Routes.UserSetupScreen)
                                     }
                                 )
 
