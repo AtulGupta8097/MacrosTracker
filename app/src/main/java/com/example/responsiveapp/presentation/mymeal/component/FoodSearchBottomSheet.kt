@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.domain.model.FoodItem
+import com.example.responsiveapp.domain.model.MacroSummary
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
@@ -168,7 +169,7 @@ private fun PrevFoodSearchBottomSheet() {
                 id = "1334",
                 name = "Pizza",
                 brand = "Pizza Hut",
-                macroSummary = com.example.responsiveapp.domain.model.MacroSummary(
+                macroSummary = MacroSummary(
                     servingLabel = "1 slice",
                     calories = 265f,
                     fat = 0f,

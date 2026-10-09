@@ -25,26 +25,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.R
-import com.example.responsiveapp.presentation.home.model.AppBarUiState
-import com.example.responsiveapp.presentation.home.model.ProfileUiModel
+import com.example.responsiveapp.presentation.home.model.StreakWeekUiState
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
 fun HomeAppBar(
     modifier: Modifier = Modifier,
-    appBarUiState: AppBarUiState,
-    onEditProfile: () -> Unit = {},
-    onSeeMoreProfile: () -> Unit = {},
+    streak: StreakWeekUiState,
 ) {
-    var showProfilePopup by remember {
+    var showStreakPopup by remember {
         mutableStateOf(false)
     }
 
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val containerMacWidth = maxWidth
+        val containerMaxWidth = maxWidth
 
         Row(
             modifier = Modifier
@@ -78,56 +75,35 @@ fun HomeAppBar(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            ProfileAvatar(
-                initial = appBarUiState.avatarInitial,
-                size = 40.dp,
-                showBorder = true,
+            StreakIndicator(
+                streakCount = streak.currentStreakCount,
                 onClick = {
-                    showProfilePopup = true
+                    showStreakPopup = true
                 }
             )
         }
 
-        if (showProfilePopup) {
+        if (showStreakPopup) {
 
-            ProfilePopup(
-                profile = appBarUiState.profile,
-                containerMaxWidth = containerMacWidth,
+            StreakWeekPopup(
+                streak = streak,
+                containerMaxWidth = containerMaxWidth,
                 onDismiss = {
-                    showProfilePopup = false
+                    showStreakPopup = false
                 },
-                onEditProfile = {
-                    showProfilePopup = false
-                    onEditProfile()
-                },
-                onSeeMoreProfile = {
-                    showProfilePopup = false
-                    onSeeMoreProfile()
-                }
             )
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
 private fun HomeAppBarPreview() {
     ResponsiveAppTheme {
         HomeAppBar(
-            appBarUiState = AppBarUiState(
-                avatarInitial = "A",
-                profile = ProfileUiModel(
-                    name = "Atul",
-                    ageText = "24 years",
-                    heightText = "175 cm",
-                    weightText = "70.0 kg",
-                    targetWeightText = "75.0 kg",
-                    activityLabel = "Moderately Active",
-                    goalLabel = "Maintain Weight",
-                    avatarInitial = "A",
-
-                )
+            streak = StreakWeekUiState(
+                currentStreakCount = 7,
+                currentStreakText = "7",
             )
         )
     }

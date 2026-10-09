@@ -363,7 +363,7 @@ private fun RulerScale(
                                         fontSize = if (isCenter) 15.sp else 13.sp
                                     ),
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.alpha(if (distance > 160) 0f else 1f)
+                                    modifier = Modifier.alpha(1f)
                                 )
                             }
                         }

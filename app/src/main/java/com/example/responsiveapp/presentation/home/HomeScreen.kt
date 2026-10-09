@@ -30,8 +30,6 @@ import com.example.responsiveapp.presentation.ui.theme.spacing
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    onEditProfile: () -> Unit = {},
-    onSeeMoreProfile: () -> Unit = {},
     onLogFoodClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -41,8 +39,6 @@ fun HomeScreen(
         modifier = modifier,
         state = state,
         listState = rememberLazyListState(),
-        onEditProfile = onEditProfile,
-        onSeeMoreProfile = onSeeMoreProfile,
         onLogFoodClick = onLogFoodClick,
         onDateSelected = viewModel::onDateSelected,
         onPreviousWeek = viewModel::onPreviousWeek,
@@ -55,8 +51,6 @@ private fun HomeContent(
     state: HomeUiState,
     listState: LazyListState,
     modifier: Modifier = Modifier,
-    onEditProfile: () -> Unit,
-    onSeeMoreProfile: () -> Unit,
     onLogFoodClick: () -> Unit,
     onDateSelected: (Long) -> Unit,
     onPreviousWeek: () -> Unit,
@@ -73,9 +67,7 @@ private fun HomeContent(
         ) {
 
             HomeAppBar(
-                appBarUiState = state.appBar,
-                onEditProfile = onEditProfile,
-                onSeeMoreProfile = onSeeMoreProfile,
+                streak = state.streak,
             )
 
             LazyColumn(
@@ -160,8 +152,6 @@ private fun HomeContentPreview() {
         HomeContent(
             state = HomeUiState(),
             listState = rememberLazyListState(),
-            onEditProfile = {},
-            onSeeMoreProfile = {},
             onLogFoodClick = {},
             onDateSelected = {},
             onPreviousWeek = {},

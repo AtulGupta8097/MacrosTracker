@@ -19,8 +19,6 @@ sealed interface Routes : NavKey {
     @Serializable
     object ProgressScreen: Routes, NavKey
     @Serializable
-    object GoalsScreen: Routes, NavKey
-    @Serializable
     object SettingsScreen: Routes, NavKey
     @Serializable
     object FoodDatabaseScreen: Routes, NavKey

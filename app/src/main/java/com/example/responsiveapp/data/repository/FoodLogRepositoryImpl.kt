@@ -12,6 +12,7 @@ import com.example.responsiveapp.domain.model.SyncStatus
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.session.SessionManager
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions // CHANGED: needed to merge-set the date doc below
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -59,8 +60,14 @@ class FoodLogRepositoryImpl @Inject constructor(
 
             try {
 
-                collection()
+                val dateDocRef = collection()
                     .document(entity.date.toLocalDateKey())
+
+                dateDocRef
+                    .set(mapOf("date" to entity.date), SetOptions.merge())
+                    .await()
+
+                dateDocRef
                     .collection("logs")
                     .document(entity.id)
                     .set(entity.toFirestoreDto())
@@ -111,26 +118,82 @@ class FoodLogRepositoryImpl @Inject constructor(
 
     override suspend fun fetchAndCacheAll() {
 
-        try {
+        val userId = sessionManager.requireUserId()
 
-            // food_logs/{dateKey} is a date-bucket document; the actual
-            // log entries live in its "logs" subcollection.
-            val dateDocs = collection().get().await()
+        Log.d(TAG, "Fetching food logs for user: $userId")
 
-            val entities = dateDocs.documents.flatMap { dateDoc ->
-                dateDoc.reference
-                    .collection("logs")
-                    .get()
-                    .await()
-                    .documents
-                    .mapNotNull { it.toObject(FoodLogDto::class.java)?.toEntity() }
+        val dateDocs = collection()
+            .get()
+            .await()
+
+        Log.d(
+            TAG,
+            "Date documents found: ${dateDocs.documents.size}"
+        )
+
+        for (dateDoc in dateDocs.documents) {
+
+            Log.d(
+                TAG,
+                "Date document: ${dateDoc.id}"
+            )
+
+            val logsSnapshot = dateDoc.reference
+                .collection("logs")
+                .get()
+                .await()
+
+            Log.d(
+                TAG,
+                "Logs found for ${dateDoc.id}: ${logsSnapshot.documents.size}"
+            )
+
+            for (logDoc in logsSnapshot.documents) {
+                Log.d(
+                    TAG,
+                    "Raw Firestore log ${logDoc.id}: ${logDoc.data}"
+                )
             }
-
-            foodLogDao.insertAllFromRemote(entities)
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to fetch FoodLogs from Firestore", e)
         }
+
+        val entities = dateDocs.documents.flatMap { dateDoc ->
+
+            dateDoc.reference
+                .collection("logs")
+                .get()
+                .await()
+                .documents
+                .mapNotNull { document ->
+
+                    try {
+                        document
+                            .toObject(FoodLogDto::class.java)
+                            ?.toEntity()
+
+                    } catch (e: Exception) {
+
+                        Log.e(
+                            TAG,
+                            "Failed to convert document ${document.id}",
+                            e
+                        )
+
+                        null
+                    }
+                }
+        }
+
+        Log.d(
+            TAG,
+            "Total entities converted: ${entities.size}"
+        )
+
+        foodLogDao.insertAllFromRemote(entities)
+
+        Log.d(
+            TAG,
+            "Inserted entities into Room: ${entities.size}"
+        )
     }
 
     private fun collection() = firestore

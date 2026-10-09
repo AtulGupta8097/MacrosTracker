@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class UserSetupViewModel @Inject constructor(
     private val saveUserProfileUseCase: SaveUserProfileUseCase,
     private val appPrefManager: AppPrefManager,
-    private val sessionManager: SessionManager
+    sessionManager: SessionManager
 ): ViewModel() {
     private val _state = MutableStateFlow(
         UserSetupState(
