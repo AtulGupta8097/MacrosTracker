@@ -28,7 +28,7 @@ fun MyMealPhoneLayout(
     onQueryChange: (String) -> Unit,
     onFoodAdd: (FoodItem) -> Unit,
     onIngredientRemove: (String) -> Unit,
-    onDelete          : () -> Unit,
+    onDelete : () -> Unit,
     onSave: () -> Unit,
 ) {
     val isOnList = state.destination is MyMealDestination.MyMealList

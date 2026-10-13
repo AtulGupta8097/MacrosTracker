@@ -9,8 +9,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,10 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.responsiveapp.presentation.home.model.StreakDayUiModel
@@ -53,7 +57,11 @@ private const val PopupWidthFraction = 0.86f
 private const val PopupInitialScale = 0.85f
 private const val PopupTargetScale = 0.85f
 
-private val DayCircleSize = 40.dp
+private val DayCircleMaxSize = 40.dp
+private val DayCircleMinSize = 28.dp
+private val DayCircleGap = 6.dp
+
+private val TodayRingWidth = 2.dp
 
 @Composable
 fun StreakWeekPopup(
@@ -112,22 +120,38 @@ fun StreakWeekPopup(
 
                     StreakHeader(streak = streak)
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = MaterialTheme.spacing.md),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        streak.days.forEach { day ->
-                            StreakDayCircle(day = day)
-                        }
-                    }
+                    StreakDayRow(
+                        days = streak.days,
+                        modifier = Modifier.padding(top = MaterialTheme.spacing.md),
+                    )
 
                     StreakFooterMessage(
                         streak = streak,
                         modifier = Modifier.padding(top = MaterialTheme.spacing.md),
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StreakDayRow(
+    days: List<StreakDayUiModel>,
+    modifier: Modifier = Modifier,
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val dayCount = days.size.coerceAtLeast(1)
+        val totalGapWidth = DayCircleGap * (dayCount - 1)
+        val circleSize = ((maxWidth - totalGapWidth) / dayCount)
+            .coerceIn(DayCircleMinSize, DayCircleMaxSize)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            days.forEach { day ->
+                StreakDayCircle(day = day, circleSize = circleSize)
             }
         }
     }
@@ -172,22 +196,19 @@ private fun StreakHeader(streak: StreakWeekUiState) {
 }
 
 @Composable
-private fun StreakDayCircle(day: StreakDayUiModel) {
+private fun StreakDayCircle(day: StreakDayUiModel, circleSize: Dp) {
 
-    val circleBackground = when {
-        day.isLogged -> Brush.linearGradient(
+    val isHighlighted = day.isLogged
+
+    val circleBackground = if (isHighlighted) {
+        Brush.linearGradient(
             listOf(
                 MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
             )
         )
-        day.isToday -> Brush.linearGradient(
-            listOf(
-                MaterialTheme.colorScheme.primaryContainer,
-                MaterialTheme.colorScheme.primaryContainer,
-            )
-        )
-        else -> Brush.linearGradient(
+    } else {
+        Brush.linearGradient(
             listOf(
                 MaterialTheme.colorScheme.surfaceVariant,
                 MaterialTheme.colorScheme.surfaceVariant,
@@ -195,51 +216,46 @@ private fun StreakDayCircle(day: StreakDayUiModel) {
         )
     }
 
-    val contentColor = when {
-        day.isLogged -> MaterialTheme.colorScheme.onPrimary
-        day.isToday -> MaterialTheme.colorScheme.primary
-        day.isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    val letterColor = if (isHighlighted) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val statusDescription = when {
+        day.isLogged -> "logged"
+        day.isToday -> "today, not yet logged"
+        day.isFuture -> "upcoming"
+        else -> "not logged"
+    }
+
+    Box(
+        modifier = Modifier
+            .size(circleSize)
+            .clip(CircleShape)
+            .background(circleBackground)
+            .then(
+                if (day.isToday && !isHighlighted) {
+                    Modifier.border(
+                        width = TodayRingWidth,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape,
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .semantics {
+                contentDescription = "${day.weekdayLabel} ${day.dayNumber}, $statusDescription"
+            },
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = day.weekdayLabel.take(1),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = if (day.isToday) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            },
+            fontSize = (circleSize.value * 0.4f).sp,
+            fontWeight = FontWeight.Bold,
+            color = letterColor,
         )
-
-        Box(
-            modifier = Modifier
-                .padding(top = MaterialTheme.spacing.xs)
-                .size(DayCircleSize)
-                .clip(CircleShape)
-                .background(circleBackground),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (day.isLogged) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Logged",
-                    tint = contentColor,
-                    modifier = Modifier.size(18.dp),
-                )
-            } else {
-                Text(
-                    text = day.dayNumber,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = contentColor,
-                )
-            }
-        }
     }
 }
 
