@@ -5,6 +5,7 @@ import com.example.responsiveapp.domain.repository.DailySummaryRepository
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.MacroTargetRepository
 import com.example.responsiveapp.domain.repository.MyMealRepository
+import com.example.responsiveapp.domain.repository.SavedFoodRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.example.responsiveapp.domain.repository.WeightRepository
 import kotlinx.coroutines.coroutineScope
@@ -22,6 +23,7 @@ class RestoreUserDataUseCase @Inject constructor(
     private val customFoodRepository: CustomFoodRepository,
     private val myMealRepository: MyMealRepository,
     private val weightRepository: WeightRepository,
+    private val savedFoodRepository: SavedFoodRepository,
 ) {
     suspend operator fun invoke() = coroutineScope {
         
@@ -35,5 +37,6 @@ class RestoreUserDataUseCase @Inject constructor(
         launch { customFoodRepository.fetchAndCacheAll() }
         launch { myMealRepository.fetchAndCacheAll() }
         launch { weightRepository.fetchAndCacheAll() }
+        launch { savedFoodRepository.fetchAndCacheAll() }
     }
 }

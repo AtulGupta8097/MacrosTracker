@@ -5,6 +5,7 @@ import com.example.responsiveapp.domain.repository.DailySummaryRepository
 import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.MacroTargetRepository
 import com.example.responsiveapp.domain.repository.MyMealRepository
+import com.example.responsiveapp.domain.repository.SavedFoodRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.example.responsiveapp.domain.repository.WeightRepository
 import javax.inject.Inject
@@ -19,6 +20,7 @@ class SyncManagerImpl @Inject constructor(
     private val dailySummaryRepository: DailySummaryRepository,
     private val userProfileRepository: UserProfileRepository,
     private val weightRepository: WeightRepository,
+    private val savedFoodRepository: SavedFoodRepository,
 
     ) : SyncManager {
 
@@ -31,6 +33,7 @@ class SyncManagerImpl @Inject constructor(
             SyncType.DAILY_SUMMARY -> dailySummaryRepository.syncPending()
             SyncType.USER_PROFILE -> userProfileRepository.syncPending()
             SyncType.WEIGHT_LOG -> weightRepository.syncPending()
+            SyncType.SAVED_FOOD -> savedFoodRepository.syncPending()
 
         }
     }

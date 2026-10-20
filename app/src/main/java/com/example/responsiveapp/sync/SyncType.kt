@@ -7,5 +7,6 @@ enum class SyncType {
     WEIGHT_LOG,
     MACRO_TARGET,
     DAILY_SUMMARY,
-    USER_PROFILE
+    USER_PROFILE,
+    SAVED_FOOD,
 }

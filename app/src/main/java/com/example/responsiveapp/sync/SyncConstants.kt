@@ -11,6 +11,7 @@ object SyncConstants {
         SyncType.DAILY_SUMMARY -> "sync_daily_summary"
         SyncType.USER_PROFILE -> "sync_user_profile"
         SyncType.WEIGHT_LOG -> "sync_weight_log"
+        SyncType.SAVED_FOOD -> "sync_saved_food"
 
     }
 }

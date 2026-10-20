@@ -11,6 +11,7 @@ import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
+import com.example.responsiveapp.data.local.dao.SavedFoodDao
 import com.example.responsiveapp.data.local.dao.UserProfileDao
 import com.example.responsiveapp.data.local.dao.WeightLogDao
 import com.example.responsiveapp.data.remote.api.FatSecretApiService
@@ -21,6 +22,7 @@ import com.example.responsiveapp.data.repository.FoodLogRepositoryImpl
 import com.example.responsiveapp.data.repository.FoodRepositoryImpl
 import com.example.responsiveapp.data.repository.MacroTargetRepositoryImpl
 import com.example.responsiveapp.data.repository.MyMealRepositoryImpl
+import com.example.responsiveapp.data.repository.SavedFoodRepositoryImpl
 import com.example.responsiveapp.data.repository.UserProfileRepositoryImpl
 import com.example.responsiveapp.data.repository.WeightRepositoryImpl
 import com.example.responsiveapp.domain.repository.AuthRepository
@@ -30,6 +32,7 @@ import com.example.responsiveapp.domain.repository.FoodLogRepository
 import com.example.responsiveapp.domain.repository.FoodRepository
 import com.example.responsiveapp.domain.repository.MacroTargetRepository
 import com.example.responsiveapp.domain.repository.MyMealRepository
+import com.example.responsiveapp.domain.repository.SavedFoodRepository
 import com.example.responsiveapp.domain.repository.UserProfileRepository
 import com.example.responsiveapp.domain.repository.WeightRepository
 import com.example.responsiveapp.domain.session.SessionManager
@@ -189,6 +192,16 @@ object AppModule {
         scheduler: SyncScheduler,
     ): WeightRepository =
         WeightRepositoryImpl(dao, firestore, sessionManager, scheduler)
+
+    @Singleton
+    @Provides
+    fun provideSavedFoodRepository(
+        dao: SavedFoodDao,
+        firestore: FirebaseFirestore,
+        sessionManager: SessionManager,
+        scheduler: SyncScheduler,
+    ): SavedFoodRepository =
+        SavedFoodRepositoryImpl(dao, firestore, sessionManager, scheduler)
 
 }
 
