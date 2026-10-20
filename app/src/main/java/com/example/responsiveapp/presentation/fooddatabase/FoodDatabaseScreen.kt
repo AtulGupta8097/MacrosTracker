@@ -23,6 +23,7 @@ import com.example.responsiveapp.presentation.foodbrowse.FoodBrowse
 import com.example.responsiveapp.presentation.commoncomponent.TopBar
 import com.example.responsiveapp.presentation.myfood.MyFoodScreen
 import com.example.responsiveapp.presentation.mymeal.MyMealScreen
+import com.example.responsiveapp.presentation.savedscan.SavedScansScreen
 import com.example.responsiveapp.presentation.ui.theme.grey
 import kotlinx.coroutines.launch
 
@@ -129,7 +130,11 @@ fun FoodDatabaseScreen(
                         MyFoodScreen(onRootChanged = { isAtRoot = it })
                     }
 
-                    FoodTab.SAVED_SCANS -> {}
+                    FoodTab.SAVED_SCANS -> {
+                        SavedScansScreen(
+                            onRootChanged = { isAtRoot = it }
+                        )
+                    }
                 }
             }
         }
