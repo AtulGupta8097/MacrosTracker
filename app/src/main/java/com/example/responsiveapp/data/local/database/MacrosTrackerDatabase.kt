@@ -14,6 +14,7 @@ import com.example.responsiveapp.data.local.dao.FoodLogDao
 import com.example.responsiveapp.data.local.dao.FoodSearchDao
 import com.example.responsiveapp.data.local.dao.MacroTargetDao
 import com.example.responsiveapp.data.local.dao.MyMealsDao
+import com.example.responsiveapp.data.local.dao.SavedFoodDao
 import com.example.responsiveapp.data.local.dao.UserProfileDao
 import com.example.responsiveapp.data.local.dao.WeightLogDao
 import com.example.responsiveapp.data.local.entity.CustomFoodEntity
@@ -23,6 +24,7 @@ import com.example.responsiveapp.data.local.entity.FoodItemEntity
 import com.example.responsiveapp.data.local.entity.FoodLogEntity
 import com.example.responsiveapp.data.local.entity.MacroTargetEntity
 import com.example.responsiveapp.data.local.entity.MyMealsEntity
+import com.example.responsiveapp.data.local.entity.SavedFoodEntity
 import com.example.responsiveapp.data.local.entity.SearchQueryEntity
 import com.example.responsiveapp.data.local.entity.SearchResultCrossRef
 import com.example.responsiveapp.data.local.entity.UserProfileEntity
@@ -41,8 +43,9 @@ import com.example.responsiveapp.data.local.entity.WeightLogEntity
         MacroTargetEntity::class,
         UserProfileEntity::class,
         WeightLogEntity::class,
+        SavedFoodEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = false,
 )
 @TypeConverters(
@@ -63,6 +66,7 @@ abstract class MacrosTrackerDatabase : RoomDatabase() {
     abstract fun userProfileDao(): UserProfileDao
 
     abstract fun weightLogDao(): WeightLogDao
+    abstract fun savedFoodDao(): SavedFoodDao
 
 
     companion object {
