@@ -10,6 +10,9 @@ import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.domain.model.foodlog.LogFoodRequest
 import com.example.responsiveapp.domain.model.scale
 import com.example.responsiveapp.domain.use_case.food.GetFoodByIdUseCase
+import com.example.responsiveapp.domain.use_case.food.ObserveIsFoodSavedUseCase
+import com.example.responsiveapp.domain.use_case.food.RemoveSavedFoodUseCase
+import com.example.responsiveapp.domain.use_case.food.SaveFoodUseCase
 import com.example.responsiveapp.domain.use_case.food.SearchFoodsUseCase
 import com.example.responsiveapp.domain.use_case.foodlog.LogFoodUseCase
 import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
@@ -42,7 +45,10 @@ private const val TAG = "FoodBrowseViewModel"
 class FoodBrowseViewModel @Inject constructor(
     private val searchFoods: SearchFoodsUseCase,
     private val getFoodById: GetFoodByIdUseCase,
-    private val foodLog: LogFoodUseCase
+    private val foodLog: LogFoodUseCase,
+    private val observeIsFoodSaved: ObserveIsFoodSavedUseCase,
+    private val saveFood: SaveFoodUseCase,
+    private val removeSavedFood: RemoveSavedFoodUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FoodBrowseState())
@@ -53,23 +59,29 @@ class FoodBrowseViewModel @Inject constructor(
     val events = _events.asSharedFlow()
 
     val foodDetailUiState: StateFlow<FoodDetailUiState> = _state
-        .map { s ->
+        .flatMapLatest { s ->
             when {
-                s.isDetailLoading -> FoodDetailUiState.Loading
+                s.isDetailLoading -> flowOf(FoodDetailUiState.Loading)
 
-                s.detailError != null -> FoodDetailUiState.Error(s.detailError)
+                s.detailError != null -> flowOf(FoodDetailUiState.Error(s.detailError))
 
-                s.selectedFood != null && s.selectedServing != null ->
-                    FoodDetailUiState.Success(
-                        foodName = s.selectedFood.name,
-                        foodBrand = s.selectedFood.brand,
-                        servings = s.selectedFood.servings,
-                        selectedServing = s.selectedServing,
-                        quantity = s.quantity,
-                        scaledNutrition = s.selectedServing.nutrition.scale(s.quantity),
-                    )
+                s.selectedFood != null && s.selectedServing != null -> {
+                    val food = s.selectedFood
+                    val serving = s.selectedServing
+                    observeIsFoodSaved(food.id).map { isSaved ->
+                        FoodDetailUiState.Success(
+                            foodName = food.name,
+                            foodBrand = food.brand,
+                            servings = food.servings,
+                            selectedServing = serving,
+                            quantity = s.quantity,
+                            scaledNutrition = serving.nutrition.scale(s.quantity),
+                            isSaved = isSaved,
+                        )
+                    }
+                }
 
-                else -> FoodDetailUiState.Loading
+                else -> flowOf(FoodDetailUiState.Loading)
             }
         }
         .distinctUntilChanged()
@@ -290,6 +302,19 @@ class FoodBrowseViewModel @Inject constructor(
                 _state.update {
                     it.copy(isLogging = false)
                 }
+            }
+        }
+    }
+
+    fun onSaveToggleClicked() {
+        val food = _state.value.selectedFood ?: return
+        val isSaved = (foodDetailUiState.value as? FoodDetailUiState.Success)?.isSaved ?: false
+
+        viewModelScope.launch {
+            if (isSaved) {
+                removeSavedFood(food.id)
+            } else {
+                saveFood(food)
             }
         }
     }

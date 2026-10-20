@@ -59,6 +59,7 @@ fun FoodBrowse(
                     onBack = viewModel::onBackFromDetail,
                     onServingSelected = viewModel::onServingSelected,
                     onQuantityChanged = viewModel::onQuantityChanged,
+                    onSaveToggle = viewModel::onSaveToggleClicked,
                     onLog = viewModel::logFoodClicked
                 )
             }
@@ -72,7 +73,8 @@ fun FoodBrowse(
                     onFirstVisibleFoodChanged = viewModel::onFirstVisibleFoodChanged,
                     onServingSelected = viewModel::onServingSelected,
                     onQuantityChanged = viewModel::onQuantityChanged,
-                    onLog = viewModel::logFoodClicked
+                    onSaveToggle = viewModel::onSaveToggleClicked,
+                    onLog = viewModel::logFoodClicked,
                 )
             }
         }

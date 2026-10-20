@@ -26,6 +26,7 @@ fun FoodDetailScreen(
     onBack: () -> Unit,
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
+    onSaveToggle: () -> Unit = {},
     onLog: () -> Unit,
 
 ) {
@@ -64,6 +65,8 @@ fun FoodDetailScreen(
                     onServingSelected = onServingSelected,
                     onQuantityChanged = onQuantityChanged,
                     onBack = onBack,
+                    isSaved = uiState.isSaved,
+                    onSaveToggle = onSaveToggle,
                     onLog = onLog
                 )
             }

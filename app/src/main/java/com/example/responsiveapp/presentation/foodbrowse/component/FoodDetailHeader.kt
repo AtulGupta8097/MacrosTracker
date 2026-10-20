@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +49,9 @@ fun FoodDetailHeader(
     foodBrand: String? = null,
     selectedServing: Serving,
     nutrition: NutritionInfo,
-    onBack: () -> Unit
+    isSaved: Boolean = false,
+    onBack: () -> Unit,
+    onSaveToggle: () -> Unit = {},
 ) {
 
     val inverseSurface = MaterialTheme.colorScheme.inverseSurface
@@ -64,6 +68,7 @@ fun FoodDetailHeader(
     val caloriesInt = remember(nutrition.calories) {
         nutrition.calories.roundToInt()
     }
+
 
     Box(
         modifier = Modifier
@@ -105,6 +110,18 @@ fun FoodDetailHeader(
                             )
                         )
                     }
+                }
+
+                IconButton(onClick = onSaveToggle) {
+                    Icon(
+                        imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = if (isSaved) "Remove from saved" else "Save food",
+                        tint = if (isSaved) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.inverseOnSurface
+                        }
+                    )
                 }
             }
 

@@ -36,10 +36,12 @@ fun FoodDetailContent(
     selectedServing: Serving,
     quantity: Float,
     scaledNutrition: NutritionInfo,
+    isSaved: Boolean = false,
     onServingSelected: (Serving) -> Unit,
     onQuantityChanged: (Float) -> Unit,
     onBack: () -> Unit,
     onLog: () -> Unit,
+    onSaveToggle: () -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier,
@@ -52,6 +54,8 @@ fun FoodDetailContent(
                 selectedServing = selectedServing,
                 nutrition = scaledNutrition,
                 onBack = onBack,
+                isSaved = isSaved,
+                onSaveToggle = onSaveToggle,
             )
         }
 

@@ -18,5 +18,6 @@ sealed class FoodDetailUiState {
         val selectedServing: Serving,
         val quantity: Float,
         val scaledNutrition: NutritionInfo,
+        val isSaved: Boolean = false,
     ) : FoodDetailUiState()
 }
