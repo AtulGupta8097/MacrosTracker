@@ -39,6 +39,9 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
 
     </application>
 

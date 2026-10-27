@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// CHANGED: new. Backs the "Saved scans" tab.
 @HiltViewModel
 class SavedScansViewModel @Inject constructor(
     observeSavedFoods: ObserveSavedFoodsUseCase,
@@ -45,9 +44,6 @@ class SavedScansViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    // Every food here is saved by definition, and the full FoodDetail is
-    // already in memory, so there is no loading/error branch and isSaved is
-    // always true.
     val foodDetailUiState: StateFlow<FoodDetailUiState> = _state
         .map { s ->
             val food = s.selectedFood

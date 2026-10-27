@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -58,11 +59,8 @@ fun CreateMealScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    val saveEnabled = if (isEditMode) {
-        hasUnsavedChanges && mealName.isNotBlank() && ingredients.isNotEmpty()
-    } else {
-        true // Always enable for create
-    }
+    val saveEnabled =
+        !isEditMode || hasUnsavedChanges && mealName.isNotBlank() && ingredients.isNotEmpty() // Always enable for create
 
     Column(
         modifier = modifier
@@ -91,17 +89,16 @@ fun CreateMealScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(scrollState)
-                .padding(MaterialTheme.spacing.md)
         ) {
 
             Text(
-                text = "Meal Name",
+                text = " Meal Name",
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp
                 ),
-                modifier = Modifier.padding(start = MaterialTheme.spacing.sm)
+                modifier = Modifier.padding(start = MaterialTheme.spacing.md)
             )
 
             CustomInputField(
@@ -109,12 +106,16 @@ fun CreateMealScreen(
                 onMealNameChanged = onMealNameChanged,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = MaterialTheme.spacing.sm),
+                    .padding(top = MaterialTheme.spacing.sm, start = MaterialTheme.spacing.md, end = MaterialTheme.spacing.md),
                 placeholder = "e.g. Post-Workout Bowl"
             )
 
             MacroSummarySection(
-                modifier = Modifier.padding(top = MaterialTheme.spacing.md),
+                modifier = Modifier.padding(
+                    top = MaterialTheme.spacing.md,
+                    start = MaterialTheme.spacing.md,
+                    end = MaterialTheme.spacing.md
+                ),
                 totalCal = totalCal,
                 totalProtein = totalProtein,
                 totalCarbs = totalCarbs,
@@ -129,8 +130,8 @@ fun CreateMealScreen(
                     .padding(
                         top = MaterialTheme.spacing.lg,
                         bottom = 0.dp,
-                        start = MaterialTheme.spacing.sm,
-                        end = MaterialTheme.spacing.sm
+                        start = MaterialTheme.spacing.md,
+                        end = MaterialTheme.spacing.md
                     )
             ) {
                 Text(
@@ -171,7 +172,11 @@ fun CreateMealScreen(
 
             AnimatedVisibility(visible = ingredients.isEmpty()) {
                 EmptyIngredientState(
-                    modifier = Modifier.padding(top = MaterialTheme.spacing.lg),
+                    modifier = Modifier.padding(
+                        top = MaterialTheme.spacing.lg,
+                        start = MaterialTheme.spacing.md,
+                        end = MaterialTheme.spacing.md
+                    ),
                     onAddItem = onIngredientAdd
                 )
             }
@@ -179,7 +184,10 @@ fun CreateMealScreen(
             AnimatedVisibility(
                 visible = ingredients.isNotEmpty(),
                 modifier = Modifier
-                    .padding(top = MaterialTheme.spacing.lg)
+                    .padding(
+                        top = MaterialTheme.spacing.lg,
+                        start = MaterialTheme.spacing.md,
+                        end = MaterialTheme.spacing.md)
 
             ) {
                 Column(
@@ -194,23 +202,24 @@ fun CreateMealScreen(
                 }
             }
 
-        }
-        CustomButton(
-            text = if(isEditMode) "Edit Meal" else "Save Meal",
-            onClick = onSave,
-            enabled = saveEnabled,
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 80.dp,max = 90.dp)
-                .padding(
-                    vertical = MaterialTheme.spacing.lg,
-                    horizontal = MaterialTheme.spacing.md
-                ),
-            buttonColors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+            CustomButton(
+                text = if(isEditMode) "Edit Meal" else "Save Meal",
+                onClick = onSave,
+                enabled = saveEnabled,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .navigationBarsPadding()
+                    .padding(MaterialTheme.spacing.md)
+                ,
+                buttonColors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
             )
-        )
+
+        }
+
     }
 }
 

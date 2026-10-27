@@ -22,7 +22,7 @@ class FatSecretAuthInterceptor @Inject constructor(
         val token = runBlocking {
             try {
                 tokenManager.getValidToken()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }

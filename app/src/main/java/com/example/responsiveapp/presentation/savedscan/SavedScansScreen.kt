@@ -28,10 +28,6 @@ import com.example.responsiveapp.presentation.foodbrowse.FoodDetailScreen
 import com.example.responsiveapp.presentation.foodbrowse.component.FoodCard
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
-// CHANGED: new. Lists the foods saved with the bookmark on Food Detail, using
-// the same FoodCard as Food Browse, and opens the same FoodDetailScreen when a
-// card is tapped. The saved FoodDetail is already local, so there is no
-// by-id network lookup on click.
 @Composable
 fun SavedScansScreen(
     viewModel: SavedScansViewModel = hiltViewModel(),

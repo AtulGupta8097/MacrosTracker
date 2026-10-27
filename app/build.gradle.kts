@@ -1,5 +1,8 @@
 import java.util.Properties
 
+val releaseAdMobAppId = "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"
+val releaseBannerAdUnitId = "ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ"
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -30,12 +33,20 @@ android {
     }
 
     buildTypes {
+
+        debug {
+            // Google's official TEST IDs
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["admobAppId"] = releaseAdMobAppId
+            buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"$releaseBannerAdUnitId\"")
         }
     }
     compileOptions {
@@ -129,5 +140,9 @@ dependencies {
 
     //MlKit
     implementation(libs.mlkit.barcode.scanning)
+
+    //AdMob
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
 
 }

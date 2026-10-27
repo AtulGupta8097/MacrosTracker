@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.responsiveapp.presentation.commoncomponent.BannerAd
 import com.example.responsiveapp.presentation.home.componet.FoodLogsSection
 import com.example.responsiveapp.presentation.home.componet.HealthMetricsSection
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
@@ -86,6 +87,9 @@ private fun HomeContent(
                         onNextWeek = onNextWeek,
                     )
                 }
+                item {
+                    BannerAd(modifier = Modifier.fillMaxWidth())
+                }
 
                 item(key = "nutrition") {
                     LoadingContent(
@@ -150,7 +154,7 @@ private inline fun LoadingContent(
 private fun HomeContentPreview() {
     ResponsiveAppTheme {
         HomeContent(
-            state = HomeUiState(),
+            state = HomeUiState(isLoading = false),
             listState = rememberLazyListState(),
             onLogFoodClick = {},
             onDateSelected = {},

@@ -6,11 +6,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.mymeals.MyMeal
 import com.example.responsiveapp.presentation.mymeal.MyMealDestination
 import com.example.responsiveapp.presentation.mymeal.MyMealUIState
 import com.example.responsiveapp.presentation.mymeal.TotalMacros
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,5 +90,28 @@ fun MyMealPhoneLayout(
         }
 
         else -> Unit
+    }
+}
+
+@Preview
+@Composable
+private fun PrevMyMealPhone() {
+    ResponsiveAppTheme {
+        MyMealPhoneLayout(
+            state = MyMealUIState(),
+            totalMacros = TotalMacros(),
+            onRootChanged = {},
+            onMealCardClick = {},
+            onMealNameChange = {},
+            onCreateMealClick = {},
+            onShowAddSheet = {},
+            onHideAddSheet = {},
+            onQueryChange = {},
+            onFoodAdd = {},
+            onIngredientRemove = {},
+            onSave = {},
+            onDelete = {},
+            onBack = {},
+        )
     }
 }

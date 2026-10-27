@@ -40,6 +40,7 @@ import com.example.responsiveapp.R
 import com.example.responsiveapp.core.navigation.Routes
 import com.example.responsiveapp.presentation.ui.theme.spacing
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun SplashScreen(
@@ -71,9 +72,9 @@ fun SplashScreen(
                 easing = {it}
             )
         )
-        delay(500)
+        delay(500.milliseconds)
         isText = true
-        delay(1000)
+        delay(1000.milliseconds)
         when(destination) {
             Routes.MainScreen -> navigateToMainScreen.invoke()
             Routes.SignInScreen -> navigateToSignInScreen.invoke()
