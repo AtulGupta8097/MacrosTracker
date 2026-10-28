@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.responsiveapp.presentation.commoncomponent.BannerAd
+import com.example.responsiveapp.presentation.home.componet.DailyGreeting
 import com.example.responsiveapp.presentation.home.componet.FoodLogsSection
 import com.example.responsiveapp.presentation.home.componet.HealthMetricsSection
 import com.example.responsiveapp.presentation.home.componet.HomeAppBar
@@ -25,6 +26,9 @@ import com.example.responsiveapp.presentation.home.componet.nutrition.NutritionP
 import com.example.responsiveapp.presentation.home.componet.skeleton.FoodLogsSectionSkeleton
 import com.example.responsiveapp.presentation.home.componet.skeleton.HealthMetricsSectionSkeleton
 import com.example.responsiveapp.presentation.home.componet.skeleton.NutritionSectionSkeleton
+import com.example.responsiveapp.presentation.home.model.DateItemUiModel
+import com.example.responsiveapp.presentation.home.model.DatePickerUiState
+import com.example.responsiveapp.presentation.home.model.WeekUiState
 import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
@@ -78,6 +82,13 @@ private fun HomeContent(
                 verticalArrangement = Arrangement.spacedBy(spacing.md),
             ) {
 
+                item(key = "greeting"){
+                    DailyGreeting(
+                        modifier = Modifier.fillMaxWidth(),
+                        name = state.userName,
+                    )
+                }
+
                 item(key = "datePicker") {
                     WeeklyDatePicker(
                         modifier = Modifier.fillMaxWidth(),
@@ -86,9 +97,6 @@ private fun HomeContent(
                         onPreviousWeek = onPreviousWeek,
                         onNextWeek = onNextWeek,
                     )
-                }
-                item {
-                    BannerAd(modifier = Modifier.fillMaxWidth())
                 }
 
                 item(key = "nutrition") {
@@ -131,6 +139,12 @@ private fun HomeContent(
                         )
                     }
                 }
+
+                if (!state.isLoading) {
+                    item {
+                        BannerAd(modifier = Modifier.fillMaxWidth())
+                    }
+                }
             }
         }
     }
@@ -154,7 +168,72 @@ private inline fun LoadingContent(
 private fun HomeContentPreview() {
     ResponsiveAppTheme {
         HomeContent(
-            state = HomeUiState(isLoading = false),
+            state = HomeUiState(
+                isLoading = false,
+                datePicker = DatePickerUiState(
+                    week = WeekUiState(
+                        weekStartDate = 0L,
+                        days = listOf(
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Sun",
+                                dayLabel = "1",
+                                isSelected = false,
+                                isToday = false,
+                                isFuture = false,
+                            ),
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Mon",
+                                dayLabel = "2",
+                                isSelected = false,
+                                isToday = false,
+                                isFuture = false,
+                            ),
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Tue",
+                                dayLabel = "3",
+                                isSelected = true,
+                                isToday = true,
+                                isFuture = false,
+                            ),
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Wed",
+                                dayLabel = "4",
+                                isSelected = false,
+                                isToday = false,
+                                isFuture = true,
+                            ),
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Thu",
+                                dayLabel = "5",
+                                isSelected = false,
+                                isToday = false,
+                                isFuture = true,
+                            ),
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Fri",
+                                dayLabel = "6",
+                                isSelected = false,
+                                isToday = false,
+                                isFuture = true,
+                            ),
+                            DateItemUiModel(
+                                epochMillis = 0L,
+                                weekdayLabel = "Sat",
+                                dayLabel = "7",
+                                isSelected = false,
+                                isToday = false,
+                                isFuture = true,
+                            )
+                        ),
+                    )
+                )
+            ),
             listState = rememberLazyListState(),
             onLogFoodClick = {},
             onDateSelected = {},

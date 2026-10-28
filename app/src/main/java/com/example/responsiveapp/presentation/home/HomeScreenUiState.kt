@@ -14,6 +14,7 @@ import com.example.responsiveapp.presentation.home.model.WeekUiState
 data class HomeUiState(
     val isLoading: Boolean = true,
     val streak: StreakWeekUiState = StreakWeekUiState(),
+    val userName: String = "",
     val datePicker: DatePickerUiState = DatePickerUiState(
         week = WeekUiState(),
     ),

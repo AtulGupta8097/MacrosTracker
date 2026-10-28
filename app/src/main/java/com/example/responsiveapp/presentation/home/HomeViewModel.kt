@@ -8,10 +8,12 @@ import com.example.responsiveapp.data.mapper.toDatePickerUiState
 import com.example.responsiveapp.domain.model.DailySummary
 import com.example.responsiveapp.domain.model.foodlog.FoodLog
 import com.example.responsiveapp.domain.model.macros.MacroTarget
+import com.example.responsiveapp.domain.session.SessionManager
 import com.example.responsiveapp.domain.use_case.dailysummary.ObserveDailySummaryForDateUseCase
 import com.example.responsiveapp.domain.use_case.foodlog.ObserveFoodLogsForDateUseCase
 import com.example.responsiveapp.domain.use_case.foodlog.ObserveLoggedDatesUseCase
 import com.example.responsiveapp.domain.use_case.macrostarget.GetCurrentMacroTargetUseCase
+import com.example.responsiveapp.domain.use_case.profile.GetUserNameUseCase
 import com.example.responsiveapp.domain.use_case.streak.ObserveStreakStatsUseCase
 import com.example.responsiveapp.presentation.home.mapper.buildStreakWeekUiState
 import com.example.responsiveapp.presentation.home.mapper.toHealthMetricsUiState
@@ -45,6 +47,7 @@ class HomeViewModel @Inject constructor(
     private val getCurrentMacroTargetUseCase: GetCurrentMacroTargetUseCase,
     private val observeStreakStatsUseCase: ObserveStreakStatsUseCase,
     private val observeLoggedDatesUseCase: ObserveLoggedDatesUseCase,
+    private val getUserName: GetUserNameUseCase,
 ) : ViewModel() {
 
     private val today = DateUtils.today()
@@ -66,6 +69,7 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
+
     /**
      * Every feature that depends on the selected date
      * should observe this flow.
@@ -86,6 +90,14 @@ class HomeViewModel @Inject constructor(
             emit(getCurrentMacroTargetUseCase())
         }
 
+    private val userNameFlow = flow {
+        emit(
+            runCatching {
+                getUserName().orEmpty().trim()
+            }.getOrDefault("")
+        )
+    }
+
     private val coreDataFlow =
         combine(
             foodLogsFlow,
@@ -105,10 +117,12 @@ class HomeViewModel @Inject constructor(
             _dateState,
             observeStreakStatsUseCase(),
             observeLoggedDatesUseCase(),
-        ) { core, dateNav, streakStats, loggedDates ->
+            userNameFlow,
+        ) { core, dateNav, streakStats, loggedDates, userName ->
 
             HomeUiState(
                 isLoading = false,
+                userName = userName,
                 streak = buildStreakWeekUiState(
                     streakStats = streakStats,
                     loggedDates = loggedDates,
@@ -120,13 +134,10 @@ class HomeViewModel @Inject constructor(
                 healthMetrics = core.macroTarget.toHealthMetricsUiState(),
                 recentMeals = core.foodLogs.toRecentMealsUiState(),
             )
-        }
-            .onEach { newState ->
-                _state.value = newState
-            }
-            .launchIn(viewModelScope)
+        }.onEach { newState ->
+            _state.value = newState
+        }.launchIn(viewModelScope)
     }
-
 
 
     fun onDateSelected(date: Long) {

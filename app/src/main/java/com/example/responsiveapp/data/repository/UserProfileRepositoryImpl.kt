@@ -44,6 +44,10 @@ class UserProfileRepositoryImpl @Inject constructor(
         scheduler.schedule(SyncType.USER_PROFILE)
     }
 
+    override suspend fun getUserName(): String? {
+       return sessionManager.currentUserName()
+    }
+
     override suspend fun getUserProfile(): UserProfile? {
 
         dao.getProfile()?.let {

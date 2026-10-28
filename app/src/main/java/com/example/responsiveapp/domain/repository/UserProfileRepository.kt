@@ -11,5 +11,7 @@ interface UserProfileRepository {
 
     suspend fun getUserProfile(): UserProfile?
 
+    suspend fun getUserName(): String?
+
     suspend fun syncPending()
 }

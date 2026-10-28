@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.Point
@@ -37,6 +39,7 @@ import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.example.responsiveapp.presentation.progress.model.MacroChartPointUi
 import com.example.responsiveapp.presentation.progress.model.ProgressRange
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import kotlin.math.atan2
 import kotlin.math.roundToInt
 
@@ -62,6 +65,8 @@ fun NutritionTrendChart(
     LaunchedEffect(points) {
         isVisible = true
     }
+
+    val axisLabelColor = colorScheme.onSurfaceVariant
 
     val enterProgress by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
@@ -114,6 +119,10 @@ fun NutritionTrendChart(
                 .axisStepSize(stepWidth)
                 .indicatorLineWidth(0.dp)
                 .steps(points.size - 1)
+                .axisLabelColor(axisLabelColor)
+                .axisLineColor(
+                    axisLabelColor.copy(alpha = 0.35f),
+                )
                 .labelData { i ->
                     val dayNumber = i + 1
 
@@ -138,6 +147,10 @@ fun NutritionTrendChart(
                 .indicatorLineWidth(0.dp)
                 .labelAndAxisLinePadding(20.dp)
                 .axisOffset(20.dp)
+                .axisLabelColor(axisLabelColor)
+                .axisLineColor(
+                    axisLabelColor.copy(alpha = 0.35f),
+                )
                 .labelData { i ->
                     (i * (axisMaxY / Y_AXIS_STEPS))
                         .roundToInt()

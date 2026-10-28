@@ -5,11 +5,24 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,8 +31,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.linechart.LineChart
@@ -42,6 +61,7 @@ private const val EnterAnimationDurationMs = 400
 private val Y_AXIS_WIDTH = 36.dp
 private val CHART_END_PADDING = 16.dp
 private const val MIN_VISIBLE_WEIGHT_RANGE = 8f
+private val SingleEntryCardShape = RoundedCornerShape(24.dp)
 
 @Composable
 fun WeightTrendChart(
@@ -49,6 +69,11 @@ fun WeightTrendChart(
     modifier: Modifier = Modifier,
 ) {
     if (points.isEmpty()) return
+
+    if (points.size == 1) {
+        SingleWeightEntry(point = points[0], modifier = modifier)
+        return
+    }
 
     val colorScheme = MaterialTheme.colorScheme
 
@@ -301,7 +326,156 @@ fun WeightTrendChart(
     }
 }
 
-private fun formatWeight(weight: Float, ): String {
+@Composable
+private fun SingleWeightEntry(
+    point: WeightChartPointUi,
+    modifier: Modifier = Modifier,
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = ChartHeight)
+            .semantics(mergeDescendants = true) { },
+        shape = SingleEntryCardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.surfaceContainerLow,
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = colorScheme.outlineVariant.copy(alpha = 0.55f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "YOUR FIRST WEIGH-IN",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colorScheme.primary,
+                )
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = formatWeight(point.weight),
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = colorScheme.onSurface,
+                        maxLines = 1,
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "kg",
+                        modifier = Modifier.padding(bottom = 7.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Text(
+                    text = point.label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Great start!",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = colorScheme.onSurface,
+                )
+                Text(
+                    text = "Add another weigh-in to see your trend take shape.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onSurfaceVariant,
+                )
+                TrendPreviewHint()
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrendPreviewHint() {
+    val colorScheme = MaterialTheme.colorScheme
+
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        if (maxWidth < 340.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                TrendPreviewLine()
+                Text(
+                    text = "A preview of your weight trend",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TrendPreviewLine()
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "A preview of your weight trend",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrendPreviewLine() {
+    val colorScheme = MaterialTheme.colorScheme
+    val accent = colorScheme.primary
+    val outline = colorScheme.outlineVariant
+    val strokeWidth = 2.dp
+    val dotRadius = 3.dp
+
+    Canvas(modifier = Modifier.size(width = 48.dp, height = 24.dp)) {
+        val lineY = size.height / 2f
+        val startX = dotRadius.toPx()
+        val endX = size.width - dotRadius.toPx()
+        val color = accent.copy(alpha = 0.42f)
+
+        drawLine(
+            color = color,
+            start = Offset(startX, lineY),
+            end = Offset(endX, lineY),
+            strokeWidth = strokeWidth.toPx(),
+            pathEffect = PathEffect.dashPathEffect(
+                floatArrayOf(3.dp.toPx(), 3.dp.toPx()),
+            ),
+        )
+        drawCircle(
+            color = accent,
+            radius = dotRadius.toPx(),
+            center = Offset(startX, lineY),
+        )
+        drawCircle(
+            color = outline,
+            radius = dotRadius.toPx(),
+            center = Offset(size.width / 2f, lineY),
+            style = Stroke(width = strokeWidth.toPx()),
+        )
+        drawCircle(
+            color = outline,
+            radius = dotRadius.toPx(),
+            center = Offset(endX, lineY),
+            style = Stroke(width = strokeWidth.toPx()),
+        )
+    }
+}
+
+private fun formatWeight(weight: Float): String {
     return if (weight % 1f == 0f) {
         weight.toInt().toString()
     } else {
@@ -329,6 +503,18 @@ private fun PrevWeightTrendChartSinglePoint() {
                 WeightChartPointUi(
                     "Aug 25",
                     68.5f,
+                ),
+                WeightChartPointUi(
+                    "Aug 26",
+                    68.2f,
+                ),
+                WeightChartPointUi(
+                    "Aug 27",
+                    67.8f,
+                ),
+                WeightChartPointUi(
+                    "Aug 28",
+                    67.3f,
                 ),
             ),
             modifier = Modifier
