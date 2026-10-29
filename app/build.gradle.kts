@@ -1,7 +1,7 @@
 import java.util.Properties
 
-val releaseAdMobAppId = "ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"
-val releaseBannerAdUnitId = "ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ"
+val releaseAdMobAppId = "ca-app-pub-7184499549176765~8974306533"
+val releaseBannerAdUnitId = "ca-app-pub-7184499549176765/2732331817"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -40,7 +40,8 @@ android {
             buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

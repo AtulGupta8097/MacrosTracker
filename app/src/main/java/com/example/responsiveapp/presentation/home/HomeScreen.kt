@@ -89,6 +89,12 @@ private fun HomeContent(
                     )
                 }
 
+                if (!state.isLoading) {
+                    item {
+                        BannerAd(modifier = Modifier.fillMaxWidth())
+                    }
+                }
+
                 item(key = "datePicker") {
                     WeeklyDatePicker(
                         modifier = Modifier.fillMaxWidth(),

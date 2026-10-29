@@ -24,7 +24,7 @@ fun DailyGreeting(
         text = greeting,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = MaterialTheme.spacing.md,vertical = MaterialTheme.spacing.sm),
+            .padding(horizontal = MaterialTheme.spacing.md),
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onBackground,

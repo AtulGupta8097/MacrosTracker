@@ -53,7 +53,7 @@ class FatSecretTokenManager(
 
             token
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

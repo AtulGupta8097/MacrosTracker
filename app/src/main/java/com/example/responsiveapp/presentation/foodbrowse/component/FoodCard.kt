@@ -17,17 +17,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.responsiveapp.domain.model.FoodItem
+import com.example.responsiveapp.domain.model.MacroSummary
+import com.example.responsiveapp.presentation.commoncomponent.CircularIconButton
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 import kotlin.math.roundToInt
 
 @Composable
 fun FoodCard(
+    modifier: Modifier = Modifier,
     food: FoodItem,
     onFoodClick: () -> Unit,
     isSelected: Boolean = false,
-    modifier: Modifier = Modifier,
 ){
     val macros = food.macroSummary
 
@@ -99,12 +103,34 @@ fun FoodCard(
                 }
             }
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add food",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+            CircularIconButton(
+                icon = Icons.Default.Add,
+                contentDescription = "Log meal",
+                onClick = onFoodClick
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PrevFoodCard() {
+    ResponsiveAppTheme {
+        FoodCard(
+            food = FoodItem(
+                id = "1334",
+                name = "Pizza",
+                brand = "Pizza Hut",
+                macroSummary = MacroSummary(
+                    servingLabel = "1 slice",
+                    calories = 265f,
+                    protein = 26f,
+                    fat = 2f,
+                    carbs = 7f
+                )
+            ),
+            onFoodClick = {},
+            isSelected = false
+        )
     }
 }
