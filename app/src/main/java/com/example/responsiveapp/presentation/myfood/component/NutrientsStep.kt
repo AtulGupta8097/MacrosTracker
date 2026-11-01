@@ -2,14 +2,21 @@ package com.example.responsiveapp.presentation.myfood.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WarningAmber
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,10 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.responsiveapp.presentation.commoncomponent.CustomButton
 import com.example.responsiveapp.presentation.myfood.MacronutrientsState
 import com.example.responsiveapp.presentation.myfood.MineralsState
 import com.example.responsiveapp.presentation.myfood.VitaminsState
+import com.example.responsiveapp.presentation.myfood.validation.NutrientErrors
+import com.example.responsiveapp.presentation.myfood.validation.NutrientField
 import com.example.responsiveapp.presentation.ui.theme.CaloriesColor
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
@@ -43,12 +51,12 @@ private val SugarColor = Color(0xFFE91E8C)
 @Composable
 fun NutrientsStep(
     foodName: String,
-    servingSize: String,
+    servingText: String,
     macros: MacronutrientsState,
     minerals: MineralsState,
     vitamins: VitaminsState,
-    canSave: Boolean,
-    isEditMode: Boolean,
+    errors: NutrientErrors,
+    calorieWarning: String?,
     onCaloriesChanged: (String) -> Unit,
     onProteinChanged: (String) -> Unit,
     onCarbohydratesChanged: (String) -> Unit,
@@ -63,16 +71,19 @@ fun NutrientsStep(
     onVitaminAChanged: (String) -> Unit,
     onVitaminCChanged: (String) -> Unit,
     onVitaminDChanged: (String) -> Unit,
-    onSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(MaterialTheme.spacing.md),
+    // CHANGED: plain scrollable Column instead of LazyColumn so every field is always
+    // composed - IME "Next" can reach all of them and scroll-to-focus works reliably.
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(MaterialTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.md),
     ) {
         if (foodName.isNotBlank()) {
-            item {
+            Column {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -88,7 +99,7 @@ fun NutrientsStep(
                     )
 
                     Text(
-                        text = "Serving: $servingSize",
+                        text = "Serving: $servingText",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -96,7 +107,7 @@ fun NutrientsStep(
             }
         }
 
-        item {
+        Column {
             NutrientGroup(
                 title = "Macronutrients",
                 accent = CaloriesColor,
@@ -107,6 +118,7 @@ fun NutrientsStep(
                     value = macros.calories,
                     color = CaloriesColor,
                     onChange = onCaloriesChanged,
+                    error = errors[NutrientField.CALORIES],
                 )
 
                 NutrientInputRow(
@@ -115,6 +127,7 @@ fun NutrientsStep(
                     value = macros.protein,
                     color = ProteinColor,
                     onChange = onProteinChanged,
+                    error = errors[NutrientField.PROTEIN],
                 )
 
                 NutrientInputRow(
@@ -123,6 +136,7 @@ fun NutrientsStep(
                     value = macros.carbohydrates,
                     color = CarbsColor,
                     onChange = onCarbohydratesChanged,
+                    error = errors[NutrientField.CARBOHYDRATES],
                 )
 
                 NutrientInputRow(
@@ -131,6 +145,7 @@ fun NutrientsStep(
                     value = macros.totalFat,
                     color = FatColor,
                     onChange = onTotalFatChanged,
+                    error = errors[NutrientField.TOTAL_FAT],
                 )
 
                 NutrientInputRow(
@@ -139,6 +154,7 @@ fun NutrientsStep(
                     value = macros.fiber,
                     color = FiberColor,
                     onChange = onFiberChanged,
+                    error = errors[NutrientField.FIBER],
                 )
 
                 NutrientInputRow(
@@ -147,11 +163,16 @@ fun NutrientsStep(
                     value = macros.sugar,
                     color = SugarColor,
                     onChange = onSugarChanged,
+                    error = errors[NutrientField.SUGAR],
                 )
             }
         }
 
-        item {
+        if (calorieWarning != null) {
+            CalorieWarning(message = calorieWarning)
+        }
+
+        Column {
             NutrientGroup(
                 title = "Minerals",
                 accent = SodiumColor,
@@ -162,6 +183,7 @@ fun NutrientsStep(
                     value = minerals.sodium,
                     color = SodiumColor,
                     onChange = onSodiumChanged,
+                    error = errors[NutrientField.SODIUM],
                 )
 
                 NutrientInputRow(
@@ -170,6 +192,7 @@ fun NutrientsStep(
                     value = minerals.cholesterol,
                     color = CholesterolColor,
                     onChange = onCholesterolChanged,
+                    error = errors[NutrientField.CHOLESTEROL],
                 )
 
                 NutrientInputRow(
@@ -178,6 +201,7 @@ fun NutrientsStep(
                     value = minerals.potassium,
                     color = PotassiumColor,
                     onChange = onPotassiumChanged,
+                    error = errors[NutrientField.POTASSIUM],
                 )
 
                 NutrientInputRow(
@@ -186,6 +210,7 @@ fun NutrientsStep(
                     value = minerals.calcium,
                     color = CalciumColor,
                     onChange = onCalciumChanged,
+                    error = errors[NutrientField.CALCIUM],
                 )
 
                 NutrientInputRow(
@@ -194,11 +219,12 @@ fun NutrientsStep(
                     value = minerals.iron,
                     color = IronColor,
                     onChange = onIronChanged,
+                    error = errors[NutrientField.IRON],
                 )
             }
         }
 
-        item {
+        Column {
             NutrientGroup(
                 title = "Vitamins",
                 accent = VitaminCColor,
@@ -209,6 +235,7 @@ fun NutrientsStep(
                     value = vitamins.vitaminA,
                     color = VitaminAColor,
                     onChange = onVitaminAChanged,
+                    error = errors[NutrientField.VITAMIN_A],
                 )
 
                 NutrientInputRow(
@@ -217,6 +244,7 @@ fun NutrientsStep(
                     value = vitamins.vitaminC,
                     color = VitaminCColor,
                     onChange = onVitaminCChanged,
+                    error = errors[NutrientField.VITAMIN_C],
                 )
 
                 NutrientInputRow(
@@ -225,30 +253,37 @@ fun NutrientsStep(
                     value = vitamins.vitaminD,
                     color = VitaminDColor,
                     onChange = onVitaminDChanged,
+                    error = errors[NutrientField.VITAMIN_D],
+                    imeAction = ImeAction.Done,
                 )
             }
         }
 
-        item {
-            Spacer(
-                modifier = Modifier.height(MaterialTheme.spacing.sm),
-            )
+    }
+}
 
-            CustomButton(
-                text = if (isEditMode) "Update Food" else "Save Food",
-                onClick = onSave,
-                enabled = canSave,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                buttonColors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                ),
-            )
-        }
+// Soft hint only - never blocks saving and never edits what the user typed.
+@Composable
+private fun CalorieWarning(message: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(SodiumColor.copy(alpha = 0.14f), MaterialTheme.shapes.medium)
+            .padding(MaterialTheme.spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.WarningAmber,
+            contentDescription = null,
+            tint = SodiumColor,
+            modifier = Modifier.size(20.dp),
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -258,7 +293,7 @@ private fun PrevNutrientsStep() {
     ResponsiveAppTheme {
         NutrientsStep(
             foodName = "Grilled Chicken Breast",
-            servingSize = "100g",
+            servingText = "100 g",
             macros = MacronutrientsState(
                 calories = "165",
                 protein = "31",
@@ -279,8 +314,8 @@ private fun PrevNutrientsStep() {
                 vitaminC = "0",
                 vitaminD = "0.1",
             ),
-            canSave = true,
-            isEditMode = false,
+            errors = NutrientErrors(mapOf(NutrientField.SODIUM to "Enter a valid number")),
+            calorieWarning = "Calories (165 kcal) don't quite match the macros (≈ 156 kcal). You can still save.",
             onCaloriesChanged = {},
             onProteinChanged = {},
             onCarbohydratesChanged = {},
@@ -295,7 +330,6 @@ private fun PrevNutrientsStep() {
             onVitaminAChanged = {},
             onVitaminCChanged = {},
             onVitaminDChanged = {},
-            onSave = {},
         )
     }
-}
+}

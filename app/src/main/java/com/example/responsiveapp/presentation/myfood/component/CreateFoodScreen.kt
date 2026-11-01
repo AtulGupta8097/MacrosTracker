@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,9 @@ import com.example.responsiveapp.presentation.myfood.MacronutrientsState
 import com.example.responsiveapp.presentation.myfood.MineralsState
 import com.example.responsiveapp.presentation.myfood.MyFoodDestination
 import com.example.responsiveapp.presentation.myfood.VitaminsState
+import com.example.responsiveapp.presentation.myfood.validation.BasicInfoErrors
+import com.example.responsiveapp.presentation.myfood.validation.CreateFoodValidator
+import com.example.responsiveapp.presentation.myfood.validation.NutrientErrors
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -35,13 +39,18 @@ fun CreateFoodScreen(
     macros: MacronutrientsState,
     minerals: MineralsState,
     vitamins: VitaminsState,
-    canProceedToNutrients: Boolean,
-    canSave: Boolean,
+    basicErrors: BasicInfoErrors,
+    nutrientErrors: NutrientErrors,
+    calorieWarning: String?,
+    isSaving: Boolean,
     onBack: () -> Unit,
     onNextStep: () -> Unit,
+    onStepSelected: (CreateFoodStep) -> Unit,
+    onPreviousStep: () -> Unit,
     onFoodNameChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
     onServingSizeChanged: (String) -> Unit,
+    onServingUnitChanged: (String) -> Unit,
     onServingsPerContainerChanged: (String) -> Unit,
     onCaloriesChanged: (String) -> Unit,
     onProteinChanged: (String) -> Unit,
@@ -67,6 +76,7 @@ fun CreateFoodScreen(
         modifier = modifier
             .fillMaxSize()
             .navigationBarsPadding()
+            .imePadding()
             .background(MaterialTheme.colorScheme.background),
     ) {
         TopBar(
@@ -85,8 +95,9 @@ fun CreateFoodScreen(
             },
         )
 
-        StepIndicator(
+        CreateFoodStepSwitcher(
             currentStep = currentStep,
+            onStepSelected = onStepSelected,
             modifier = Modifier.padding(
                 horizontal = MaterialTheme.spacing.md,
                 vertical = MaterialTheme.spacing.sm,
@@ -112,24 +123,26 @@ fun CreateFoodScreen(
                 CreateFoodStep.BASIC_INFO -> {
                     BasicInfoStep(
                         state = basicInfo,
-                        canProceedToNutrients = canProceedToNutrients,
+                        errors = basicErrors,
                         onFoodNameChanged = onFoodNameChanged,
                         onDescriptionChanged = onDescriptionChanged,
                         onServingSizeChanged = onServingSizeChanged,
+                        onServingUnitChanged = onServingUnitChanged,
                         onServingsPerContainerChanged = onServingsPerContainerChanged,
-                        onNext = onNextStep,
                     )
                 }
 
                 CreateFoodStep.NUTRIENTS -> {
                     NutrientsStep(
                         foodName = basicInfo.foodName,
-                        servingSize = basicInfo.servingSize,
+                        servingText = CreateFoodValidator.combineServing(
+                            basicInfo.servingSize, basicInfo.servingUnit
+                        ),
                         macros = macros,
                         minerals = minerals,
                         vitamins = vitamins,
-                        canSave = canSave,
-                        isEditMode = isEditMode,
+                        errors = nutrientErrors,
+                        calorieWarning = calorieWarning,
                         onCaloriesChanged = onCaloriesChanged,
                         onProteinChanged = onProteinChanged,
                         onCarbohydratesChanged = onCarbohydratesChanged,
@@ -144,10 +157,18 @@ fun CreateFoodScreen(
                         onVitaminAChanged = onVitaminAChanged,
                         onVitaminCChanged = onVitaminCChanged,
                         onVitaminDChanged = onVitaminDChanged,
-                        onSave = onSave,
                     )
                 }
             }
         }
+
+        CreateFoodBottomActions(
+            currentStep = currentStep,
+            isEditMode = isEditMode,
+            isSaving = isSaving,
+            onNext = onNextStep,
+            onBack = onPreviousStep,
+            onSave = onSave,
+        )
     }
-}
+}

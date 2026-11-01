@@ -121,8 +121,8 @@ fun FoodDetailContent(
                 imageVector = Icons.Default.Add,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
                     .navigationBarsPadding()
+                    .height(80.dp)
                     .padding(MaterialTheme.spacing.md),
                 buttonColors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,

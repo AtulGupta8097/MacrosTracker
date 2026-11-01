@@ -13,9 +13,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.presentation.foodbrowse.component.ErrorState
 import com.example.responsiveapp.presentation.foodbrowse.component.FoodDetailContent
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 import kotlin.math.roundToInt
 
@@ -76,3 +78,4 @@ fun FoodDetailScreen(
 
 fun Float.fmt(): String =
     if (this < 10f) "%.1f".format(this) else "${roundToInt()}"
+

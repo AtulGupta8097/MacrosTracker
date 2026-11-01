@@ -34,6 +34,7 @@ fun MyMealListScreen(
     meals: List<MyMeal> = emptyList(),
     selectedMealId: String? = null,
     onMealClicked: (MyMeal) -> Unit,
+    onLogClicked: (MyMeal) -> Unit,
     onCreateClick: () -> Unit,
 ) {
     Column(
@@ -82,7 +83,9 @@ fun MyMealListScreen(
                                 CircularIconButton(
                                     icon = Icons.Default.Add,
                                     contentDescription = "Log meal",
-                                    onClick = { },
+                                    onClick = {
+                                        onLogClicked(meal)
+                                    }
                                 )
                             },
                         )

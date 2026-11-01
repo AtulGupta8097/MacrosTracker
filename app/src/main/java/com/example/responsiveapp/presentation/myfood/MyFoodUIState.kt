@@ -4,6 +4,8 @@ import androidx.compose.runtime.Immutable
 import com.example.responsiveapp.domain.model.CustomToastProperty
 import com.example.responsiveapp.domain.model.myfood.CustomFood
 import com.example.responsiveapp.presentation.commoncomponent.SuccessToast
+import com.example.responsiveapp.presentation.myfood.validation.BasicInfoErrors
+import com.example.responsiveapp.presentation.myfood.validation.NutrientErrors
 
 enum class CreateFoodStep {
     BASIC_INFO,
@@ -14,7 +16,10 @@ enum class CreateFoodStep {
 data class BasicInfoState(
     val foodName: String = "",
     val description: String = "",
+    // CHANGED: servingSize now holds only the amount ("100"); the unit is separate so each
+    // field can use the right keyboard. They are joined as "100 g" when saving.
     val servingSize: String = "",
+    val servingUnit: String = "",
     val servingsPerContainer: String = ""
 )
 
@@ -63,9 +68,15 @@ data class MyFoodUIState(
     val minerals: MineralsState = MineralsState(),
     val vitamins: VitaminsState = VitaminsState(),
 
+    // CHANGED: validation output. Errors only appear after the user has attempted to leave
+    // the step / save, then update live while they fix the fields.
+    val basicErrors: BasicInfoErrors = BasicInfoErrors(),
+    val nutrientErrors: NutrientErrors = NutrientErrors(),
+    val basicErrorsVisible: Boolean = false,
+    val nutrientErrorsVisible: Boolean = false,
+    val calorieWarning: String? = null,
+
     // ViewModel Flags
-    val canProceedToNutrients: Boolean = false,
-    val canSave: Boolean = false,
     val hasUnsavedChanges: Boolean = false,
     val isSaving: Boolean = false,
 
@@ -74,4 +85,4 @@ data class MyFoodUIState(
     val toastType: CustomToastProperty = SuccessToast(),
     val toastMessage: String? = null,
     val toastDuration: Long = 3000
-)
+)

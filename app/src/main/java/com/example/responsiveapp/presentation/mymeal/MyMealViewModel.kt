@@ -8,8 +8,10 @@ import com.example.responsiveapp.domain.model.CustomToastProperty
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.MealIngredient
 import com.example.responsiveapp.domain.model.NutritionInfo
+import com.example.responsiveapp.domain.model.foodlog.LogFoodRequest
 import com.example.responsiveapp.domain.model.mymeals.MyMeal
 import com.example.responsiveapp.domain.use_case.food.SearchFoodsUseCase
+import com.example.responsiveapp.domain.use_case.foodlog.LogFoodUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.DeleteMyMealUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.ObServeMyMealUseCase
 import com.example.responsiveapp.domain.use_case.mymeal.SaveMyMealUseCase
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MyMealViewModel @Inject constructor(
@@ -33,6 +36,7 @@ class MyMealViewModel @Inject constructor(
     private val saveMyMeal: SaveMyMealUseCase,
     private val deleteMyMeal: DeleteMyMealUseCase,
     private val searchFoodUseCase: SearchFoodsUseCase,
+    private val logFoodUseCase: LogFoodUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MyMealUIState())
@@ -55,7 +59,7 @@ class MyMealViewModel @Inject constructor(
 
         searchJob = viewModelScope.launch {
             if (query.isNotBlank()) {
-                delay(300)
+                delay(300.milliseconds)
             }
 
             searchFood(query)
@@ -119,6 +123,24 @@ class MyMealViewModel @Inject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    fun onFoodLogClicked(meal: MyMeal) {
+        viewModelScope.launch {
+            val request = LogFoodRequest(
+                foodName = meal.name,
+                servingDescription = "1 serving",
+                quantity = 1f,
+                nutrition = meal.totalNutritionInfo,
+                ingredients = meal.ingredients
+            )
+
+            when (val result = logFoodUseCase(request)) {
+                is Resource.Success -> showToast("Meal logged successfully", SuccessToast())
+                is Resource.Error -> showToast(result.message ?: "Unable to log meal", ErrorToast())
+                else -> Unit
+            }
         }
     }
 
@@ -314,6 +336,7 @@ class MyMealViewModel @Inject constructor(
             }
         }
     }
+
 
     private fun showToast(
         message: String,

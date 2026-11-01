@@ -45,6 +45,7 @@ fun MyMealTabletLayout(
     onIngredientRemove: (String) -> Unit,
     onSave            : () -> Unit,
     onDelete          : () -> Unit,
+    onFoodLogClicked: (MyMeal) -> Unit,
 ) {
     val sheetState   = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val selectedId   = state.editingMeal?.id
@@ -62,6 +63,7 @@ fun MyMealTabletLayout(
             selectedMealId = selectedId,
             onCreateClick  = onCreateMealClick,
             onMealClicked  = onMealCardClick,
+            onLogClicked = onFoodLogClicked
         )
 
         VerticalDivider(

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.responsiveapp.domain.model.NutritionInfo
@@ -40,6 +42,7 @@ import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.presentation.ui.theme.CarbsColor
 import com.example.responsiveapp.presentation.ui.theme.FatColor
 import com.example.responsiveapp.presentation.ui.theme.ProteinColor
+import com.example.responsiveapp.presentation.ui.theme.ResponsiveAppTheme
 import com.example.responsiveapp.presentation.ui.theme.spacing
 import kotlin.math.roundToInt
 
@@ -120,7 +123,9 @@ fun FoodDetailHeader(
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.inverseOnSurface
-                        }
+                        },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                            .size(38.dp)
                     )
                 }
             }

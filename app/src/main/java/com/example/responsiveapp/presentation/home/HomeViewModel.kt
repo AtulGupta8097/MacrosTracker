@@ -130,7 +130,9 @@ class HomeViewModel @Inject constructor(
                     today = today,
                 ),
                 datePicker = dateNav.toDatePickerUiState(),
-                nutrition = core.dailySummary.toNutritionUiState(),
+                nutrition = core.dailySummary.toNutritionUiState(
+                    fallbackTarget = core.macroTarget?.targets,
+                ),
                 healthMetrics = core.macroTarget.toHealthMetricsUiState(),
                 recentMeals = core.foodLogs.toRecentMealsUiState(),
             )

@@ -18,9 +18,11 @@ import com.example.responsiveapp.presentation.ui.theme.FiberColor
 import com.example.responsiveapp.presentation.ui.theme.ProteinColor
 import kotlin.math.roundToInt
 
-fun DailySummary?.toNutritionUiState(): NutritionUiState {
+fun DailySummary?.toNutritionUiState(
+    fallbackTarget: NutritionTargets? = null,
+): NutritionUiState {
 
-    val target = this?.target ?: NutritionTargets()
+    val target = this?.target ?: fallbackTarget ?: NutritionTargets()
     val consumed = this?.consumed ?: NutritionProgress()
 
     val calories = CaloriesUiModel(

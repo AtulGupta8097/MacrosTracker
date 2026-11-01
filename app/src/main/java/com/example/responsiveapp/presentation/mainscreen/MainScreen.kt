@@ -32,6 +32,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.responsiveapp.core.navigation.Routes
+import com.example.responsiveapp.presentation.barcode.BarcodeScanScreen
 import com.example.responsiveapp.presentation.fooddatabase.FoodDatabaseScreen
 import com.example.responsiveapp.presentation.home.HomeScreen
 import com.example.responsiveapp.presentation.mainscreen.component.AddFoodBottomSheet
@@ -60,7 +61,6 @@ fun MainScreen(
     val routesWithBottomBar = listOf(
         Routes.HomeScreen,
         Routes.ProgressScreen,
-        // CHANGED: removed Routes.GoalsScreen
         Routes.SettingsScreen
     )
 
@@ -69,7 +69,6 @@ fun MainScreen(
     val navItems = listOf(
         Navbar.Home,
         Navbar.Progress,
-        // CHANGED: removed Navbar.Goal
         Navbar.Settings,
     )
 
@@ -149,8 +148,12 @@ fun MainScreen(
         AddFoodBottomSheet(
             onDismiss = { showBottomSheet = false },
             onOptionSelected = { option ->
-                if (option == "Food Database") {
-                    navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
+                when (option) {
+                    "Food Database" ->
+                        navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
+
+                    "Scan Barcode" ->
+                        navBackStack.navigateSingleTop(Routes.BarcodeScanScreen)
                 }
             },
         )
@@ -158,7 +161,6 @@ fun MainScreen(
 }
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun MainContent(
     modifier: Modifier = Modifier,
@@ -219,6 +221,19 @@ private fun MainContent(
                                     navBackStack.removeLastOrNull()
                                     navBackStack.navigateSingleTop(Routes.HomeScreen)
                                 }
+                            )
+                        }
+
+                        entry<Routes.BarcodeScanScreen> {
+                            BarcodeScanScreen(
+                                onBack = {
+                                    navBackStack.removeLastOrNull()
+                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
+                                },
+                                onLogged = {
+                                    navBackStack.removeLastOrNull()
+                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
+                                },
                             )
                         }
 

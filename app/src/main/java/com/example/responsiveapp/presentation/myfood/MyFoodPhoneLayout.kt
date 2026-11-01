@@ -17,9 +17,11 @@ fun MyFoodPhoneLayout(
     onBack: () -> Unit,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
+    onStepSelected: (CreateFoodStep) -> Unit,
     onFoodNameChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
     onServingSizeChanged: (String) -> Unit,
+    onServingUnitChanged: (String) -> Unit,
     onServingsPerContainerChanged: (String) -> Unit,
     onCaloriesChanged: (String) -> Unit,
     onProteinChanged: (String) -> Unit,
@@ -80,8 +82,10 @@ fun MyFoodPhoneLayout(
                 macros = state.macros,
                 minerals = state.minerals,
                 vitamins = state.vitamins,
-                canProceedToNutrients = state.canProceedToNutrients,
-                canSave = state.canSave,
+                basicErrors = state.basicErrors,
+                nutrientErrors = state.nutrientErrors,
+                calorieWarning = state.calorieWarning,
+                isSaving = state.isSaving,
 
                 onBack =
                     if (
@@ -96,12 +100,23 @@ fun MyFoodPhoneLayout(
                 onNextStep =
                     onNextStep,
 
+
+                onStepSelected =
+
+                    onStepSelected,
+
+                onPreviousStep =
+
+                    onPreviousStep,
+
                 onFoodNameChanged =
                     onFoodNameChanged,
                 onDescriptionChanged =
                     onDescriptionChanged,
                 onServingSizeChanged =
                     onServingSizeChanged,
+                onServingUnitChanged =
+                    onServingUnitChanged,
                 onServingsPerContainerChanged =
                     onServingsPerContainerChanged,
 
@@ -143,4 +158,4 @@ fun MyFoodPhoneLayout(
             )
         }
     }
-}
+}

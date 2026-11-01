@@ -32,6 +32,7 @@ fun MyMealPhoneLayout(
     onIngredientRemove: (String) -> Unit,
     onDelete : () -> Unit,
     onSave: () -> Unit,
+    onFoodLogClicked: (MyMeal) -> Unit,
 ) {
     val isOnList = state.destination is MyMealDestination.MyMealList
     val isEditMode = state.destination is MyMealDestination.Edit
@@ -51,7 +52,8 @@ fun MyMealPhoneLayout(
                 modifier = modifier,
                 meals = state.meals,
                 onCreateClick = onCreateMealClick,
-                onMealClicked = onMealCardClick
+                onMealClicked = onMealCardClick,
+                onLogClicked = onFoodLogClicked
             )
         }
 
@@ -112,6 +114,7 @@ private fun PrevMyMealPhone() {
             onSave = {},
             onDelete = {},
             onBack = {},
+            onFoodLogClicked = {}
         )
     }
 }

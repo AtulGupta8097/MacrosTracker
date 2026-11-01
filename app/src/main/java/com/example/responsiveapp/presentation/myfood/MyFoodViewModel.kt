@@ -8,13 +8,16 @@ import com.example.responsiveapp.domain.model.myfood.CustomFood
 import com.example.responsiveapp.domain.use_case.myfood.DeleteCustomFoodUseCase
 import com.example.responsiveapp.domain.use_case.myfood.ObserveCustomFoodsUseCase
 import com.example.responsiveapp.domain.use_case.myfood.SaveCustomFoodUseCase
+import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
 import com.example.responsiveapp.presentation.commoncomponent.SuccessToast
+import com.example.responsiveapp.presentation.myfood.validation.CreateFoodValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -54,6 +57,9 @@ class MyFoodViewModel @Inject constructor(
 
     fun onFoodCardClick(food: CustomFood) {
         originalFood = food
+        // CHANGED: stored "100 g" -> amount + unit for the two serving inputs.
+        val (servingAmount, servingUnit) =
+            CreateFoodValidator.splitServing(food.servingSize)
 
         _state.update {
             it.copy(
@@ -64,12 +70,13 @@ class MyFoodViewModel @Inject constructor(
                 basicInfo = BasicInfoState(
                     foodName = food.name,
                     description = food.description,
-                    servingSize = food.servingSize,
+                    servingSize = servingAmount,
+                    servingUnit = servingUnit,
                     servingsPerContainer = food.servingsPerContainer.fmt()
                 ),
 
                 macros = MacronutrientsState(
-                    calories = food.nutrition.calories.fmt(),
+                    calories = CreateFoodValidator.formatNumber(food.nutrition.calories), // CHANGED: calories is required, so 0 must show as "0"
                     protein = food.nutrition.protein.fmt(),
                     carbohydrates = food.nutrition.carbs.fmt(),
                     totalFat = food.nutrition.fat.fmt(),
@@ -107,17 +114,37 @@ class MyFoodViewModel @Inject constructor(
         }
     }
 
-    fun onNextStep() {
-        if (_state.value.canProceedToNutrients) {
-            _state.update {
-                it.copy(currentStep = CreateFoodStep.NUTRIENTS)
-            }
+    // CHANGED: Next and tapping the "Nutrients" segment share one rule - Basic Info must be
+    // valid first, otherwise stay here and surface inline errors.
+    fun onNextStep() = goToNutrientsIfBasicValid()
+
+    fun onStepSelected(step: CreateFoodStep) {
+        when (step) {
+            CreateFoodStep.BASIC_INFO -> onPreviousStep()
+            CreateFoodStep.NUTRIENTS ->
+                if (_state.value.currentStep != CreateFoodStep.NUTRIENTS) goToNutrientsIfBasicValid()
         }
     }
 
+    // Going back only changes the step; every typed value stays in state.
     fun onPreviousStep() {
         _state.update {
             it.copy(currentStep = CreateFoodStep.BASIC_INFO)
+        }
+    }
+
+    private fun goToNutrientsIfBasicValid() {
+        _state.update { s ->
+            val errors = CreateFoodValidator.validateBasicInfo(s.basicInfo)
+            if (errors.hasErrors) {
+                s.copy(basicErrors = errors, basicErrorsVisible = true)
+            } else {
+                s.copy(
+                    basicErrors = errors,
+                    basicErrorsVisible = false,
+                    currentStep = CreateFoodStep.NUTRIENTS,
+                )
+            }
         }
     }
 
@@ -130,6 +157,9 @@ class MyFoodViewModel @Inject constructor(
 
     fun onServingSizeChanged(v: String) =
         update { it.copy(basicInfo = it.basicInfo.copy(servingSize = v)) }
+
+    fun onServingUnitChanged(v: String) =
+        update { it.copy(basicInfo = it.basicInfo.copy(servingUnit = v)) }
 
     fun onServingsPerContainerChanged(v: String) =
         update { it.copy(basicInfo = it.basicInfo.copy(servingsPerContainer = v)) }
@@ -180,64 +210,107 @@ class MyFoodViewModel @Inject constructor(
         update { it.copy(vitamins = it.vitamins.copy(vitaminD = v)) }
 
     fun onSave() {
-        viewModelScope.launch {
-            val s = _state.value
+        // Validate + claim the "saving" flag in one atomic update, so rapid repeated taps
+        // can never start two saves.
+        var toSave: MyFoodUIState? = null
 
-            if (!s.canSave) return@launch
+        _state.update { s ->
+            toSave = null
+            if (s.isSaving) return@update s
 
-            _state.update {
-                it.copy(isSaving = true)
-            }
+            val basic = CreateFoodValidator.validateBasicInfo(s.basicInfo)
+            val nutrients = CreateFoodValidator.validateNutrients(s.macros, s.minerals, s.vitamins)
 
-            val food = CustomFood(
-                id = s.editingFood?.id ?: UUID.randomUUID().toString(),
-                name = s.basicInfo.foodName.trim(),
-                description = s.basicInfo.description.trim(),
-                servingSize = s.basicInfo.servingSize.trim(),
-                servingsPerContainer = s.basicInfo.servingsPerContainer.f(),
-
-                nutrition = NutritionInfo(
-                    calories = s.macros.calories.f(),
-                    protein = s.macros.protein.f(),
-                    carbs = s.macros.carbohydrates.f(),
-                    fat = s.macros.totalFat.f(),
-                    fiber = s.macros.fiber.f(),
-                    sugar = s.macros.sugar.f(),
-
-                    sodium = s.minerals.sodium.f(),
-                    cholesterol = s.minerals.cholesterol.f(),
-                    potassium = s.minerals.potassium.f(),
-                    calcium = s.minerals.calcium.f(),
-                    iron = s.minerals.iron.f(),
-
-                    vitaminA = s.vitamins.vitaminA.f(),
-                    vitaminC = s.vitamins.vitaminC.f(),
-                    vitaminD = s.vitamins.vitaminD.f(),
-                ),
-
-                createdAt =
-                    s.editingFood?.createdAt ?: System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
-            )
-
-            saveCustomFood(food)
-
-            showToast(
-                if (s.editingFood != null)
-                    "Food updated!"
-                else
-                    "Food saved!",
-                SuccessToast()
-            )
-
-            originalFood = null
-
-            _state.update { current ->
-                MyFoodUIState(
-                    foods = current.foods,
-                    destination = MyFoodDestination.List
+            if (basic.hasErrors || nutrients.hasErrors) {
+                s.copy(
+                    basicErrors = basic,
+                    nutrientErrors = nutrients,
+                    basicErrorsVisible = true,
+                    nutrientErrorsVisible = true,
+                    currentStep = if (basic.hasErrors) CreateFoodStep.BASIC_INFO else CreateFoodStep.NUTRIENTS,
+                )
+            } else {
+                toSave = s
+                s.copy(
+                    basicErrors = basic,
+                    nutrientErrors = nutrients,
+                    isSaving = true,
                 )
             }
+        }
+
+        val snapshot = toSave
+        if (snapshot == null) {
+            if (!_state.value.isSaving) {
+                showToast("Please fix the highlighted fields", ErrorToast())
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            val food = buildFood(snapshot)
+
+            try {
+                saveCustomFood(food)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Keep everything the user typed; just unlock the form and tell them.
+                _state.update { it.copy(isSaving = false) }
+                showToast("Couldn't save the food. Your changes are kept - please try again.", ErrorToast())
+                return@launch
+            }
+
+            originalFood = null
+            // CHANGED: navigate only after a successful save, and keep the toast in the new
+            // state (previously the reset wiped it immediately).
+            resetToList(
+                if (snapshot.editingFood != null) "Food updated!" else "Food saved!"
+            )
+        }
+    }
+
+    private fun buildFood(s: MyFoodUIState): CustomFood {
+        fun v(raw: String) = CreateFoodValidator.valueOrZero(raw)
+        val now = System.currentTimeMillis()
+        return CustomFood(
+            id = s.editingFood?.id ?: UUID.randomUUID().toString(),
+            name = s.basicInfo.foodName.trim(),
+            description = s.basicInfo.description.trim(),
+            servingSize = CreateFoodValidator.combineServing(
+                s.basicInfo.servingSize, s.basicInfo.servingUnit
+            ),
+            servingsPerContainer = v(s.basicInfo.servingsPerContainer),
+            nutrition = NutritionInfo(
+                calories = v(s.macros.calories),
+                protein = v(s.macros.protein),
+                carbs = v(s.macros.carbohydrates),
+                fat = v(s.macros.totalFat),
+                fiber = v(s.macros.fiber),
+                sugar = v(s.macros.sugar),
+                sodium = v(s.minerals.sodium),
+                cholesterol = v(s.minerals.cholesterol),
+                potassium = v(s.minerals.potassium),
+                calcium = v(s.minerals.calcium),
+                iron = v(s.minerals.iron),
+                vitaminA = v(s.vitamins.vitaminA),
+                vitaminC = v(s.vitamins.vitaminC),
+                vitaminD = v(s.vitamins.vitaminD),
+            ),
+            createdAt = s.editingFood?.createdAt ?: now,
+            updatedAt = now,
+        )
+    }
+
+    private fun resetToList(message: String) {
+        _state.update { current ->
+            MyFoodUIState(
+                foods = current.foods,
+                destination = MyFoodDestination.List,
+                showToast = true,
+                toastMessage = message,
+                toastType = SuccessToast(),
+            )
         }
     }
 
@@ -248,19 +321,8 @@ class MyFoodViewModel @Inject constructor(
 
             deleteCustomFood(foodId)
 
-            showToast(
-                "Food deleted",
-                SuccessToast()
-            )
-
             originalFood = null
-
-            _state.update { current ->
-                MyFoodUIState(
-                    foods = current.foods,
-                    destination = MyFoodDestination.List
-                )
-            }
+            resetToList("Food deleted")
         }
     }
 
@@ -279,7 +341,6 @@ class MyFoodViewModel @Inject constructor(
                 toastMessage = message,
                 toastType = type,
                 toastDuration = duration,
-                isSaving = false,
             )
         }
     }
@@ -302,63 +363,50 @@ class MyFoodViewModel @Inject constructor(
     }
 
     private fun MyFoodUIState.recompute(): MyFoodUIState {
-        val basicValid =
-            basicInfo.foodName.isNotBlank() &&
-                    basicInfo.servingSize.isNotBlank()
-
-        val nutrientValid =
-            macros.calories.isNotBlank()
-
-        val isEdit =
-            editingFood != null
+        fun v(raw: String) = CreateFoodValidator.valueOrZero(raw)
 
         val changed =
-            if (isEdit && originalFood != null) {
+            if (editingFood != null && originalFood != null) {
                 val o = originalFood!!
+                val n = o.nutrition
 
                 basicInfo.foodName.trim() != o.name ||
                         basicInfo.description.trim() != o.description ||
-                        basicInfo.servingSize.trim() != o.servingSize ||
+                        CreateFoodValidator.combineServing(basicInfo.servingSize, basicInfo.servingUnit) != o.servingSize ||
+                        v(basicInfo.servingsPerContainer) != o.servingsPerContainer ||
 
-                        macros.calories.f() != o.nutrition.calories ||
-                        macros.protein.f() != o.nutrition.protein ||
-                        macros.carbohydrates.f() != o.nutrition.carbs ||
-                        macros.totalFat.f() != o.nutrition.fat ||
-                        macros.fiber.f() != o.nutrition.fiber ||
-                        macros.sugar.f() != o.nutrition.sugar ||
+                        v(macros.calories) != n.calories ||
+                        v(macros.protein) != n.protein ||
+                        v(macros.carbohydrates) != n.carbs ||
+                        v(macros.totalFat) != n.fat ||
+                        v(macros.fiber) != n.fiber ||
+                        v(macros.sugar) != n.sugar ||
 
-                        minerals.sodium.f() != o.nutrition.sodium ||
-                        minerals.cholesterol.f() != o.nutrition.cholesterol ||
-                        minerals.potassium.f() != o.nutrition.potassium ||
-                        minerals.calcium.f() != o.nutrition.calcium ||
-                        minerals.iron.f() != o.nutrition.iron ||
+                        v(minerals.sodium) != n.sodium ||
+                        v(minerals.cholesterol) != n.cholesterol ||
+                        v(minerals.potassium) != n.potassium ||
+                        v(minerals.calcium) != n.calcium ||
+                        v(minerals.iron) != n.iron ||
 
-                        vitamins.vitaminA.f() != o.nutrition.vitaminA ||
-                        vitamins.vitaminC.f() != o.nutrition.vitaminC ||
-                        vitamins.vitaminD.f() != o.nutrition.vitaminD
+                        v(vitamins.vitaminA) != n.vitaminA ||
+                        v(vitamins.vitaminC) != n.vitaminC ||
+                        v(vitamins.vitaminD) != n.vitaminD
             } else {
                 false
             }
 
         return copy(
-            canProceedToNutrients = basicValid,
-            canSave =
-                basicValid &&
-                        nutrientValid &&
-                        (!isEdit || changed),
+            // Once errors have been shown they update live as the user fixes the fields.
+            basicErrors = if (basicErrorsVisible)
+                CreateFoodValidator.validateBasicInfo(basicInfo) else basicErrors,
+            nutrientErrors = if (nutrientErrorsVisible)
+                CreateFoodValidator.validateNutrients(macros, minerals, vitamins) else nutrientErrors,
+            calorieWarning = CreateFoodValidator.calorieWarning(macros),
             hasUnsavedChanges = changed,
         )
     }
 
-    private fun String.f() =
-        toFloatOrNull() ?: 0f
-
+    // Float -> text for the edit form. 0 shows as an empty (optional) field.
     private fun Float.fmt() =
-        if (this == 0f) {
-            ""
-        } else if (this == toLong().toFloat()) {
-            toLong().toString()
-        } else {
-            toString()
-        }
+        if (this == 0f) "" else CreateFoodValidator.formatNumber(this)
 }

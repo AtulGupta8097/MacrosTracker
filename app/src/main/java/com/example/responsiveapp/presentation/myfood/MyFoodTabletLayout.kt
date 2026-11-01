@@ -33,9 +33,11 @@ fun MyFoodTabletLayout(
     onFoodCardClick: (CustomFood) -> Unit,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
+    onStepSelected: (CreateFoodStep) -> Unit,
     onFoodNameChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
     onServingSizeChanged: (String) -> Unit,
+    onServingUnitChanged: (String) -> Unit,
     onServingsPerContainerChanged: (String) -> Unit,
     onCaloriesChanged: (String) -> Unit,
     onProteinChanged: (String) -> Unit,
@@ -103,12 +105,23 @@ fun MyFoodTabletLayout(
                     macros = state.macros,
                     minerals = state.minerals,
                     vitamins = state.vitamins,
-                    canProceedToNutrients = state.canProceedToNutrients,
-                    canSave = state.canSave,
+                    basicErrors = state.basicErrors,
+                    nutrientErrors = state.nutrientErrors,
+                    calorieWarning = state.calorieWarning,
+                    isSaving = state.isSaving,
                     onBack = {},
 
                     onNextStep =
                         onNextStep,
+
+
+                    onStepSelected =
+
+                        onStepSelected,
+
+                    onPreviousStep =
+
+                        onPreviousStep,
 
                     onFoodNameChanged =
                         onFoodNameChanged,
@@ -116,6 +129,8 @@ fun MyFoodTabletLayout(
                         onDescriptionChanged,
                     onServingSizeChanged =
                         onServingSizeChanged,
+                    onServingUnitChanged =
+                        onServingUnitChanged,
                     onServingsPerContainerChanged =
                         onServingsPerContainerChanged,
 
@@ -212,4 +227,4 @@ private fun PrevRightPaneIdleHint() {
     MaterialTheme {
         RightPaneIdleHint()
     }
-}
+}

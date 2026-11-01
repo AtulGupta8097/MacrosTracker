@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.responsiveapp.domain.model.mymeals.MyMeal
 import com.example.responsiveapp.presentation.commoncomponent.CustomToast
 import com.example.responsiveapp.presentation.mymeal.component.MyMealPhoneLayout
 import com.example.responsiveapp.presentation.mymeal.component.MyMealTabletLayout
@@ -37,7 +38,9 @@ fun MyMealScreen(
         onSave = viewModel::onSaveMeal,
         onDelete = viewModel::onDeleteMeal,
         onBack = viewModel::onBack,
-        hideToast = viewModel::hideToast
+        hideToast = viewModel::hideToast,
+        onFoodLogClicked = viewModel::onFoodLogClicked
+
     )
 }
 
@@ -46,7 +49,7 @@ fun MyMealContent(
     state: MyMealUIState,
     onRootChanged: (Boolean) -> Unit,
     onCreateMealClick: () -> Unit,
-    onMealCardClick: (com.example.responsiveapp.domain.model.mymeals.MyMeal) -> Unit,
+    onMealCardClick: (MyMeal) -> Unit,
     onMealNameChange: (String) -> Unit,
     onShowAddSheet: () -> Unit,
     onHideAddSheet: () -> Unit,
@@ -57,6 +60,7 @@ fun MyMealContent(
     onDelete: () -> Unit,
     onBack: () -> Unit,
     hideToast: () -> Unit,
+    onFoodLogClicked: (MyMeal) -> Unit,
 ) {
     val totalMacros = state.ingredient.totalMacros()
     val deviceConfiguration = MaterialTheme.deviceConfiguration
@@ -80,6 +84,7 @@ fun MyMealContent(
                     onSave = onSave,
                     onDelete = onDelete,
                     onBack = onBack,
+                    onFoodLogClicked = onFoodLogClicked
                 )
             }
             DeviceConfiguration.TABLET,
@@ -97,6 +102,7 @@ fun MyMealContent(
                     onIngredientRemove = onIngredientRemove,
                     onSave = onSave,
                     onDelete = onDelete,
+                    onFoodLogClicked = onFoodLogClicked
                 )
             }
 
@@ -132,7 +138,8 @@ private fun PrevMyMeal() {
             onSave = {},
             onDelete = {},
             onBack = {},
-            hideToast = {}
+            hideToast = {},
+            onFoodLogClicked = {},
         )
     }
 }

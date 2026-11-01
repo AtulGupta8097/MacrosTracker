@@ -220,7 +220,7 @@ class FoodRepositoryImpl @Inject constructor(
             val lookupResponse =
                 api.findFoodIdForBarcode(barcode)
 
-            Log.d("TAG", "getFoodDetailByBarcode: ${lookupResponse}")
+            Log.d("TAG", "getFoodDetailByBarcode: $lookupResponse")
 
             if (!lookupResponse.isSuccessful) {
                 error("Barcode lookup failed: ${lookupResponse.code()}")
