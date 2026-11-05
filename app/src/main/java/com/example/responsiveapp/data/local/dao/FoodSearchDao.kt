@@ -1,14 +1,19 @@
 package com.example.responsiveapp.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import com.example.responsiveapp.data.local.entity.FoodItemEntity
 import com.example.responsiveapp.data.local.entity.SearchQueryEntity
 import com.example.responsiveapp.data.local.entity.SearchResultCrossRef
 import kotlinx.coroutines.flow.Flow
+
+/** A single-transaction view of a query's metadata and its joined food rows. */
+data class SearchCacheSnapshot(
+    val searchQuery: SearchQueryEntity?,
+    val foods: List<FoodItemEntity>,
+)
 
 @Dao
 interface FoodSearchDao {
@@ -19,7 +24,7 @@ interface FoodSearchDao {
         FROM food_items f
         INNER JOIN search_result_cross_ref r
             ON f.id = r.foodId
-        WHERE r.query = :query
+        WHERE r.`query` = :query
         ORDER BY r.position
         """
     )
@@ -33,7 +38,7 @@ interface FoodSearchDao {
         FROM food_items f
         INNER JOIN search_result_cross_ref r
             ON f.id = r.foodId
-        WHERE r.query = :query
+        WHERE r.`query` = :query
         ORDER BY r.position
         """
     )
@@ -45,32 +50,40 @@ interface FoodSearchDao {
         """
         SELECT *
         FROM search_queries
-        WHERE query = :query
+        WHERE `query` = :query
         """
     )
     suspend fun getSearchQuery(
         query: String,
     ): SearchQueryEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplaceFoods(
+    @Transaction
+    suspend fun getSearchCacheSnapshot(
+        query: String,
+    ): SearchCacheSnapshot = SearchCacheSnapshot(
+        searchQuery = getSearchQuery(query),
+        foods = getSearchResults(query),
+    )
+
+    @Upsert
+    suspend fun upsertFoods(
         foods: List<FoodItemEntity>,
     )
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplaceSearchQuery(
+    @Upsert
+    suspend fun upsertSearchQuery(
         searchQuery: SearchQueryEntity,
     )
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplaceSearchResults(
+    @Upsert
+    suspend fun upsertSearchResults(
         results: List<SearchResultCrossRef>,
     )
 
     @Query(
         """
         DELETE FROM search_result_cross_ref
-        WHERE query = :query
+        WHERE `query` = :query
         """
     )
     suspend fun deleteSearchResults(
@@ -80,8 +93,8 @@ interface FoodSearchDao {
     @Query(
         """
         DELETE FROM search_queries
-        WHERE query NOT IN (
-            SELECT query
+        WHERE `query` NOT IN (
+            SELECT `query`
             FROM search_queries
             ORDER BY lastFetchedAt DESC
             LIMIT :maxQueries
@@ -110,8 +123,8 @@ interface FoodSearchDao {
         results: List<SearchResultCrossRef>,
     ) {
         deleteSearchResults(searchQuery.query)
-        insertOrReplaceFoods(foods)
-        insertOrReplaceSearchQuery(searchQuery)
-        insertOrReplaceSearchResults(results)
+        upsertFoods(foods)
+        upsertSearchQuery(searchQuery)
+        upsertSearchResults(results)
     }
 }

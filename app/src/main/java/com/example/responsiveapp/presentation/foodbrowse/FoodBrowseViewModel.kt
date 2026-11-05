@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.core.utils.Resource
 import com.example.responsiveapp.domain.calculator.ToastState
 import com.example.responsiveapp.domain.model.CustomToastProperty
+import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.model.Serving
 import com.example.responsiveapp.domain.model.foodlog.LogFoodRequest
 import com.example.responsiveapp.domain.model.scale
@@ -19,26 +20,33 @@ import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
 import com.example.responsiveapp.presentation.commoncomponent.SuccessToast
 import com.example.responsiveapp.presentation.foodbrowse.component.FoodBrowseEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 private const val TAG = "FoodBrowseViewModel"
+private const val SEARCH_LIMIT = 38
+private const val SEARCH_DEBOUNCE_MS = 300L
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -51,11 +59,10 @@ class FoodBrowseViewModel @Inject constructor(
     private val removeSavedFood: RemoveSavedFoodUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(FoodBrowseState())
+    private val _state = MutableStateFlow(FoodBrowseState(isLoading = true))
     val state: StateFlow<FoodBrowseState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<FoodBrowseEvent>()
-
     val events = _events.asSharedFlow()
 
     val foodDetailUiState: StateFlow<FoodDetailUiState> = _state
@@ -98,19 +105,29 @@ class FoodBrowseViewModel @Inject constructor(
 
     private fun observeSearchQuery() {
         state
-            .map { it.query }
+            .map { it.query.trim() }
             .distinctUntilChanged()
             .flatMapLatest { query ->
-                if (query.isBlank()) {
-                    flowOf(query)
-                } else {
-                    flow {
-                        kotlinx.coroutines.delay(300)
-                        emit(query)
+                flow {
+                    if (query.isNotBlank()) {
+                        delay(SEARCH_DEBOUNCE_MS)
                     }
+                    emitAll(searchFoods(query, SEARCH_LIMIT))
                 }
             }
-            .onEach { query -> searchFood(query) }
+            .onEach(::handleSearchResult)
+            .catch { exception ->
+                if (exception is CancellationException) throw exception
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = searchErrorMessage(
+                            responseMessage = null,
+                            hasVisibleResults = it.foods.isNotEmpty(),
+                        ),
+                    )
+                }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -119,47 +136,65 @@ class FoodBrowseViewModel @Inject constructor(
         super.onCleared()
     }
 
-    private var searchJob: Job? = null
     private var detailJob: Job? = null
 
     fun onQueryChange(query: String) {
-        _state.update { it.copy(query = query) }
+        _state.update {
+            val queryChanged = it.query.trim().lowercase(Locale.ROOT) !=
+                    query.trim().lowercase(Locale.ROOT)
+            it.copy(
+                query = query,
+                foods = if (queryChanged) emptyList() else it.foods,
+                isLoading = queryChanged,
+                error = null,
+            )
+        }
     }
 
-    fun searchFood(query: String) {
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-
-            searchFoods(query, 38)
-                .collect { result ->
-
-                    when (result) {
-
-                        is Resource.Loading -> {
-                            _state.update { it.copy(isLoading = true) }
-                        }
-
-                        is Resource.Success -> {
-                            _state.update {
-                                it.copy(
-                                    foods = result.data ?: emptyList(),
-                                    isLoading = false,
-                                    error = null
-                                )
-                            }
-                        }
-
-                        is Resource.Error -> {
-                            _state.update {
-                                it.copy(
-                                    error = result.message,
-                                    isLoading = false
-                                )
-                            }
-                        }
-                    }
+    private fun handleSearchResult(result: Resource<List<FoodItem>>) {
+        when (result) {
+            is Resource.Loading -> {
+                _state.update {
+                    it.copy(
+                        isLoading = true,
+                        error = null,
+                    )
                 }
+            }
+
+            is Resource.Success -> {
+                _state.update {
+                    it.copy(
+                        foods = result.data ?: emptyList(),
+                        isLoading = false,
+                        error = null,
+                    )
+                }
+            }
+
+            is Resource.Error -> {
+                Log.w(TAG, result.message ?: "Food search failed")
+                _state.update {
+                    it.copy(
+                        error = searchErrorMessage(
+                            responseMessage = result.message,
+                            hasVisibleResults = it.foods.isNotEmpty(),
+                        ),
+                        isLoading = false,
+                    )
+                }
+            }
         }
+    }
+
+    private fun searchErrorMessage(
+        responseMessage: String?,
+        hasVisibleResults: Boolean,
+    ): String = when {
+        hasVisibleResults -> "Couldn't refresh foods. Showing the saved results."
+        responseMessage?.contains("unexpected response", ignoreCase = true) == true ->
+            "The food service returned an unexpected response. Please try again."
+        else -> "Couldn't load foods. Check your connection and try again."
     }
 
     fun openFoodDetail(foodId: String) {
@@ -200,12 +235,9 @@ class FoodBrowseViewModel @Inject constructor(
         detailJob?.cancel()
 
         detailJob = viewModelScope.launch {
-
             getFoodById(foodId)
                 .collect { result ->
-
                     when (result) {
-
                         is Resource.Loading -> {
                             _state.update {
                                 it.copy(
@@ -236,7 +268,7 @@ class FoodBrowseViewModel @Inject constructor(
                             _state.update {
                                 it.copy(
                                     detailError = result.message,
-                                    isDetailLoading = false
+                                    isDetailLoading = false,
                                 )
                             }
                         }
@@ -246,62 +278,39 @@ class FoodBrowseViewModel @Inject constructor(
     }
 
     fun logFoodClicked() {
-
-        val detail =
-            foodDetailUiState.value as? FoodDetailUiState.Success
-                ?: return
+        val detail = foodDetailUiState.value as? FoodDetailUiState.Success ?: return
 
         viewModelScope.launch {
-
-            _state.update {
-                it.copy(isLogging = true)
-            }
+            _state.update { it.copy(isLogging = true) }
 
             try {
-
                 val request = LogFoodRequest(
-
                     foodName = detail.foodName,
-
-                    servingDescription =
-                        detail.selectedServing.description,
-
+                    servingDescription = detail.selectedServing.description,
                     quantity = detail.quantity,
-
-                    nutrition = detail.scaledNutrition
-
+                    nutrition = detail.scaledNutrition,
                 )
 
                 when (val result = foodLog(request)) {
-
                     is Resource.Success -> {
-
                         showToast(
                             message = "Food logged successfully.",
-                            type = SuccessToast()
+                            type = SuccessToast(),
                         )
-
-                        _events.emit(
-                            FoodBrowseEvent.FoodLogged
-                        )
+                        _events.emit(FoodBrowseEvent.FoodLogged)
                     }
 
                     is Resource.Error -> {
-
                         showToast(
                             message = result.message ?: "Unable to log food.",
-                            type = ErrorToast()
+                            type = ErrorToast(),
                         )
                     }
 
                     else -> Unit
                 }
-
             } finally {
-
-                _state.update {
-                    it.copy(isLogging = false)
-                }
+                _state.update { it.copy(isLogging = false) }
             }
         }
     }
@@ -319,7 +328,6 @@ class FoodBrowseViewModel @Inject constructor(
         }
     }
 
-
     private fun showToast(
         message: String,
         type: CustomToastProperty = SuccessToast(),
@@ -332,16 +340,12 @@ class FoodBrowseViewModel @Inject constructor(
                     message = message,
                     type = type,
                     duration = duration,
-                )
+                ),
             )
         }
     }
 
     fun hideToast() {
-        _state.update {
-            it.copy(
-                toast = ToastState()
-            )
-        }
+        _state.update { it.copy(toast = ToastState()) }
     }
 }

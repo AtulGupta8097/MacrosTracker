@@ -39,9 +39,7 @@ fun FoodBrowseTabletLayout(
         snapshotFlow { listState.firstVisibleItemIndex }
             .distinctUntilChanged()
             .collect { index ->
-                foods.getOrNull(index)?.id?.let { foodId ->
-                    onFirstVisibleFoodChanged(foodId)
-                }
+                foods.getOrNull(index)?.id?.let(onFirstVisibleFoodChanged)
             }
     }
 
@@ -51,6 +49,7 @@ fun FoodBrowseTabletLayout(
             onQueryChange = onQueryChange,
             data = foods,
             isLoading = state.isLoading,
+            error = state.error,
             onFoodClick = onFoodClick,
             selectedFoodId = selectedFoodId,
             listState = listState,
@@ -84,6 +83,7 @@ private fun FoodBrowseListScreenImpl(
     onQueryChange: (String) -> Unit,
     data: List<FoodItem>,
     isLoading: Boolean,
+    error: String?,
     onFoodClick: (String) -> Unit,
     selectedFoodId: String? = null,
     listState: androidx.compose.foundation.lazy.LazyListState,
@@ -94,6 +94,7 @@ private fun FoodBrowseListScreenImpl(
         onQueryChange = onQueryChange,
         data = data,
         isLoading = isLoading,
+        error = error,
         onFoodClick = onFoodClick,
         selectedFoodId = selectedFoodId,
         listState = listState,

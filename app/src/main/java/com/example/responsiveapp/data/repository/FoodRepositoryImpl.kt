@@ -15,16 +15,15 @@ import com.example.responsiveapp.data.remote.api.FatSecretApiService
 import com.example.responsiveapp.domain.model.FoodDetail
 import com.example.responsiveapp.domain.model.FoodItem
 import com.example.responsiveapp.domain.repository.FoodRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,169 +41,190 @@ class FoodRepositoryImpl @Inject constructor(
     override fun searchFoods(
         query: String,
         limit: Int,
-    ): Flow<Resource<List<FoodItem>>> = channelFlow {
-
-        val normalizedQuery = query.trim().lowercase()
-
-        val roomJob = launch {
-            foodSearchDao
-                .observeSearchResults(normalizedQuery)
-                .distinctUntilChanged()
-                .collect { foods ->
-                    if (foods.isNotEmpty()) {
-                        send(
-                            Resource.Success(
-                                foods.map { it.toDomain() },
-                            ),
-                        )
-                    }
-                }
+    ): Flow<Resource<List<FoodItem>>> = flow {
+        val trimmedQuery = query.trim()
+        if (trimmedQuery.isBlank()) {
+            emit(Resource.Success<List<FoodItem>>(emptyList()))
+            return@flow
         }
 
-        val searchLock =
-            searchLocks.getOrPut(normalizedQuery) { Mutex() }
+        val normalizedQuery = trimmedQuery.lowercase(Locale.ROOT)
+        // Bump this namespace after changing response/cache validation so old
+        // empty entries created by the permissive parser are fetched again.
+        val cacheKey = "$SEARCH_CACHE_VERSION:$normalizedQuery"
+        val requestedLimit = limit.coerceAtLeast(1)
+        val searchLock = searchLocks.getOrPut(cacheKey) { Mutex() }
 
-        val shouldFetch = searchLock.withLock {
-            val cachedQuery =
-                foodSearchDao.getSearchQuery(normalizedQuery)
+        searchLock.withLock {
+            val snapshot = foodSearchDao.getSearchCacheSnapshot(cacheKey)
+            val cachedQuery = snapshot.searchQuery
+            val cachedEntities = snapshot.foods
 
-            cachedQuery == null ||
-                    !cachedQuery.canServe(limit)
-        }
+            // Metadata is only trusted when its count and completion flag agree
+            // with the rows actually returned by Room.
+            val cacheIsConsistent = cachedQuery != null &&
+                    cachedQuery.totalResults >= 0 &&
+                    cachedQuery.cachedCount >= 0 &&
+                    cachedQuery.cachedCount == cachedEntities.size &&
+                    cachedQuery.cachedCount <= cachedQuery.totalResults &&
+                    cachedQuery.isComplete ==
+                    (cachedQuery.cachedCount >= cachedQuery.totalResults)
 
-        if (shouldFetch) {
+            // Joined rows can still be displayed as a stale preview while a
+            // refresh runs, even when their metadata is inconsistent. The
+            // consistency check below controls whether they can satisfy cache.
+            val cachedFoods = cachedEntities.map { it.toDomain() }
 
-            val hasCachedResults =
-                foodSearchDao
-                    .getSearchResults(normalizedQuery)
-                    .isNotEmpty()
+            val validEmptyCache = cacheIsConsistent &&
+                    cachedQuery != null &&
+                    cachedFoods.isEmpty() &&
+                    cachedQuery.totalResults == 0 &&
+                    cachedQuery.isComplete
 
-            if (!hasCachedResults) {
-                send(Resource.Loading())
+            val hasCachedPreview = cachedFoods.isNotEmpty() || validEmptyCache
+
+            // Emit stale rows first; the ViewModel keeps them visible when the
+            // following Loading state arrives.
+            if (hasCachedPreview) {
+                emit(Resource.Success(cachedFoods))
             }
 
-            runCatching {
+            val canUseCache = cacheIsConsistent &&
+                    cachedQuery?.canServe(requestedLimit) == true
+            if (canUseCache) {
+                return@withLock
+            }
+
+            emit(Resource.Loading())
+
+            val response = try {
                 api.searchFoods(
-                    searchExpression = query,
-                    maxResults = limit,
+                    searchExpression = trimmedQuery,
+                    maxResults = requestedLimit,
                 )
-            }.fold(
-                onSuccess = { response ->
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (exception: Exception) {
+                emit(
+                    Resource.Error(
+                        exception.message ?: "Unable to search foods",
+                    ),
+                )
+                return@withLock
+            }
 
-                    if (!response.isSuccessful) {
-                        if (!hasCachedResults) {
-                            send(
-                                Resource.Error(
-                                    "API error: ${response.code()}",
-                                ),
-                            )
-                        }
-                        return@fold
-                    }
+            if (!response.isSuccessful) {
+                emit(Resource.Error("API error: ${response.code()}"))
+                return@withLock
+            }
 
-                    val foodDtos =
-                        response.body()?.foods?.food.orEmpty()
+            val body = response.body()
+            if (body == null) {
+                emit(Resource.Error("Empty API response"))
+                return@withLock
+            }
 
-                    val totalResults =
-                        response.body()
-                            ?.foods
-                            ?.totalResults
-                            ?.toIntOrNull()
-                            ?: foodDtos.size
+            val foodsContainer = body.foods
+            if (foodsContainer == null) {
+                Log.w(TAG, "Food search response did not include a foods container for $normalizedQuery")
+                emit(Resource.Error("The food service returned an unexpected response. Please try again."))
+                return@withLock
+            }
 
-                    val domainFoods =
-                        foodDtos.map { it.toDomain() }
+            val foodDtos = foodsContainer.food.orEmpty()
+            val reportedTotal = foodsContainer.totalResults
+                ?.toIntOrNull()
+                ?.takeIf { it >= 0 }
 
-                    val foodEntities =
-                        domainFoods.map { it.toEntity() }
+            // A legitimate empty search includes an explicit zero count. A
+            // missing count or missing foods wrapper must not become a cached
+            // empty success, because that can mask an API response error.
+            if (foodDtos.isEmpty() && reportedTotal != 0) {
+                Log.w(TAG, "Food search response had no foods and no zero total for $normalizedQuery")
+                emit(Resource.Error("The food service returned an unexpected response. Please try again."))
+                return@withLock
+            }
 
-                    val searchMappings =
-                        foodEntities.mapIndexed { position, food ->
-                            SearchResultCrossRef(
-                                query = normalizedQuery,
-                                foodId = food.id,
-                                position = position,
-                            )
-                        }
+            val savedFoods: List<FoodItem>
+            try {
+                val domainFoods = foodDtos
+                    .map { it.toDomain() }
+                    .distinctBy { it.id }
 
-                    val searchQueryEntity =
-                        SearchQueryEntity(
-                            query = normalizedQuery,
-                            totalResults = totalResults,
-                            cachedCount = foodEntities.size,
-                            isComplete =
-                                foodEntities.size >= totalResults ||
-                                        foodEntities.size >= limit,
-                            lastFetchedAt = System.currentTimeMillis(),
-                        )
+                val foodEntities = domainFoods.map { it.toEntity() }
+                val totalResults = maxOf(
+                    reportedTotal ?: foodEntities.size,
+                    foodEntities.size,
+                )
 
-                    foodSearchDao.replaceSearchResults(
-                        searchQuery = searchQueryEntity,
-                        foods = foodEntities,
-                        results = searchMappings,
+                val searchMappings = foodEntities.mapIndexed { position, food ->
+                    SearchResultCrossRef(
+                        query = cacheKey,
+                        foodId = food.id,
+                        position = position,
                     )
+                }
 
-                    launch {
-                        foodSearchDao.deleteOldQueries(
-                            MAX_CACHED_QUERIES,
-                        )
-                        foodSearchDao.deleteOrphanedFoods()
-                    }
-                },
-                onFailure = { throwable ->
-                    if (!hasCachedResults) {
-                        send(
-                            Resource.Error(
-                                throwable.message
-                                    ?: "Network error",
-                            ),
-                        )
-                    }
-                },
-            )
-        }
+                val searchQueryEntity = SearchQueryEntity(
+                    query = cacheKey,
+                    totalResults = totalResults,
+                    cachedCount = foodEntities.size,
+                    isComplete = foodEntities.size >= totalResults,
+                    lastFetchedAt = System.currentTimeMillis(),
+                )
 
-        awaitClose {
-            roomJob.cancel()
+                foodSearchDao.replaceSearchResults(
+                    searchQuery = searchQueryEntity,
+                    foods = foodEntities,
+                    results = searchMappings,
+                )
+                savedFoods = domainFoods
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (exception: Exception) {
+                emit(
+                    Resource.Error(
+                        exception.message ?: "Unable to save search results",
+                    ),
+                )
+                return@withLock
+            }
+
+            // Cache cleanup must not turn a successful search into an error.
+            try {
+                foodSearchDao.deleteOldQueries(MAX_CACHED_QUERIES)
+                foodSearchDao.deleteOrphanedFoods()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (exception: Exception) {
+                Log.w(TAG, "Unable to clean up old search cache entries", exception)
+            }
+
+            emit(Resource.Success(savedFoods))
         }
     }.flowOn(ioDispatcher)
 
     override suspend fun getFoodDetail(
         foodId: String,
     ): Result<FoodDetail> = withContext(ioDispatcher) {
-
         runCatching {
+            val cachedDetail = foodDetailDao.getById(foodId)
 
-            val cachedDetail =
-                foodDetailDao.getById(foodId)
-
-            if (
-                cachedDetail != null &&
-                cachedDetail.servings.isNotEmpty()
-            ) {
+            if (cachedDetail != null && cachedDetail.servings.isNotEmpty()) {
                 return@runCatching cachedDetail.toDomain()
             }
 
-            val apiResponse =
-                api.getFoodById(foodId)
-
+            val apiResponse = api.getFoodById(foodId)
             if (!apiResponse.isSuccessful) {
                 error("Food not found: ${apiResponse.code()}")
             }
 
-            val foodDto =
-                apiResponse.body()?.food
-                    ?: error(
-                        "Empty response body for food $foodId",
-                    )
-
-            val foodDetail =
-                foodDto.toDomain()
+            val foodDto = apiResponse.body()?.food
+                ?: error("Empty response body for food $foodId")
+            val foodDetail = foodDto.toDomain()
 
             runCatching {
-                foodDetailDao.insert(
-                    foodDetail.toEntity(),
-                )
+                foodDetailDao.insert(foodDetail.toEntity())
             }
 
             foodDetail
@@ -214,21 +234,16 @@ class FoodRepositoryImpl @Inject constructor(
     override suspend fun getFoodDetailByBarcode(
         barcode: String,
     ): Result<FoodDetail> = withContext(ioDispatcher) {
-
         runCatching {
-
-            val lookupResponse =
-                api.findFoodIdForBarcode(barcode)
-
+            val lookupResponse = api.findFoodIdForBarcode(barcode)
             Log.d("TAG", "getFoodDetailByBarcode: $lookupResponse")
 
             if (!lookupResponse.isSuccessful) {
                 error("Barcode lookup failed: ${lookupResponse.code()}")
             }
 
-            val foodId =
-                lookupResponse.body()?.foodId?.value
-                    ?: error("Empty barcode lookup response")
+            val foodId = lookupResponse.body()?.foodId?.value
+                ?: error("Empty barcode lookup response")
 
             if (foodId == "0") {
                 throw NoSuchElementException(NO_BARCODE_MATCH)
@@ -239,6 +254,8 @@ class FoodRepositoryImpl @Inject constructor(
     }
 
     private companion object {
+        const val TAG = "FoodRepositoryImpl"
+        const val SEARCH_CACHE_VERSION = "food-search-v2"
         const val NO_BARCODE_MATCH = "no_barcode_match"
     }
 }

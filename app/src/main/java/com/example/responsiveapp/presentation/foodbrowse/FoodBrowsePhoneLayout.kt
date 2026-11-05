@@ -32,6 +32,7 @@ fun FoodBrowsePhoneLayout(
                 onQueryChange = onQueryChange,
                 data = state.foods,
                 isLoading = state.isLoading,
+                error = state.error,
                 onFoodClick = onFoodClick,
                 selectedFoodId = state.selectedFood?.id,
             )
@@ -56,6 +57,7 @@ private fun FoodBrowseListScreenImpl(
     onQueryChange: (String) -> Unit,
     data: List<FoodItem>,
     isLoading: Boolean,
+    error: String?,
     onFoodClick: (String) -> Unit,
     selectedFoodId: String? = null,
 ) {
@@ -64,6 +66,7 @@ private fun FoodBrowseListScreenImpl(
         onQueryChange = onQueryChange,
         data = data,
         isLoading = isLoading,
+        error = error,
         onFoodClick = onFoodClick,
         selectedFoodId = selectedFoodId,
     )
