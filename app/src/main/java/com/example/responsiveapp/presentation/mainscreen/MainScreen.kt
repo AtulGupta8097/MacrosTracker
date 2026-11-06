@@ -78,11 +78,10 @@ fun MainScreen(
     when (deviceConfig) {
 
         DeviceConfiguration.MOBILE -> {
-
-            if (showBottomBar) {
-                Scaffold(
-                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                    bottomBar = {
+            Scaffold(
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                bottomBar = {
+                    if (showBottomBar) {
                         BottomNav(
                             items = navItems,
                             selectedTab = selectedTabIndex,
@@ -92,17 +91,10 @@ fun MainScreen(
                             onAddClick = { showBottomSheet = true },
                         )
                     }
-                ) { padding ->
-                    MainContent(
-                        modifier = Modifier.padding(padding),
-                        navBackStack = navBackStack,
-                        onSignedOut = onSignedOut,
-                        onAccountDeleted = onAccountDeleted,
-                    )
                 }
-            } else {
+            ) { padding ->
                 MainContent(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().padding(padding),
                     navBackStack = navBackStack,
                     onSignedOut = onSignedOut,
                     onAccountDeleted = onAccountDeleted,
@@ -168,79 +160,71 @@ private fun MainContent(
     onSignedOut: () -> Unit,
     onAccountDeleted: () -> Unit,
 ) {
+    val saveableStateDecorator =
+        rememberSaveableStateHolderNavEntryDecorator<NavKey>()
 
-    val currentEntry = navBackStack.lastOrNull() ?: return
+    val viewModelStoreDecorator =
+        rememberViewModelStoreNavEntryDecorator<NavKey>()
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+    val entryDecorators = remember(
+        saveableStateDecorator,
+        viewModelStoreDecorator
     ) {
+        listOf(
+            saveableStateDecorator,
+            viewModelStoreDecorator
+        )
+    }
 
-        AnimatedContent(
-            targetState = currentEntry,
-            transitionSpec = {
-                slideInHorizontally { it } + fadeIn() togetherWith
-                        slideOutHorizontally { -it } + fadeOut()
-            },
-            label = "NavTransition",
-        ) { targetEntry ->
+    NavDisplay(
+        modifier = modifier.fillMaxSize(),
+        entryDecorators = entryDecorators,
+        backStack = navBackStack,
+        entryProvider = entryProvider {
 
-            key(targetEntry) {
+            entry<Routes.HomeScreen> {
+                HomeScreen(
+                    onLogFoodClick = {
+                        navBackStack.navigateSingleTop(
+                            Routes.FoodDatabaseScreen
+                        )
+                    }
+                )
+            }
 
-                NavDisplay(
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                    backStack = navBackStack,
-                    entryProvider = entryProvider {
+            entry<Routes.ProgressScreen> {
+                ProgressScreen()
+            }
 
-                        entry<Routes.HomeScreen> {
-                            HomeScreen(
-                                onLogFoodClick = {
-                                    navBackStack.navigateSingleTop(Routes.FoodDatabaseScreen)
-                                }
-                            )
-                        }
-                        entry<Routes.ProgressScreen> { ProgressScreen() }
-                        // CHANGED: removed Goals entry
-                        entry<Routes.SettingsScreen> {
-                            SettingsScreen(
-                                onPrivacyPolicyClick = {},
-                                onTermsClick = {},
-                                onRateAppClick = {},
-                                onSignedOut = onSignedOut,
-                                onAccountDeleted = onAccountDeleted,
-                            )
-                        }
+            entry<Routes.SettingsScreen> {
+                SettingsScreen(
+                    onPrivacyPolicyClick = {},
+                    onTermsClick = {},
+                    onRateAppClick = {},
+                    onSignedOut = onSignedOut,
+                    onAccountDeleted = onAccountDeleted
+                )
+            }
 
-                        entry<Routes.FoodDatabaseScreen> {
-                            FoodDatabaseScreen(
-                                onBack = {
-                                    navBackStack.removeLastOrNull()
-                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
-                                }
-                            )
-                        }
+            entry<Routes.FoodDatabaseScreen> {
+                FoodDatabaseScreen(
+                    onBack = {
+                        navBackStack.removeLastOrNull()
+                    }
+                )
+            }
 
-                        entry<Routes.BarcodeScanScreen> {
-                            BarcodeScanScreen(
-                                onBack = {
-                                    navBackStack.removeLastOrNull()
-                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
-                                },
-                                onLogged = {
-                                    navBackStack.removeLastOrNull()
-                                    navBackStack.navigateSingleTop(Routes.HomeScreen)
-                                },
-                            )
-                        }
-
+            entry<Routes.BarcodeScanScreen> {
+                BarcodeScanScreen(
+                    onBack = {
+                        navBackStack.removeLastOrNull()
                     },
+                    onLogged = {
+                        navBackStack.removeLastOrNull()
+                    }
                 )
             }
         }
-    }
+    )
 }
 

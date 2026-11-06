@@ -2,6 +2,8 @@ package com.example.responsiveapp.core.di
 
 import android.content.Context
 import androidx.work.WorkManager
+import com.example.responsiveapp.core.camera.CameraHelper
+import com.example.responsiveapp.core.camera.CameraHelperImpl
 import com.example.responsiveapp.data.datastore.EncryptedTokenDataStore
 import com.example.responsiveapp.data.datastore.TokenDataStore
 import com.example.responsiveapp.data.local.dao.CustomFoodDao
@@ -46,6 +48,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -204,8 +207,6 @@ object AppModule {
         SavedFoodRepositoryImpl(dao, firestore, sessionManager, scheduler)
 
 }
-
-
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

@@ -1,23 +1,29 @@
 package com.example.responsiveapp.presentation.barcode
 
-import androidx.compose.foundation.background
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.responsiveapp.presentation.commoncomponent.CustomToast
-import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
+import com.example.responsiveapp.core.permission.rememberPermissionHandler
 
 @Composable
 fun BarcodeScanScreen(
@@ -25,87 +31,82 @@ fun BarcodeScanScreen(
     onLogged: () -> Unit,
     viewModel: BarcodeScanViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val currentOnLogged by rememberUpdatedState(onLogged)
-    val permission = rememberCameraPermissionState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val permission = rememberPermissionHandler(Manifest.permission.CAMERA)
+    val snackbarHostState = remember { SnackbarHostState() }
+    var isInfoVisible by rememberSaveable { mutableStateOf(false) }
 
-    var torchOn by rememberSaveable { mutableStateOf(false) }
-    var hasFlash by remember { mutableStateOf(false) }
-
-    var toastMessage by remember { mutableStateOf("") }
-    var toastVisible by remember { mutableStateOf(false) }
-
-    val errorToast = remember { ErrorToast() }
-
-    val isAdded = uiState is BarcodeScanUiState.Added
-    LaunchedEffect(isAdded) {
-        if (isAdded) currentOnLogged()
+    val actions = remember(viewModel, permission) {
+        BarcodeScanActions(
+            onBack = viewModel::onNavigateBack,
+            onCameraReady = viewModel::onCameraReady,
+            onCameraDisposed = viewModel::onCameraDisposed,
+            onPreviewStreaming = viewModel::onPreviewStreaming,
+            onRetryCamera = viewModel::onRetryCamera,
+            onToggleTorch = viewModel::onToggleTorch,
+            onSwitchCamera = viewModel::onSwitchCamera,
+            onZoomClick = viewModel::onZoomCycle,
+            onRequestPermission = permission.request,
+            onOpenSettings = permission.openSettings,
+            onViewNutrition = viewModel::onViewNutrition,
+            onScanAnother = viewModel::onScanAnother,
+            onRetryLookup = viewModel::onRetryLookup,
+            onServingSelected = viewModel::onServingSelected,
+            onQuantityIncrement = viewModel::onQuantityIncrement,
+            onQuantityDecrement = viewModel::onQuantityDecrement,
+            onLogFood = viewModel::onLogFood,
+            onInfo = { isInfoVisible = true },
+        )
     }
 
-    // CHANGED: the ViewModel emitted "Couldn't add to log" but nothing ever collected it.
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { message ->
-            toastMessage = message
-            toastVisible = true
+    LaunchedEffect(Unit) {
+        if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            viewModel.onCameraError(IllegalStateException("No camera available"))
         }
     }
 
-    val cameraGranted = permission.status == CameraPermissionStatus.Granted
-    val scanning = uiState is BarcodeScanUiState.Scanning
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-    ) {
-        when (permission.status) {
-            CameraPermissionStatus.Granted -> {
-                BarcodeScannerPreview(
-                    analyzing = scanning,
-                    torchEnabled = torchOn,
-                    onBarcodeDetected = viewModel::onBarcodeDetected,
-                    onTorchAvailabilityChanged = { hasFlash = it },
-                    modifier = Modifier.fillMaxSize(),
-                )
-                BarcodeScannerOverlay(
-                    scanning = scanning,
-                    modifier = Modifier.fillMaxSize(),
-                )
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is BarcodeScanEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+                BarcodeScanEvent.NavigateBack -> onBack()
+                BarcodeScanEvent.Logged -> onLogged()
             }
-
-            CameraPermissionStatus.Denied -> BarcodeScannerPermissionDenied(
-                onRequestPermission = permission.request,
-                onOpenSettings = permission.openSettings,
-                modifier = Modifier.fillMaxSize(),
-            )
-
-            CameraPermissionStatus.Requesting -> Unit
         }
+    }
 
-        BarcodeScannerTopBar(
-            onBack = onBack,
-            showTorch = cameraGranted && hasFlash,
-            torchOn = torchOn,
-            onTorchToggle = { torchOn = !torchOn },
-            modifier = Modifier.align(Alignment.TopCenter),
+    BackHandler(onBack = viewModel::onNavigateBack)
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        BarcodeScanContent(
+            state = state,
+            permissionStatus = permission.status,
+            actions = actions
         )
 
-        if (cameraGranted) {
-            BarcodeScannerBottomContent(
-                uiState = uiState,
-                onServingSelected = viewModel::onServingSelected,
-                onQuantityChanged = viewModel::onQuantityChanged,
-                onAddToLog = viewModel::onAddToLog,
-                onScanAgain = viewModel::onScanAgain,
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
-        }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+        )
+    }
 
-        CustomToast(
-            message = toastMessage,
-            type = errorToast,
-            visibility = toastVisible,
-            onDismiss = { toastVisible = false },
+    if (isInfoVisible) {
+        AlertDialog(
+            onDismissRequest = { isInfoVisible = false },
+            title = { Text("Scanning tips") },
+            text = {
+                Text(
+                    "Hold your phone steady and keep the barcode inside the frame. " +
+                        "Use the flashlight in dim light. " +
+                        "EAN-8, EAN-13 and UPC-A product barcodes are supported."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { isInfoVisible = false }) { Text("Got it") }
+            }
         )
     }
 }
