@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +29,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -105,12 +110,17 @@ fun AddFoodBottomSheet(
             }
         },
     ) {
+        // CHANGED: content scrolls (needed in landscape where the sheet is shorter than its content)
+        // and respects the navigation bar; in landscape the options sit in two columns.
+        val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
                     .padding(horizontal = 24.dp)
-                    .padding(bottom = 40.dp),
+                    .padding(bottom = 24.dp),
         ) {
             Text(
                 text = "Add Food",
@@ -135,14 +145,27 @@ fun AddFoodBottomSheet(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            options.forEach { option ->
-                AddFoodOptionItem(
-                    option = option,
-                    onClick = {
-                        onOptionSelected(option.title)
-                        onDismiss()
-                    },
-                )
+            val columns = if (isLandscape) 2 else 1
+            options.chunked(columns).forEach { rowOptions ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    rowOptions.forEach { option ->
+                        AddFoodOptionItem(
+                            option = option,
+                            onClick = {
+                                onOptionSelected(option.title)
+                                onDismiss()
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    // keep a lone last item the same width as the others
+                    if (rowOptions.size < columns) {
+                        Spacer(modifier = Modifier.weight((columns - rowOptions.size).toFloat()))
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -153,11 +176,12 @@ fun AddFoodBottomSheet(
 private fun AddFoodOptionItem(
     option: AddFoodOption,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         onClick = onClick,
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .height(72.dp),
         shape = RoundedCornerShape(16.dp),
