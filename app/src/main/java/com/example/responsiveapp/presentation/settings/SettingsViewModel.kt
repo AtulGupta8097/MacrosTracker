@@ -14,6 +14,7 @@ import com.example.responsiveapp.domain.use_case.authentication.SendPasswordRese
 import com.example.responsiveapp.domain.use_case.authentication.SignOutUseCase
 import com.example.responsiveapp.domain.use_case.profile.ObserveUserProfileUseCase
 import com.example.responsiveapp.domain.use_case.profile.SaveUserProfileUseCase
+import com.example.responsiveapp.presentation.auth.toUserMessage
 import com.example.responsiveapp.presentation.settings.mapper.toProfileSummaryUiState
 import com.example.responsiveapp.presentation.settings.model.SettingsUiState
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
@@ -118,7 +119,7 @@ class SettingsViewModel @Inject constructor(
                     }
                     .onFailure {
                         _events.emit(
-                            SettingsEvent.Error(it.message ?: "Couldn't send reset email")
+                            SettingsEvent.Error(it.toUserMessage())
                         )
                     }
             }

@@ -1,29 +1,11 @@
 {
   "project_info": {
     "project_number": "976870746858",
+    "firebase_url": "https://fitness-4a673-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "fitness-4a673",
     "storage_bucket": "fitness-4a673.firebasestorage.app"
   },
   "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:976870746858:android:4fbf80a59b4ca083240593",
-        "android_client_info": {
-          "package_name": "com.example.fitness"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBu8yy6n7S1PMndIEBLwhJd4TmIPkWpMQ8"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:976870746858:android:279d50459dfa97dc240593",
@@ -31,7 +13,20 @@
           "package_name": "com.example.responsiveapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "976870746858-5usrjr86c55tbkkq32k3i63jvqbbn9m5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.responsiveapp",
+            "certificate_hash": "5512b9638e60ae4b9eaa8693ffde048921f2268b"
+          }
+        },
+        {
+          "client_id": "976870746858-qk123uktgtpjbhs85drqbhkafe3vjufk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBu8yy6n7S1PMndIEBLwhJd4TmIPkWpMQ8"
@@ -39,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "976870746858-qk123uktgtpjbhs85drqbhkafe3vjufk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

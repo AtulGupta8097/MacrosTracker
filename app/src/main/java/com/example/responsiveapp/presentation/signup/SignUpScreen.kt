@@ -1,26 +1,15 @@
 package com.example.responsiveapp.presentation.signup
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,18 +21,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.responsiveapp.domain.model.CustomToastProperty
-import com.example.responsiveapp.presentation.commoncomponent.AuthTextField
-import com.example.responsiveapp.presentation.commoncomponent.AuthTopScreen
-import com.example.responsiveapp.presentation.commoncomponent.CustomButton
+import com.example.responsiveapp.presentation.auth.AuthValidator
+import com.example.responsiveapp.presentation.auth.component.AuthField
+import com.example.responsiveapp.presentation.auth.component.AuthPrimaryButton
+import com.example.responsiveapp.presentation.auth.component.AuthScreenLayout
+import com.example.responsiveapp.presentation.auth.component.GoogleSignInButton
+import com.example.responsiveapp.presentation.auth.component.OrDivider
+import com.example.responsiveapp.presentation.auth.rememberGoogleIdTokenProvider
 import com.example.responsiveapp.presentation.commoncomponent.CustomToast
 import com.example.responsiveapp.presentation.commoncomponent.ErrorToast
-import com.example.responsiveapp.presentation.signin.component.BottomCard
+import com.example.responsiveapp.presentation.commoncomponent.HighLightedText
 import com.example.responsiveapp.presentation.ui.theme.spacing
 
 @Composable
@@ -53,192 +46,130 @@ fun SignUpScreen(
     navigateToHome: () -> Unit,
     navigateToUserSetup: () -> Unit
 ) {
-    val signUpState by viewmodel.state.collectAsState()
     val uiState by viewmodel.uiState.collectAsState()
-    val scroll = rememberScrollState()
+    val googleTokenProvider = rememberGoogleIdTokenProvider()
+    val toastType = remember { ErrorToast() }
     var showToast by remember { mutableStateOf(false) }
-    val toastType by remember { mutableStateOf<CustomToastProperty>(ErrorToast()) }
     var message by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-
         viewmodel.event.collect { event ->
             when (event) {
-
-                is SignUpEvent.NavigateToHome -> {
-                    navigateToHome.invoke()
-                }
-
+                is SignUpEvent.NavigateToHome -> navigateToHome()
+                is SignUpEvent.NavigateToLogin -> navigateToSignIn()
+                is SignUpEvent.NavigateToUserSetup -> navigateToUserSetup()
                 is SignUpEvent.ShowError -> {
-                    showToast = true
                     message = event.message
-                }
-
-                is SignUpEvent.NavigateToLogin -> {
-                    navigateToSignIn.invoke()
-                }
-                is SignUpEvent.NavigateToUserSetup -> {
-                    navigateToUserSetup.invoke()
+                    showToast = true
                 }
             }
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .imePadding()
+    AuthScreenLayout(
+        heading = "Create account",
+        subHeading = "Set your goals and start logging meals",
+        overlay = {
+            CustomToast(
+                message = message,
+                type = toastType,
+                visibility = showToast,
+                onDismiss = { showToast = false }
+            )
+        }
     ) {
+        AuthField(
+            label = "Name",
+            value = uiState.username,
+            onValueChange = viewmodel::onUsernameChange,
+            placeholder = "Your name",
+            icon = Icons.Filled.Person,
+            error = uiState.usernameError,
+            enabled = !uiState.isBusy,
+            imeAction = ImeAction.Next
+        )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(scroll),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AuthTopScreen()
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.xxl))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.md),
-                horizontalArrangement = Arrangement.Start
-            ){
+        AuthField(
+            label = "Email",
+            value = uiState.email,
+            onValueChange = viewmodel::onEmailChange,
+            placeholder = "name@example.com",
+            icon = Icons.Filled.Mail,
+            error = uiState.emailError,
+            enabled = !uiState.isBusy,
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        )
 
-                Text(
-                    "Username",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onBackground)
-            }
-
-            AuthTextField(
-                value = uiState.username,
-                onValueChange = viewmodel::onUsernameChange,
-                placeholder = {
-                    Text(
-                        "Username",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = null
-                    )
-                },
-                isError = uiState.usernameError != null,
-                errorMsg = uiState.usernameError,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.md))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.md),
-                horizontalArrangement = Arrangement.Start
-            ){
-
-            Text(
-                "Email",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground)
-            }
-
-            AuthTextField(
-                value = uiState.email,
-                onValueChange = viewmodel::onEmailChange,
-                placeholder = {
-                    Text(
-                        "email",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Mail,
-                        contentDescription = null
-                    )
-                },
-                isError = uiState.emailError != null,
-                errorMsg = uiState.emailError,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.md))
-
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.md),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Text(
-                    "Password",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            AuthTextField(
+        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.xs)) {
+            AuthField(
+                label = "Password",
                 value = uiState.password,
                 onValueChange = viewmodel::onPasswordChange,
-                placeholder = {
-                    Text(
-                        "Enter your password",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Lock,
-                        contentDescription = null
-                    )
-                },
-                visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = viewmodel::togglePasswordVisibility) {
-                        Icon(
-                            imageVector = Icons.Default.RemoveRedEye,
-                            contentDescription = null,
-                            tint = if (uiState.isPasswordVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-
-                },
-                isError = uiState.passwordError != null,
-                errorMsg = uiState.passwordError,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = MaterialTheme.spacing.md)
+                placeholder = "Create a password",
+                icon = Icons.Filled.Lock,
+                error = uiState.passwordError,
+                enabled = !uiState.isBusy,
+                imeAction = ImeAction.Next,
+                isPassword = true,
+                passwordVisible = uiState.isPasswordVisible,
+                onTogglePasswordVisibility = viewmodel::togglePasswordVisibility
             )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.xxl))
 
-            CustomButton(
-                text = "Sign up",
-                onClick = { viewmodel.signUp() },
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                isLoading = signUpState == SignUpState.Loading,
-                modifier = Modifier
-                    .padding(horizontal = MaterialTheme.spacing.md)
-                    .fillMaxWidth()
-                    .height(62.dp)
-                    .padding(MaterialTheme.spacing.sm)
-
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            BottomCard(onSignUpClicked = viewmodel::onSignInClicked )
+            if (uiState.passwordError == null) {
+                Text(
+                    text = "At least ${AuthValidator.MIN_PASSWORD_LENGTH} characters with a letter and a number",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = MaterialTheme.spacing.xs)
+                )
+            }
         }
+
+        AuthField(
+            label = "Confirm password",
+            value = uiState.confirmPassword,
+            onValueChange = viewmodel::onConfirmPasswordChange,
+            placeholder = "Re-enter your password",
+            icon = Icons.Filled.Lock,
+            error = uiState.confirmPasswordError,
+            enabled = !uiState.isBusy,
+            imeAction = ImeAction.Done,
+            onImeAction = viewmodel::signUp,
+            isPassword = true,
+            passwordVisible = uiState.isConfirmPasswordVisible,
+            onTogglePasswordVisibility = viewmodel::toggleConfirmPasswordVisibility
+        )
+
+        AuthPrimaryButton(
+            text = "Create account",
+            onClick = viewmodel::signUp,
+            isLoading = uiState.isLoading,
+            enabled = !uiState.isGoogleLoading
+        )
+
+        OrDivider()
+
+        GoogleSignInButton(
+            text = "Sign up with Google",
+            onClick = { viewmodel.onGoogleSignInClicked(googleTokenProvider::getIdToken) },
+            enabled = !uiState.isLoading,
+            isLoading = uiState.isGoogleLoading
+        )
+
+        HighLightedText(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(vertical = MaterialTheme.spacing.sm),
+            normal = "Already have an account? ",
+            highlighted = "Sign in",
+            normalStyle = SpanStyle(color = MaterialTheme.colorScheme.onBackground),
+            highlightedStyle = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium,
+            onClick = viewmodel::onSignInClicked
+        )
     }
-    CustomToast(
-        message = message,
-        type = toastType,
-        visibility = showToast,
-        onDismiss = { showToast = !showToast }
-    )
 }

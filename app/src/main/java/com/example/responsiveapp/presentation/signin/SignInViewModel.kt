@@ -1,11 +1,14 @@
 package com.example.responsiveapp.presentation.signin
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.responsiveapp.data.datastore.AppPrefManager
-import com.example.responsiveapp.domain.use_case.authentication.RestoreUserDataUseCase
+import com.example.responsiveapp.domain.use_case.authentication.CompleteSignInUseCase
 import com.example.responsiveapp.domain.use_case.authentication.SignInUseCase
+import com.example.responsiveapp.presentation.auth.AuthValidator
+import com.example.responsiveapp.presentation.auth.GoogleSignInHandler
+import com.example.responsiveapp.presentation.auth.GoogleSignInOutcome
+import com.example.responsiveapp.presentation.auth.GoogleTokenResult
+import com.example.responsiveapp.presentation.auth.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,27 +22,15 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase,
-    private val restoreUserDataUseCase: RestoreUserDataUseCase,
-    private val appPrefManager: AppPrefManager
+    private val completeSignInUseCase: CompleteSignInUseCase,
+    private val googleSignInHandler: GoogleSignInHandler
 ) : ViewModel() {
-
-    private val _state = MutableStateFlow<SignInState>(SignInState.SignOut)
-    val state = _state.asStateFlow()
 
     private val _uiState = MutableStateFlow(SignInUiState())
     val uiState = _uiState.asStateFlow()
 
     private val _event = MutableSharedFlow<SignInEvent>()
     val event = _event.asSharedFlow()
-
-    init {
-        Log.d("LOG", "Initialized")
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("LOG", "Cleared")
-    }
 
     fun onEmailChange(value: String) {
         _uiState.update {
@@ -69,20 +60,10 @@ class SignInViewModel @Inject constructor(
 
     fun signIn() {
         val currentUiState = _uiState.value
+        if (currentUiState.isBusy) return
 
-        val emailError =
-            if (currentUiState.email.isBlank()) {
-                "Email required"
-            } else {
-                null
-            }
-
-        val passwordError =
-            if (currentUiState.password.length < 6) {
-                "Password too short"
-            } else {
-                null
-            }
+        val emailError = AuthValidator.email(currentUiState.email)
+        val passwordError = AuthValidator.existingPassword(currentUiState.password)
 
         if (emailError != null || passwordError != null) {
             _uiState.update {
@@ -94,58 +75,62 @@ class SignInViewModel @Inject constructor(
             return
         }
 
-        _state.value = SignInState.Loading
+        _uiState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             signInUseCase(
-                currentUiState.email,
+                currentUiState.email.trim(),
                 currentUiState.password
-            ).collect { result ->
-
-                result.onSuccess { authResult ->
-                    authResult.user?.let { user ->
-                        Log.d("LOG", user.toString())
-
-                        appPrefManager.setLoggedIn(true)
-                        restoreUserDataUseCase()
-
-                        val isUserSetup = appPrefManager.isUserSetup.first()
-
-                        _state.value = SignInState.SignOut
-                        _event.emit(
-                            if (isUserSetup) {
-                                SignInEvent.NavigateToMainScreen
-                            } else {
-                                SignInEvent.NavigateToUserSetup
-                            }
-                        )
-                    } ?: run {
-                        Log.d("LOG", result.isSuccess.toString())
-
-                        _state.value = SignInState.SignOut
-                        _event.emit(
-                            SignInEvent.ShowError("Something went wrong")
-                        )
+            ).first()
+                .onSuccess { authResult ->
+                    if (authResult.user != null) {
+                        val isUserSetup = completeSignInUseCase()
+                        _uiState.update { it.copy(isLoading = false) }
+                        _event.emit(destination(isUserSetup))
+                    } else {
+                        _uiState.update { it.copy(isLoading = false) }
+                        _event.emit(SignInEvent.ShowError("Something went wrong. Please try again."))
                     }
                 }
-
-                result.onFailure { throwable ->
-                    Log.d("LOG", throwable.toString())
-
-                    _state.value = SignInState.SignOut
-                    _event.emit(
-                        SignInEvent.ShowError(
-                            throwable.message ?: "Something went wrong"
-                        )
-                    )
+                .onFailure { throwable ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    _event.emit(SignInEvent.ShowError(throwable.toUserMessage()))
                 }
+        }
+    }
+
+    fun onGoogleSignInClicked(fetchToken: suspend () -> GoogleTokenResult) {
+        if (_uiState.value.isBusy) return
+
+        _uiState.update { it.copy(isGoogleLoading = true) }
+
+        viewModelScope.launch {
+            val outcome = googleSignInHandler(fetchToken)
+            _uiState.update { it.copy(isGoogleLoading = false) }
+
+            when (outcome) {
+                is GoogleSignInOutcome.Success -> _event.emit(destination(outcome.isUserSetupComplete))
+                is GoogleSignInOutcome.Failure -> _event.emit(SignInEvent.ShowError(outcome.message))
+                GoogleSignInOutcome.Cancelled -> Unit
             }
         }
     }
 
     fun onSignUpClicked() {
+        if (_uiState.value.isBusy) return
         viewModelScope.launch {
             _event.emit(SignInEvent.NavigateToSignUp)
         }
     }
+
+    fun onForgotPasswordClicked() {
+        val current = _uiState.value
+        if (current.isBusy) return
+        viewModelScope.launch {
+            _event.emit(SignInEvent.NavigateToForgotPassword(current.email.trim()))
+        }
+    }
+
+    private fun destination(isUserSetupComplete: Boolean): SignInEvent =
+        if (isUserSetupComplete) SignInEvent.NavigateToMainScreen else SignInEvent.NavigateToUserSetup
 }

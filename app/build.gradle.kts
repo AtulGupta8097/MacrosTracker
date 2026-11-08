@@ -146,4 +146,7 @@ dependencies {
     implementation(libs.play.services.ads)
     implementation(libs.user.messaging.platform)
 
+    //Google Id
+    implementation(libs.googleid)
+
 }
