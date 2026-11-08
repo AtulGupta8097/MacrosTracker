@@ -37,13 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxWidth
 
-// CHANGED: redesigned side rail (used in landscape / wide windows).
-//  - Rounded trailing edge on a tonal surface instead of a flat full-height rail.
-//  - The "add food" button is a header at the top of the rail (it used to be wedged between
-//    Home and Progress, which made the order of the items look broken).
-//  - Items use a pill indicator (orange tint when selected) with the label underneath.
-//  - Handles status bar / display cutout / side navigation bar insets itself (the Scaffold above
-//    passes zero insets) and scrolls, so nothing is cut off on short landscape phone screens.
 @Composable
 fun SideNav(
     items: List<Navbar>,

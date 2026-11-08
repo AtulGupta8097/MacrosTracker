@@ -4,10 +4,15 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 sealed interface Routes : NavKey {
+
     @Serializable
     object SplashScreen : Routes, NavKey
     @Serializable
     object SignInScreen : Routes, NavKey
+
+
+    @Serializable
+    data class ForgotPasswordScreen(val email: String) : Routes, NavKey
     @Serializable
     object SignUpScreen : Routes, NavKey
     @Serializable

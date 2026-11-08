@@ -74,9 +74,9 @@ fun MyMealListScreen(
                         FoodLogCard(
                             name = meal.name,
                             caloriesText = "${meal.totalNutritionInfo.calories.toInt()} kcal",
-                            proteinText = formatMacroValue(meal.totalNutritionInfo.protein),
-                            carbsText = formatMacroValue(meal.totalNutritionInfo.carbs),
-                            fatText = formatMacroValue(meal.totalNutritionInfo.fat),
+                            proteinText = "${formatMacroValue(meal.totalNutritionInfo.protein)}g",
+                            carbsText = "${formatMacroValue(meal.totalNutritionInfo.carbs)}g",
+                            fatText = "${formatMacroValue(meal.totalNutritionInfo.fat)}g",
                             isSelected = meal.id == selectedMealId,
                             onClick = { onMealClicked(meal) },
                             trailingContent = {

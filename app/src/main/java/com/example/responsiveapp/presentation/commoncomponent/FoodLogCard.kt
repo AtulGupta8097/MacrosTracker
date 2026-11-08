@@ -176,7 +176,7 @@ private fun MacroItem(
         )
 
         Text(
-            text = "${value}g",
+            text = "${value}",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = tint,
@@ -191,9 +191,9 @@ private fun FoodLogCardTimePreview() {
         FoodLogCard(
             name = "Chicken Thigh",
             caloriesText = "209 kcal",
-            proteinText = "26",
-            carbsText = "0",
-            fatText = "11",
+            proteinText = "26g",
+            carbsText = "0g",
+            fatText = "11g",
             trailingContent = {
                 Text(
                     text = "12:40 PM",

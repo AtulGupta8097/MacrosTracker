@@ -1,26 +1,30 @@
 package com.example.responsiveapp.presentation.signup
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.responsiveapp.data.datastore.AppPrefManager
 import com.example.responsiveapp.domain.use_case.authentication.SignUpUseCase
+import com.example.responsiveapp.presentation.auth.AuthValidator
+import com.example.responsiveapp.presentation.auth.GoogleSignInHandler
+import com.example.responsiveapp.presentation.auth.GoogleSignInOutcome
+import com.example.responsiveapp.presentation.auth.GoogleTokenResult
+import com.example.responsiveapp.presentation.auth.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SignUpViewmodel @Inject constructor(
     private val signUpUseCase: SignUpUseCase,
-    private val appPrefManager: AppPrefManager
+    private val appPrefManager: AppPrefManager,
+    private val googleSignInHandler: GoogleSignInHandler
 ) : ViewModel() {
-    private val _state = MutableStateFlow<SignUpState>(SignUpState.SignOut)
-    val state = _state.asStateFlow()
 
     private val _uiState = MutableStateFlow(SignUpUiState())
     val uiState = _uiState.asStateFlow()
@@ -31,78 +35,99 @@ class SignUpViewmodel @Inject constructor(
     fun onUsernameChange(value: String) {
         _uiState.update { it.copy(username = value, usernameError = null) }
     }
+
     fun onEmailChange(value: String) {
         _uiState.update { it.copy(email = value, emailError = null) }
     }
 
     fun onPasswordChange(value: String) {
-        _uiState.update { it.copy(password = value, passwordError = null) }
+        _uiState.update { it.copy(password = value, passwordError = null, confirmPasswordError = null) }
+    }
+
+    fun onConfirmPasswordChange(value: String) {
+        _uiState.update { it.copy(confirmPassword = value, confirmPasswordError = null) }
     }
 
     fun togglePasswordVisibility() {
         _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
     }
-    init {
-        Log.d("Log","SignInViewModel Initialized")
-    }
 
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("Log","SignInViewModel Cleared")
+    fun toggleConfirmPasswordVisibility() {
+        _uiState.update { it.copy(isConfirmPasswordVisible = !it.isConfirmPasswordVisible) }
     }
 
     fun signUp() {
+        val currentUiState = _uiState.value
+        if (currentUiState.isBusy) return
 
-        val currentUiState= _uiState.value
+        val nameError = AuthValidator.name(currentUiState.username)
+        val emailError = AuthValidator.email(currentUiState.email)
+        val passwordError = AuthValidator.newPassword(currentUiState.password)
+        val confirmError = AuthValidator.confirmPassword(
+            currentUiState.password,
+            currentUiState.confirmPassword
+        )
 
-        val emailError =
-            if (currentUiState.email.isBlank()) "Email required"
-            else null
-
-        val passwordError =
-            if (currentUiState.password.length < 6) "Password too short"
-            else null
-        val nameError =
-            if (currentUiState.username.isBlank()) "Name required"
-            else null
-
-        if (emailError != null || passwordError != null || nameError != null) {
+        if (nameError != null || emailError != null || passwordError != null || confirmError != null) {
             _uiState.update {
-                it.copy(emailError = emailError, passwordError = passwordError, usernameError = nameError)
+                it.copy(
+                    usernameError = nameError,
+                    emailError = emailError,
+                    passwordError = passwordError,
+                    confirmPasswordError = confirmError
+                )
             }
             return
         }
 
-        _state.value = SignUpState.Loading
-        viewModelScope.launch {
-            signUpUseCase(currentUiState.email, currentUiState.password, currentUiState.username).collect { result ->
+        _uiState.update { it.copy(isLoading = true) }
 
-                result.onSuccess { authResult ->
-                    authResult.user?.let {
-                        Log.d("LOG",it.toString())
+        viewModelScope.launch {
+            signUpUseCase(
+                currentUiState.email.trim(),
+                currentUiState.password,
+                currentUiState.username
+            ).first()
+                .onSuccess { authResult ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (authResult.user != null) {
                         appPrefManager.setLoggedIn(true)
-                        _state.value = SignUpState.SignOut
                         _event.emit(SignUpEvent.NavigateToUserSetup)
-                    } ?: run {
-                        Log.d("LOG",result.isSuccess.toString())
-                        _state.value = SignUpState.SignOut
-                        _event.emit(SignUpEvent.ShowError("Something went wrong"))
+                    } else {
+                        _event.emit(SignUpEvent.ShowError("Something went wrong. Please try again."))
                     }
                 }
-
-                result.onFailure {
-                    Log.d("LOG",it.toString())
-                    _state.value = SignUpState.SignOut
-                    _event.emit(SignUpEvent.ShowError(it.message ?: "Something went wrong"))
+                .onFailure { throwable ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    _event.emit(SignUpEvent.ShowError(throwable.toUserMessage()))
                 }
+        }
+    }
+
+    fun onGoogleSignInClicked(fetchToken: suspend () -> GoogleTokenResult) {
+        if (_uiState.value.isBusy) return
+
+        _uiState.update { it.copy(isGoogleLoading = true) }
+
+        viewModelScope.launch {
+            val outcome = googleSignInHandler(fetchToken)
+            _uiState.update { it.copy(isGoogleLoading = false) }
+
+            when (outcome) {
+                is GoogleSignInOutcome.Success -> _event.emit(
+                    if (outcome.isUserSetupComplete) SignUpEvent.NavigateToHome
+                    else SignUpEvent.NavigateToUserSetup
+                )
+                is GoogleSignInOutcome.Failure -> _event.emit(SignUpEvent.ShowError(outcome.message))
+                GoogleSignInOutcome.Cancelled -> Unit
             }
         }
     }
 
     fun onSignInClicked() {
+        if (_uiState.value.isBusy) return
         viewModelScope.launch {
             _event.emit(SignUpEvent.NavigateToLogin)
         }
     }
-
 }
