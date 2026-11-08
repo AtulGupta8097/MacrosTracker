@@ -49,7 +49,7 @@ class AuthRepositoryImp(private val auth: FirebaseAuth) : AuthRepository {
             )?.await()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
 
         result
@@ -67,7 +67,6 @@ class AuthRepositoryImp(private val auth: FirebaseAuth) : AuthRepository {
 
     override suspend fun sendPasswordResetEmail(email: String): Flow<Result<Unit>> = authFlow {
         auth.sendPasswordResetEmail(email).await()
-        Unit
     }
 
     override suspend fun deleteAccount(): Flow<Result<Unit>> = flow {
@@ -89,20 +88,19 @@ class AuthRepositoryImp(private val auth: FirebaseAuth) : AuthRepository {
         val email = user.email ?: throw AuthException(AuthFailure.NotSignedIn)
         user.reauthenticate(EmailAuthProvider.getCredential(email, currentPassword)).await()
         user.updatePassword(newPassword).await()
-        Unit
     }
 
     override suspend fun reauthenticateWithPassword(password: String): Result<Unit> = runAuth {
         val user = auth.currentUser ?: throw AuthException(AuthFailure.NotSignedIn)
         val email = user.email ?: throw AuthException(AuthFailure.NotSignedIn)
         user.reauthenticate(EmailAuthProvider.getCredential(email, password)).await()
-        Unit
+
     }
 
     override suspend fun reauthenticateWithGoogle(idToken: String): Result<Unit> = runAuth {
         val user = auth.currentUser ?: throw AuthException(AuthFailure.NotSignedIn)
         user.reauthenticate(GoogleAuthProvider.getCredential(idToken, null)).await()
-        Unit
+
     }
 
     override fun getLinkedProviders(): LinkedProviders {
@@ -121,7 +119,7 @@ class AuthRepositoryImp(private val auth: FirebaseAuth) : AuthRepository {
             user.linkWithCredential(pending.credential).await()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
     }
 
