@@ -1,0 +1,9 @@
+package com.macrivo.app.domain.model
+
+data class DailySummary(
+    val date: Long,
+    val target: NutritionTargets,
+    val consumed: NutritionProgress,
+    val createdAt: Long,
+    val updatedAt: Long
+)

@@ -42,6 +42,43 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976870746858:android:d67b52ec5f5a6a8a240593",
+        "android_client_info": {
+          "package_name": "com.macrivo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "976870746858-j58628tc91bso0pktmr3blkeang8ujkc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macrivo.app",
+            "certificate_hash": "5512b9638e60ae4b9eaa8693ffde048921f2268b"
+          }
+        },
+        {
+          "client_id": "976870746858-qk123uktgtpjbhs85drqbhkafe3vjufk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu8yy6n7S1PMndIEBLwhJd4TmIPkWpMQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "976870746858-qk123uktgtpjbhs85drqbhkafe3vjufk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

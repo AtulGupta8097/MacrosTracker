@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ResponsiveApp"
+rootProject.name = "Macrivo"
 include(":app")
  

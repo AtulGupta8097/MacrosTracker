@@ -1,0 +1,131 @@
+package com.macrivo.app.data.mapper
+
+import com.macrivo.app.data.local.converter.IngredientConverters
+import com.macrivo.app.data.local.entity.MyMealsEntity
+import com.macrivo.app.data.remote.dto.firebase.MyMealDto
+import com.macrivo.app.domain.model.NutritionInfo
+import com.macrivo.app.domain.model.SyncStatus
+import com.macrivo.app.domain.model.mymeals.MyMeal
+
+fun MyMeal.toEntity() = MyMealsEntity(
+    id = id,
+    name = name,
+    ingredientsJson = IngredientConverters.fromIngredients(ingredients),
+    calories = totalNutritionInfo.calories,
+    protein = totalNutritionInfo.protein,
+    carbs = totalNutritionInfo.carbs,
+    fat = totalNutritionInfo.fat,
+    fiber = totalNutritionInfo.fiber,
+    sugar = totalNutritionInfo.sugar,
+    sodium = totalNutritionInfo.sodium,
+    cholesterol = totalNutritionInfo.cholesterol,
+    saturatedFat = totalNutritionInfo.saturatedFat,
+    polyunsaturatedFat = totalNutritionInfo.polyunsaturatedFat,
+    monounsaturatedFat = totalNutritionInfo.monounsaturatedFat,
+    transFat = totalNutritionInfo.transFat,
+    potassium = totalNutritionInfo.potassium,
+    addedSugars = totalNutritionInfo.addedSugars,
+    vitaminA = totalNutritionInfo.vitaminA,
+    vitaminC = totalNutritionInfo.vitaminC,
+    vitaminD = totalNutritionInfo.vitaminD,
+    calcium = totalNutritionInfo.calories,
+    iron = totalNutritionInfo.iron,
+    createdAt = createAt,
+    updatedAt = createAt
+)
+
+fun MyMealsEntity.toDomain() = MyMeal(
+    id = id,
+    name = name,
+    ingredients = IngredientConverters.toIngredients(ingredientsJson),
+    totalNutritionInfo = NutritionInfo(
+        calories = calories,
+        protein = protein,
+        carbs = carbs,
+        fat = fat,
+        fiber = fiber,
+        sugar = sugar,
+        sodium = sodium,
+        cholesterol = cholesterol,
+        saturatedFat = saturatedFat,
+        polyunsaturatedFat = polyunsaturatedFat,
+        monounsaturatedFat = monounsaturatedFat,
+        transFat = transFat,
+        potassium = potassium,
+        addedSugars = addedSugars,
+        vitaminA = vitaminA,
+        vitaminC = vitaminC,
+        vitaminD = vitaminD,
+        calcium = calcium,
+        iron = iron
+    ),
+    createAt = createdAt,
+    updatedAt = updatedAt
+)
+
+fun MyMealsEntity.toFirestoreDto() =
+    MyMealDto(
+        id = id,
+        name = name,
+        ingredientsJson = ingredientsJson,
+        calories = calories,
+        protein = protein,
+        carbs = carbs,
+        fat = fat,
+        fiber = fiber,
+        sugar = sugar,
+        sodium = sodium,
+        cholesterol = cholesterol,
+        saturatedFat = saturatedFat,
+        polyunsaturatedFat = polyunsaturatedFat,
+        monounsaturatedFat = monounsaturatedFat,
+        transFat = transFat,
+        potassium = potassium,
+        addedSugars = addedSugars,
+        vitaminA = vitaminA,
+        vitaminC = vitaminC,
+        vitaminD = vitaminD,
+        calcium = calcium,
+        iron = iron,
+        createdAt = createdAt,
+        updatedAt = updatedAt
+    )
+
+fun MyMealDto.toEntity(
+    syncStatus: SyncStatus = SyncStatus.SYNCED,
+    lastSyncAttempt: Long? = System.currentTimeMillis()
+) = MyMealsEntity(
+    id = id,
+    name = name,
+    ingredientsJson = ingredientsJson,
+    calories = calories,
+    protein = protein,
+    carbs = carbs,
+    fat = fat,
+    fiber = fiber,
+    sugar = sugar,
+    sodium = sodium,
+    cholesterol = cholesterol,
+    saturatedFat = saturatedFat,
+    polyunsaturatedFat = polyunsaturatedFat,
+    monounsaturatedFat = monounsaturatedFat,
+    transFat = transFat,
+    potassium = potassium,
+    addedSugars = addedSugars,
+    vitaminA = vitaminA,
+    vitaminC = vitaminC,
+    vitaminD = vitaminD,
+    calcium = calcium,
+    iron = iron,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    syncStatus = syncStatus,
+    retryCount = 0,
+    lastSyncAttempt = lastSyncAttempt
+)
+
+fun List<MyMealsEntity>.toDomain(): List<MyMeal>  {
+    return map{
+        it.toDomain()
+    }
+}
