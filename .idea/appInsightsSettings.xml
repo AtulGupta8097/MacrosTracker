@@ -9,8 +9,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.responsiveapp" />
-                  <option name="mobileSdkAppId" value="1:976870746858:android:279d50459dfa97dc240593" />
+                  <option name="appId" value="com.macrivo.app" />
+                  <option name="mobileSdkAppId" value="1:976870746858:android:d67b52ec5f5a6a8a240593" />
                   <option name="projectId" value="fitness-4a673" />
                   <option name="projectNumber" value="976870746858" />
                 </ConnectionSetting>

@@ -1,0 +1,16 @@
+package com.macrivo.app.presentation.progress.model
+
+import androidx.compose.runtime.Immutable
+
+@Immutable
+data class WeightProgressUiState(
+    val hasData: Boolean = false,
+    val points: List<WeightChartPointUi> = emptyList(),
+    val logCount: Int = 0,
+)
+
+@Immutable
+data class WeightChartPointUi(
+    val label: String,
+    val weight: Float,
+)

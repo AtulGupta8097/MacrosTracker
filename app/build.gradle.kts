@@ -16,11 +16,11 @@ plugins {
 val localProperties = Properties()
 localProperties.load(rootProject.file("local.properties").inputStream())
 android {
-    namespace = "com.example.responsiveapp"
+    namespace = "com.macrivo.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.responsiveapp"
+        applicationId = "com.macrivo.app"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
