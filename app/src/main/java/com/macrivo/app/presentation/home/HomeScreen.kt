@@ -204,6 +204,7 @@ private fun HomeContent(
                     }
                 }
 
+
                 item(key = "foodLogs") {
                     LoadingContent(
                         isLoading = state.isLoading,
@@ -216,6 +217,12 @@ private fun HomeContent(
                             onMealClick = onFoodLogClick,
                             onMealDelete = onFoodLogDelete,
                         )
+                    }
+                }
+
+                if (!state.isLoading) {
+                    item {
+                        BannerAd(modifier = Modifier.fillMaxWidth())
                     }
                 }
 
@@ -232,11 +239,6 @@ private fun HomeContent(
                     }
                 }
 
-                if (!state.isLoading) {
-                    item {
-                        BannerAd(modifier = Modifier.fillMaxWidth())
-                    }
-                }
             }
         }
     }

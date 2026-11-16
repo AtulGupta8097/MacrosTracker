@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.macrivo.app.presentation.commoncomponent.BannerAd
 import com.macrivo.app.presentation.progress.componet.NutritionOverviewSection
 import com.macrivo.app.presentation.progress.componet.ProgressHeader
 import com.macrivo.app.presentation.progress.componet.RangeSelector
@@ -45,6 +46,10 @@ fun ProgressScreen(
                 ProgressHeader(modifier = Modifier.fillMaxWidth())
             }
 
+            item(key = "bannerAd") {
+                BannerAd(modifier = Modifier.fillMaxWidth())
+            }
+
             item {
                 RangeSelector(
                     selected = state.range,
@@ -68,6 +73,10 @@ fun ProgressScreen(
                     state = state.macroDistribution,
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+
+            item(key = "bannerAd") {
+                BannerAd(modifier = Modifier.fillMaxWidth())
             }
 
             item {
