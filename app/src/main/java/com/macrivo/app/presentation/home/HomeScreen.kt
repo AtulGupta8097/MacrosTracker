@@ -11,7 +11,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -51,19 +54,30 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    // CHANGED: the food details bottom sheet (null = closed).
     val foodDetail by viewModel.foodDetail.collectAsStateWithLifecycle()
 
-    HomeContent(
-        modifier = modifier,
-        state = state,
-        listState = rememberLazyListState(),
-        onLogFoodClick = onLogFoodClick,
-        onFoodLogClick = viewModel::onFoodLogClick,
-        onDateSelected = viewModel::onDateSelected,
-        onPreviousWeek = viewModel::onPreviousWeek,
-        onNextWeek = viewModel::onNextWeek,
-    )
+    val listSnackbar = remember { SnackbarHostState() }
+    LaunchedEffect(viewModel) {
+        viewModel.listMessages.collect { listSnackbar.showSnackbar(it) }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        HomeContent(
+            modifier = Modifier.fillMaxSize(),
+            state = state,
+            listState = rememberLazyListState(),
+            onLogFoodClick = onLogFoodClick,
+            onFoodLogClick = viewModel::onFoodLogClick,
+            onFoodLogDelete = viewModel::onDeleteFoodLogFromList,
+            onDateSelected = viewModel::onDateSelected,
+            onPreviousWeek = viewModel::onPreviousWeek,
+            onNextWeek = viewModel::onNextWeek,
+        )
+        SnackbarHost(
+            hostState = listSnackbar,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
 
     foodDetail?.let { detail ->
         FoodDetailSheet(
@@ -126,6 +140,7 @@ private fun HomeContent(
     modifier: Modifier = Modifier,
     onLogFoodClick: () -> Unit,
     onFoodLogClick: (String) -> Unit,
+    onFoodLogDelete: (String) -> Unit = {},
     onDateSelected: (Long) -> Unit,
     onPreviousWeek: () -> Unit,
     onNextWeek: () -> Unit,
@@ -199,6 +214,7 @@ private fun HomeContent(
                         FoodLogsSection(
                             recentMealsUiState = state.recentMeals,
                             onMealClick = onFoodLogClick,
+                            onMealDelete = onFoodLogDelete,
                         )
                     }
                 }

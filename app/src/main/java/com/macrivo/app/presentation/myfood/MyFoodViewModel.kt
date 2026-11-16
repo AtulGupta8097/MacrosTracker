@@ -57,7 +57,7 @@ class MyFoodViewModel @Inject constructor(
 
     fun onFoodCardClick(food: CustomFood) {
         originalFood = food
-        // CHANGED: stored "100 g" -> amount + unit for the two serving inputs.
+
         val (servingAmount, servingUnit) =
             CreateFoodValidator.splitServing(food.servingSize)
 
@@ -114,7 +114,7 @@ class MyFoodViewModel @Inject constructor(
         }
     }
 
-    // CHANGED: Next and tapping the "Nutrients" segment share one rule - Basic Info must be
+    // Next and tapping the "Nutrients" segment share one rule - Basic Info must be
     // valid first, otherwise stay here and surface inline errors.
     fun onNextStep() = goToNutrientsIfBasicValid()
 
@@ -255,15 +255,13 @@ class MyFoodViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                // Keep everything the user typed; just unlock the form and tell them.
+
                 _state.update { it.copy(isSaving = false) }
                 showToast("Couldn't save the food. Your changes are kept - please try again.", ErrorToast())
                 return@launch
             }
 
             originalFood = null
-            // CHANGED: navigate only after a successful save, and keep the toast in the new
-            // state (previously the reset wiped it immediately).
             resetToList(
                 if (snapshot.editingFood != null) "Food updated!" else "Food saved!"
             )
@@ -396,7 +394,6 @@ class MyFoodViewModel @Inject constructor(
             }
 
         return copy(
-            // Once errors have been shown they update live as the user fixes the fields.
             basicErrors = if (basicErrorsVisible)
                 CreateFoodValidator.validateBasicInfo(basicInfo) else basicErrors,
             nutrientErrors = if (nutrientErrorsVisible)
@@ -406,7 +403,6 @@ class MyFoodViewModel @Inject constructor(
         )
     }
 
-    // Float -> text for the edit form. 0 shows as an empty (optional) field.
     private fun Float.fmt() =
         if (this == 0f) "" else CreateFoodValidator.formatNumber(this)
 }

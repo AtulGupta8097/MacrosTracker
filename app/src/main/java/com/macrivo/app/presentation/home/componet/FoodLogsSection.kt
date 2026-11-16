@@ -4,7 +4,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.macrivo.app.presentation.commoncomponent.ConfirmDeleteFoodDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,9 +41,22 @@ import com.macrivo.app.presentation.ui.theme.spacing
 fun FoodLogsSection(
     recentMealsUiState: RecentMealsUiState,
     modifier: Modifier = Modifier,
-    // CHANGED: tapping a card opens that food's details.
     onMealClick: (String) -> Unit = {},
+    onMealDelete: (String) -> Unit = {},
 ) {
+    var pendingDelete by remember { mutableStateOf<FoodLogUiModel?>(null) }
+
+    pendingDelete?.let { meal ->
+        ConfirmDeleteFoodDialog(
+            foodName = meal.name,
+            onConfirm = {
+                onMealDelete(meal.id)
+                pendingDelete = null
+            },
+            onDismiss = { pendingDelete = null },
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -43,24 +77,85 @@ fun FoodLogsSection(
             EmptyFoodLogsState()
         } else {
             recentMealsUiState.meals.forEach { meal ->
-                FoodLogCard(
-                    name = meal.name,
-                    caloriesText = meal.caloriesText,
-                    proteinText = meal.proteinText,
-                    carbsText = meal.carbsText,
-                    fatText = meal.fatText,
-                    onClick = { onMealClick(meal.id) },
-                    trailingContent = {
-                        Text(
-                            text = meal.timeText,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                key(meal.id) {
+                    SwipeToDeleteBox(
+                        enabled = meal.canDelete,
+                        onDeleteRequested = { pendingDelete = meal },
+                    ) {
+                        FoodLogCard(
+                            name = meal.name,
+                            caloriesText = meal.caloriesText,
+                            proteinText = meal.proteinText,
+                            carbsText = meal.carbsText,
+                            fatText = meal.fatText,
+                            onClick = { onMealClick(meal.id) },
+                            trailingContent = {
+                                Text(
+                                    text = meal.timeText,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
                         )
-                    },
-                )
+                    }
+                }
             }
         }
     }
+}
+
+
+@Composable
+private fun SwipeToDeleteBox(
+    enabled: Boolean,
+    onDeleteRequested: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    if (!enabled) {
+        content()
+        return
+    }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { target ->
+            if (target == SwipeToDismissBoxValue.EndToStart) onDeleteRequested()
+            false // never stay dismissed - the item is only removed after the user confirms
+        },
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val swiping = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        if (swiping) MaterialTheme.colorScheme.error else Color.Transparent
+                    )
+                    .padding(horizontal = MaterialTheme.spacing.lg),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                if (swiping) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onError,
+                        )
+                        Text(
+                            text = "Delete",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onError,
+                        )
+                    }
+                }
+            }
+        },
+        content = { content() },
+    )
 }
 
 @Preview(showBackground = true)

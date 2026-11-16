@@ -21,6 +21,7 @@ fun FoodLog.toUiModel(): FoodLogUiModel =
         proteinText = "${formatMacroValue(nutrition.protein)}g",
         carbsText = "${formatMacroValue(nutrition.carbs)}g",
         fatText = "${formatMacroValue(nutrition.fat)}g",
+        canDelete = isEditable,
     )
 
 fun List<FoodLog>.toRecentMealsUiState(): RecentMealsUiState =
@@ -28,14 +29,9 @@ fun List<FoodLog>.toRecentMealsUiState(): RecentMealsUiState =
         meals = map { it.toUiModel() }
     )
 
-/**
- * CHANGED: builds the state the shared FoodDetailScreen needs for a LOGGED food. A log has exactly
- * one "serving" (what was logged) and its nutrition is already multiplied by the quantity, so the
- * serving picker stays hidden and the caption says "per 2 x 100 g". Only today's logs can be deleted.
- */
+
 fun FoodLog.toFoodDetailUiState(
     isBusy: Boolean = false,
-    // CHANGED: the quantity being edited (defaults to the stored one). Nutrition is re-scaled from it.
     editedQuantity: Float = quantity,
 ): FoodDetailUiState.Success {
     val serving = servingDescription.ifBlank { "serving" }
@@ -56,7 +52,6 @@ fun FoodLog.toFoodDetailUiState(
 
     return FoodDetailUiState.Success(
         foodName = foodName,
-        // the shared header shows this under the name: when it was logged
         foodBrand = "${DateUtils.formatFullDate(date)} \u00b7 ${DateUtils.formatTimeOfDay(createdAt)}",
         servings = listOf(loggedServing),
         selectedServing = loggedServing,

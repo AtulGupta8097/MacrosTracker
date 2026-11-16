@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -51,16 +52,13 @@ fun FoodDetailContent(
     onBack: () -> Unit,
     onLog: () -> Unit,
     onSaveToggle: () -> Unit = {},
-    // CHANGED: mode-specific behaviour (see FoodDetailMode).
     mode: FoodDetailMode = FoodDetailMode.BROWSE,
     onDelete: () -> Unit = {},
     isBusy: Boolean = false,
-    // CHANGED: LOGGED_TODAY lets the quantity be edited; "Save changes" is enabled once it differs.
     hasChanges: Boolean = false,
     onSaveChanges: () -> Unit = {},
 ) {
     val isBrowse = mode == FoodDetailMode.BROWSE
-    // the quantity stepper is shown for catalogue foods and for foods logged today
     val canEditQuantity = isBrowse || mode == FoodDetailMode.LOGGED_TODAY
 
     LazyColumn(
@@ -102,7 +100,6 @@ fun FoodDetailContent(
                 )
             }
         } else {
-            // a food logged on a previous day is history - shown, never changed
             item(key = "quantity-readonly") {
                 ReadOnlyQuantity(
                     quantity = quantity,
@@ -172,7 +169,9 @@ fun FoodDetailContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .navigationBarsPadding(),
+                        .navigationBarsPadding()
+                        .padding(vertical = MaterialTheme.spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.sm)
                 ) {
                     CustomButton(
                         text = "Save changes",
@@ -181,8 +180,8 @@ fun FoodDetailContent(
                         imageVector = Icons.Default.Check,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(80.dp)
-                            .padding(MaterialTheme.spacing.md),
+                            .heightIn(min = 54.dp)
+                            .padding(horizontal = MaterialTheme.spacing.sm),
                         buttonColors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -195,11 +194,8 @@ fun FoodDetailContent(
                         imageVector = Icons.Default.Delete,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(80.dp)
-                            .padding(
-                                start = MaterialTheme.spacing.md,
-                                end = MaterialTheme.spacing.md,
-                                bottom = MaterialTheme.spacing.md,
+                            .heightIn(min = 54.dp)
+                            .padding(horizontal = MaterialTheme.spacing.sm
                             ),
                         buttonColors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error,

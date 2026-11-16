@@ -85,10 +85,13 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
+
     private val selectedFoodLogId = MutableStateFlow<String?>(null)
+    // a save or a delete is running
     private val isDeleting = MutableStateFlow(false)
     private val editedQuantity = MutableStateFlow<Float?>(null)
 
+    /** null = sheet closed. */
     val foodDetail = selectedFoodLogId
         .flatMapLatest { id ->
             if (id == null) {
@@ -116,8 +119,26 @@ class HomeViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    // One-off messages (e.g. a failed delete) - shown once, not part of the screen state.
     private val _messages = Channel<String>(Channel.BUFFERED)
     val messages = _messages.receiveAsFlow()
+
+    private val _listMessages = Channel<String>(Channel.BUFFERED)
+    val listMessages = _listMessages.receiveAsFlow()
+
+    /**
+     * Swipe-to-delete, called after the confirmation dialog. Same use case (and so the same rules:
+     * today only, summary updated in the same transaction, Firestore delete synced, never negative)
+     * as the Delete button in the details sheet.
+     */
+    fun onDeleteFoodLogFromList(id: String) {
+        viewModelScope.launch {
+            val result = deleteFoodLogUseCase(id)
+            if (result is Resource.Error) {
+                _listMessages.send(result.message ?: "Unable to delete this food.")
+            }
+        }
+    }
 
     fun onFoodLogClick(id: String) {
         editedQuantity.value = null
@@ -137,6 +158,10 @@ class HomeViewModel @Inject constructor(
         editedQuantity.value = quantity
     }
 
+    /**
+     * Stores the edited quantity. Room changes (log + daily summary in one transaction), Home re-emits
+     * by itself; the sheet closes on success and shows a message on failure.
+     */
     fun onSaveFoodLogChanges() {
         val id = selectedFoodLogId.value ?: return
         val detail = foodDetail.value as? FoodDetailUiState.Success ?: return
@@ -157,6 +182,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Deletes the open food. No Home state is touched here: the delete changes Room (log + daily
+     * summary in one transaction), the observed flows re-emit and Home updates by itself.
+     */
     fun onDeleteFoodLog() {
         val id = selectedFoodLogId.value ?: return
         val detail = foodDetail.value as? FoodDetailUiState.Success ?: return
@@ -176,6 +205,10 @@ class HomeViewModel @Inject constructor(
     }
 
 
+    /**
+     * Every feature that depends on the selected date
+     * should observe this flow.
+     */
     private val selectedDateFlow =
         _dateState
             .map { it.selectedDate }

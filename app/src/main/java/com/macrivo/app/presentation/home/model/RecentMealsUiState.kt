@@ -11,6 +11,7 @@ data class FoodLogUiModel(
     val proteinText: String,
     val carbsText: String,
     val fatText: String,
+    val canDelete: Boolean = false,
 )
 
 @Immutable

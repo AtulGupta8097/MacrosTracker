@@ -71,8 +71,7 @@ fun NutrientsStep(
     onVitaminDChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // CHANGED: plain scrollable Column instead of LazyColumn so every field is always
-    // composed - IME "Next" can reach all of them and scroll-to-focus works reliably.
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -260,7 +259,6 @@ fun NutrientsStep(
     }
 }
 
-// Soft hint only - never blocks saving and never edits what the user typed.
 @Composable
 private fun CalorieWarning(message: String, modifier: Modifier = Modifier) {
     Row(
