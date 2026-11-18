@@ -3,6 +3,7 @@ package com.macrivo.app.presentation.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.macrivo.app.data.datastore.AppPrefManager
+import com.macrivo.app.domain.use_case.authentication.ClaimLocalDataUseCase
 import com.macrivo.app.domain.use_case.authentication.SignUpUseCase
 import com.macrivo.app.presentation.auth.AuthValidator
 import com.macrivo.app.presentation.auth.GoogleSignInHandler
@@ -23,7 +24,9 @@ import kotlinx.coroutines.launch
 class SignUpViewmodel @Inject constructor(
     private val signUpUseCase: SignUpUseCase,
     private val appPrefManager: AppPrefManager,
-    private val googleSignInHandler: GoogleSignInHandler
+    private val googleSignInHandler: GoogleSignInHandler,
+    // CHANGED
+    private val claimLocalData: ClaimLocalDataUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SignUpUiState())
@@ -91,6 +94,7 @@ class SignUpViewmodel @Inject constructor(
                 .onSuccess { authResult ->
                     _uiState.update { it.copy(isLoading = false) }
                     if (authResult.user != null) {
+                        claimLocalData(authResult.user!!.uid) // CHANGED: fresh account starts with an empty database
                         appPrefManager.setLoggedIn(true)
                         _event.emit(SignUpEvent.NavigateToUserSetup)
                     } else {

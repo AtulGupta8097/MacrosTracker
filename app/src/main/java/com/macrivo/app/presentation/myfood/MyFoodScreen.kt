@@ -25,6 +25,7 @@ fun MyFoodScreen(
         onRootChanged = onRootChanged,
         onCreateFoodClick = viewModel::onCreateFoodClicked,
         onFoodCardClick = viewModel::onFoodCardClick,
+        onLogFood = viewModel::onLogFood, // CHANGED
         onBack = viewModel::onBack,
         onNextStep = viewModel::onNextStep,
         onPreviousStep = viewModel::onPreviousStep,
@@ -60,6 +61,7 @@ fun MyFoodContent(
     onRootChanged: (Boolean) -> Unit,
     onCreateFoodClick: () -> Unit,
     onFoodCardClick: (com.macrivo.app.domain.model.myfood.CustomFood) -> Unit,
+    onLogFood: (com.macrivo.app.domain.model.myfood.CustomFood) -> Unit, // CHANGED
     onBack: () -> Unit,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
@@ -97,6 +99,7 @@ fun MyFoodContent(
                     onRootChanged = onRootChanged,
                     onCreateFoodClick = onCreateFoodClick,
                     onFoodCardClick = onFoodCardClick,
+                    onLogFood = onLogFood, // CHANGED
                     onBack = onBack,
                     onNextStep = onNextStep,
                     onPreviousStep = onPreviousStep,
@@ -132,6 +135,7 @@ fun MyFoodContent(
                     state = state,
                     onCreateFoodClick = onCreateFoodClick,
                     onFoodCardClick = onFoodCardClick,
+                    onLogFood = onLogFood, // CHANGED
                     onNextStep = onNextStep,
                     onPreviousStep = onPreviousStep,
                     onStepSelected = onStepSelected,
@@ -178,6 +182,7 @@ private fun PrevMyFoodScreen() {
         onRootChanged = {},
         onCreateFoodClick = {},
         onFoodCardClick = {},
+        onLogFood = {}, // CHANGED
         onBack = {},
         onNextStep = {},
         onPreviousStep = {},

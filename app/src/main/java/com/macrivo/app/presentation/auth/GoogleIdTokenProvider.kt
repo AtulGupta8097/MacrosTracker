@@ -50,13 +50,13 @@ class GoogleIdTokenProvider(private val context: Context) {
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: GetCredentialCancellationException) {
+        } catch (_: GetCredentialCancellationException) {
             GoogleTokenResult.Cancelled
-        } catch (e: NoCredentialException) {
+        } catch (_: NoCredentialException) {
             GoogleTokenResult.NoAccount
-        } catch (e: GetCredentialException) {
+        } catch (_: GetCredentialException) {
             GoogleTokenResult.Failed
-        } catch (e: GoogleIdTokenParsingException) {
+        } catch (_: GoogleIdTokenParsingException) {
             GoogleTokenResult.Failed
         }
     }

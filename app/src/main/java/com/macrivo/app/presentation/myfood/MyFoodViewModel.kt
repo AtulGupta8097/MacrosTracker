@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.macrivo.app.domain.model.CustomToastProperty
 import com.macrivo.app.domain.model.NutritionInfo
+import com.macrivo.app.core.utils.Resource
+import com.macrivo.app.domain.model.foodlog.LogFoodRequest
 import com.macrivo.app.domain.model.myfood.CustomFood
+import com.macrivo.app.domain.use_case.foodlog.LogFoodUseCase
 import com.macrivo.app.domain.use_case.myfood.DeleteCustomFoodUseCase
 import com.macrivo.app.domain.use_case.myfood.ObserveCustomFoodsUseCase
 import com.macrivo.app.domain.use_case.myfood.SaveCustomFoodUseCase
@@ -27,6 +30,7 @@ class MyFoodViewModel @Inject constructor(
     observeCustomFoods: ObserveCustomFoodsUseCase,
     private val saveCustomFood: SaveCustomFoodUseCase,
     private val deleteCustomFood: DeleteCustomFoodUseCase,
+    private val logFood: LogFoodUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MyFoodUIState())
@@ -55,9 +59,37 @@ class MyFoodViewModel @Inject constructor(
         }
     }
 
+    private var isLogging = false
+
+    fun onLogFood(food: CustomFood) {
+        if (isLogging) return
+        isLogging = true
+
+        viewModelScope.launch {
+            try {
+                val request = LogFoodRequest(
+                    foodName = food.name,
+                    servingDescription = food.servingSize,
+                    quantity = 1f,
+                    nutrition = food.nutrition,
+                )
+                when (val result = logFood(request)) {
+                    is Resource.Success -> showToast("${food.name} logged.", SuccessToast())
+                    is Resource.Error -> showToast(result.message ?: "Unable to log food.", ErrorToast())
+                    else -> Unit
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                showToast("Unable to log food.", ErrorToast())
+            } finally {
+                isLogging = false
+            }
+        }
+    }
+
     fun onFoodCardClick(food: CustomFood) {
         originalFood = food
-
         val (servingAmount, servingUnit) =
             CreateFoodValidator.splitServing(food.servingSize)
 
@@ -76,7 +108,7 @@ class MyFoodViewModel @Inject constructor(
                 ),
 
                 macros = MacronutrientsState(
-                    calories = CreateFoodValidator.formatNumber(food.nutrition.calories), // CHANGED: calories is required, so 0 must show as "0"
+                    calories = CreateFoodValidator.formatNumber(food.nutrition.calories),
                     protein = food.nutrition.protein.fmt(),
                     carbohydrates = food.nutrition.carbs.fmt(),
                     totalFat = food.nutrition.fat.fmt(),
@@ -114,8 +146,6 @@ class MyFoodViewModel @Inject constructor(
         }
     }
 
-    // Next and tapping the "Nutrients" segment share one rule - Basic Info must be
-    // valid first, otherwise stay here and surface inline errors.
     fun onNextStep() = goToNutrientsIfBasicValid()
 
     fun onStepSelected(step: CreateFoodStep) {
@@ -254,14 +284,15 @@ class MyFoodViewModel @Inject constructor(
                 saveCustomFood(food)
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
-
+            } catch (_: Exception) {
+                // Keep everything the user typed; just unlock the form and tell them.
                 _state.update { it.copy(isSaving = false) }
                 showToast("Couldn't save the food. Your changes are kept - please try again.", ErrorToast())
                 return@launch
             }
 
             originalFood = null
+            // state (previously the reset wiped it immediately).
             resetToList(
                 if (snapshot.editingFood != null) "Food updated!" else "Food saved!"
             )
@@ -394,6 +425,7 @@ class MyFoodViewModel @Inject constructor(
             }
 
         return copy(
+            // Once errors have been shown they update live as the user fixes the fields.
             basicErrors = if (basicErrorsVisible)
                 CreateFoodValidator.validateBasicInfo(basicInfo) else basicErrors,
             nutrientErrors = if (nutrientErrorsVisible)
@@ -403,6 +435,7 @@ class MyFoodViewModel @Inject constructor(
         )
     }
 
+    // Float -> text for the edit form. 0 shows as an empty (optional) field.
     private fun Float.fmt() =
         if (this == 0f) "" else CreateFoodValidator.formatNumber(this)
 }

@@ -149,4 +149,7 @@ dependencies {
     //Google Id
     implementation(libs.googleid)
 
+    //Splash API
+    implementation(libs.androidx.core.splashscreen)
+
 }

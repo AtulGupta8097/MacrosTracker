@@ -24,7 +24,6 @@ import com.macrivo.app.presentation.commoncomponent.TopBar
 import com.macrivo.app.presentation.myfood.MyFoodScreen
 import com.macrivo.app.presentation.mymeal.MyMealScreen
 import com.macrivo.app.presentation.savedscan.SavedScansScreen
-import com.macrivo.app.presentation.ui.theme.grey
 import kotlinx.coroutines.launch
 
 enum class FoodTab(val title: String) {
@@ -93,7 +92,7 @@ fun FoodDatabaseScreen(
                                         style = MaterialTheme.typography.labelLarge.copy(
                                             color = if (selected)
                                                 MaterialTheme.colorScheme.primary
-                                            else grey,
+                                            else MaterialTheme.colorScheme.onBackground,
                                             fontWeight = if (selected)
                                                 FontWeight.Normal
                                             else FontWeight.Thin

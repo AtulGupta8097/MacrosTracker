@@ -31,6 +31,7 @@ fun MyFoodTabletLayout(
     state: MyFoodUIState,
     onCreateFoodClick: () -> Unit,
     onFoodCardClick: (CustomFood) -> Unit,
+    onLogFood: (CustomFood) -> Unit, // CHANGED
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
     onStepSelected: (CreateFoodStep) -> Unit,
@@ -75,6 +76,7 @@ fun MyFoodTabletLayout(
                 onCreateFoodClick,
             onFoodCardClick =
                 onFoodCardClick,
+            onLogClick = onLogFood, // CHANGED
         )
 
         VerticalDivider(

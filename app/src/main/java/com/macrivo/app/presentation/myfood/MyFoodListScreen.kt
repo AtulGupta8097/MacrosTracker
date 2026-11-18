@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.macrivo.app.domain.model.myfood.CustomFood
 import com.macrivo.app.presentation.commoncomponent.CustomButton
 import com.macrivo.app.presentation.commoncomponent.EmptyState
-import com.macrivo.app.presentation.myfood.component.MyFoodCard
+import com.macrivo.app.presentation.commoncomponent.CircularIconButton
+import com.macrivo.app.presentation.commoncomponent.FoodLogCard
+import kotlin.math.roundToInt
 import com.macrivo.app.presentation.ui.theme.spacing
 
 @Composable
@@ -32,6 +34,7 @@ fun MyFoodListScreen(
     selectedFoodId: String? = null,
     onCreateFoodClick: () -> Unit,
     onFoodCardClick: (CustomFood) -> Unit,
+    onLogClick: (CustomFood) -> Unit, // CHANGED: log the food from the list
 ) {
 
     Column(
@@ -85,12 +88,24 @@ fun MyFoodListScreen(
                         key = { it.id },
                     ) { food ->
 
-                        MyFoodCard(
-                            food = food,
-                            isSelected =
-                                food.id == selectedFoodId,
-                            onClick = {
-                                onFoodCardClick(food)
+                        FoodLogCard(
+                            name = food.name,
+                            subtitle = listOfNotNull(
+                                food.description.takeIf { it.isNotBlank() },
+                                food.servingSize.takeIf { it.isNotBlank() }?.let { "per $it" },
+                            ).joinToString(" · ").ifEmpty { null },
+                            caloriesText = "${food.nutrition.calories.roundToInt()} kcal",
+                            proteinText = "${food.nutrition.protein.roundToInt()}g",
+                            carbsText = "${food.nutrition.carbs.roundToInt()}g",
+                            fatText = "${food.nutrition.fat.roundToInt()}g",
+                            isSelected = food.id == selectedFoodId,
+                            onClick = { onFoodCardClick(food) },
+                            trailingContent = {
+                                CircularIconButton(
+                                    icon = Icons.Default.Add,
+                                    contentDescription = "Log meal",
+                                    onClick = { onLogClick(food) },
+                                )
                             },
                         )
                     }

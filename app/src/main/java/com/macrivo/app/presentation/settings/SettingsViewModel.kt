@@ -137,7 +137,7 @@ class SettingsViewModel @Inject constructor(
                         val message = if (error is FirebaseAuthRecentLoginRequiredException) {
                             "Please sign in again before deleting your account"
                         } else {
-                            error.message ?: "Couldn't delete account"
+                            "Couldn't delete account. Please try again."
                         }
                         _events.emit(SettingsEvent.Error(message))
                     }

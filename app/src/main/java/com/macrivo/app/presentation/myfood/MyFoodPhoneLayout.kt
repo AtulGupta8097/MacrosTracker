@@ -14,6 +14,7 @@ fun MyFoodPhoneLayout(
     onRootChanged: (Boolean) -> Unit,
     onCreateFoodClick: () -> Unit,
     onFoodCardClick: (CustomFood) -> Unit,
+    onLogFood: (CustomFood) -> Unit, // CHANGED
     onBack: () -> Unit,
     onNextStep: () -> Unit,
     onPreviousStep: () -> Unit,
@@ -68,6 +69,7 @@ fun MyFoodPhoneLayout(
                     onCreateFoodClick,
                 onFoodCardClick =
                     onFoodCardClick,
+                onLogClick = onLogFood, // CHANGED
             )
         }
 
