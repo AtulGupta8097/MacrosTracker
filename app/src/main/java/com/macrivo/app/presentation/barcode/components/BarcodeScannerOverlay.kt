@@ -41,14 +41,15 @@ import com.macrivo.app.presentation.ui.theme.spacing
 fun BarcodeScannerOverlay(
     status: BarcodeScanStatus,
     modifier: Modifier = Modifier,
+    isUnlocked: Boolean = true, // CHANGED: while locked the unlock card replaces the instructions
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         ScannerFrame(
-            isScanning = status == BarcodeScanStatus.SCANNING,
+            isScanning = status == BarcodeScanStatus.SCANNING && isUnlocked,
             modifier = Modifier.align(Alignment.Center)
         )
 
-        if (status == BarcodeScanStatus.INITIALIZING || status == BarcodeScanStatus.SCANNING) {
+        if (isUnlocked && (status == BarcodeScanStatus.INITIALIZING || status == BarcodeScanStatus.SCANNING)) {
             ScanningInstructions(
                 isInitializing = status == BarcodeScanStatus.INITIALIZING,
                 modifier = Modifier
@@ -153,7 +154,7 @@ private fun ScanningInstructions(
             }
 
             Text(
-                text = "Keep the barcode inside the frame",
+                text = if (isInitializing) "Keep the barcode inside the frame" else "Scan unlocked · keep the barcode inside the frame",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

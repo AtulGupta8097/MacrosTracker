@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.macrivo.app.core.permission.findActivity
 import com.macrivo.app.core.permission.rememberPermissionHandler
 
 @Composable
@@ -37,7 +38,7 @@ fun BarcodeScanScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var isInfoVisible by rememberSaveable { mutableStateOf(false) }
 
-    val actions = remember(viewModel, permission) {
+    val actions = remember(viewModel, permission, context) {
         BarcodeScanActions(
             onBack = viewModel::onNavigateBack,
             onCameraReady = viewModel::onCameraReady,
@@ -57,6 +58,8 @@ fun BarcodeScanScreen(
             onQuantityDecrement = viewModel::onQuantityDecrement,
             onLogFood = viewModel::onLogFood,
             onInfo = { isInfoVisible = true },
+            onWatchAd = { context.findActivity()?.let(viewModel::onWatchAdClicked) },
+            onRetryAd = viewModel::onRetryAd,
         )
     }
 
@@ -101,6 +104,7 @@ fun BarcodeScanScreen(
                 Text(
                     "Hold your phone steady and keep the barcode inside the frame. " +
                         "Use the flashlight in dim light. " +
+                        "Each scan is unlocked by watching one short ad. " +
                         "EAN-8, EAN-13 and UPC-A product barcodes are supported."
                 )
             },

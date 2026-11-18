@@ -2,6 +2,7 @@ import java.util.Properties
 
 val releaseAdMobAppId = "ca-app-pub-7184499549176765~8974306533"
 val releaseBannerAdUnitId = "ca-app-pub-7184499549176765/2732331817"
+val releaseRewardedAdUnitId = "ca-app-pub-7184499549176765/3605259895"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -38,6 +39,7 @@ android {
             // Google's official TEST IDs
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
             buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
+            buildConfigField("String", "ADMOB_REWARDED_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
         }
         release {
             isMinifyEnabled = true
@@ -48,6 +50,7 @@ android {
             )
             manifestPlaceholders["admobAppId"] = releaseAdMobAppId
             buildConfigField("String", "ADMOB_BANNER_AD_UNIT_ID", "\"$releaseBannerAdUnitId\"")
+            buildConfigField("String", "ADMOB_REWARDED_AD_UNIT_ID", "\"$releaseRewardedAdUnitId\"")
         }
     }
     compileOptions {

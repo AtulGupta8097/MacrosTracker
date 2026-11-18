@@ -1,6 +1,7 @@
 package com.macrivo.app.presentation.barcode
 
 import androidx.compose.runtime.Immutable
+import com.macrivo.app.core.ads.RewardedAdState
 import com.macrivo.app.domain.model.FoodDetail
 import com.macrivo.app.domain.model.NutritionInfo
 import com.macrivo.app.domain.model.Serving
@@ -21,7 +22,10 @@ data class BarcodeScanUiState(
     val food: FoodDetail? = null,
     val selectedServing: Serving? = null,
     val quantity: Float = 1f,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+
+    val isUnlocked: Boolean = false,
+    val ad: RewardedAdState = RewardedAdState.Idle,
 ) {
     val scaledNutrition: NutritionInfo?
         get() = selectedServing?.nutrition?.scale(quantity)

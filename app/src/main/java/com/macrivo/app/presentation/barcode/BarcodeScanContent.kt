@@ -28,6 +28,7 @@ import com.macrivo.app.presentation.barcode.components.CameraUnavailableContent
 import com.macrivo.app.presentation.barcode.components.ProductFoundContent
 import com.macrivo.app.presentation.barcode.components.ProductNutritionContent
 import com.macrivo.app.presentation.barcode.components.ScannerErrorContent
+import com.macrivo.app.presentation.barcode.components.ScanUnlockCard
 import com.macrivo.app.presentation.barcode.components.ScannerLoadingOverlay
 import com.macrivo.app.presentation.ui.theme.spacing
 
@@ -51,6 +52,8 @@ class BarcodeScanActions(
     val onQuantityDecrement: () -> Unit,
     val onLogFood: () -> Unit,
     val onInfo: () -> Unit,
+    val onWatchAd: () -> Unit,
+    val onRetryAd: () -> Unit,
 )
 
 @Composable
@@ -172,7 +175,20 @@ private fun ScannerStage(
             )
         }
 
-        BarcodeScannerOverlay(status = state.status)
+        BarcodeScannerOverlay(status = state.status, isUnlocked = state.isUnlocked) // CHANGED
+
+        if (!state.isUnlocked &&
+            (state.status == BarcodeScanStatus.INITIALIZING || state.status == BarcodeScanStatus.SCANNING)
+        ) {
+            ScanUnlockCard(
+                adState = state.ad,
+                onWatchAd = actions.onWatchAd,
+                onRetry = actions.onRetryAd,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(MaterialTheme.spacing.md)
+            )
+        }
 
         CameraControls(
             enabled = state.status == BarcodeScanStatus.SCANNING,

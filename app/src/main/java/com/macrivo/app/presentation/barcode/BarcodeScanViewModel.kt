@@ -1,9 +1,14 @@
 package com.macrivo.app.presentation.barcode
 
+import android.app.Activity
 import androidx.camera.view.LifecycleCameraController
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.macrivo.app.core.ads.RewardedAdManager
+import com.macrivo.app.core.ads.RewardedAdResult
+import com.macrivo.app.core.ads.RewardedAdState
+import com.macrivo.app.core.ads.ScanUnlockStore
 import com.macrivo.app.core.camera.BarcodeAnalyzer
 import com.macrivo.app.core.camera.CameraHelper
 import com.macrivo.app.core.utils.Resource
@@ -20,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -35,6 +41,8 @@ class BarcodeScanViewModel @Inject constructor(
     private val getFoodDetailByBarcodeUseCase: GetFoodDetailByBarcodeUseCase,
     private val logFoodUseCase: LogFoodUseCase,
     private val cameraHelper: CameraHelper,
+    private val rewardedAds: RewardedAdManager,
+    private val scanUnlock: ScanUnlockStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BarcodeScanUiState())
@@ -62,6 +70,19 @@ class BarcodeScanViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+
+        combine(scanUnlock.isUnlocked, rewardedAds.state) { unlocked, ad -> unlocked to ad }
+            .onEach { (unlocked, ad) ->
+                _state.update { it.copy(isUnlocked = unlocked, ad = ad) }
+                updateAnalyzer()
+                // locked with nothing loaded (e.g. right after the previous scan): get the next ad ready
+                if (!unlocked && ad == RewardedAdState.Idle) rewardedAds.load()
+            }
+            .launchIn(viewModelScope)
+
+        //  preload the ad; ask again when the consent flow later allows ads
+        if (!scanUnlock.isUnlocked.value) rewardedAds.load()
+
     }
     private var lastBarcode: String? = null
     private var lastScanAgainAt = 0L
@@ -78,7 +99,7 @@ class BarcodeScanViewModel @Inject constructor(
         cameraHelper.initialize(controller, lifecycleOwner, ::onCameraError)
         cameraHelper.setCameraLens(_state.value.isFrontCamera)
         cameraHelper.setAnalyzer(analyzerExecutor, analyzer)
-        analyzer.setEnabled(_state.value.status == BarcodeScanStatus.INITIALIZING)
+        updateAnalyzer()
     }
 
     fun onCameraDisposed() {
@@ -113,6 +134,7 @@ class BarcodeScanViewModel @Inject constructor(
                 status = if (it.status == BarcodeScanStatus.INITIALIZING) BarcodeScanStatus.SCANNING else it.status
             )
         }
+        updateAnalyzer() // CHANGED
     }
 
     fun onToggleTorch() {
@@ -153,6 +175,13 @@ class BarcodeScanViewModel @Inject constructor(
         val isRecentDuplicate = barcode == lastBarcode &&
                 System.currentTimeMillis() - lastScanAgainAt < RESCAN_COOLDOWN_MS
         if (isRecentDuplicate) return
+
+        // CHANGED: the one place a scan starts. It needs an earned credit and uses it up atomically, so
+        // there is no way to scan without a reward and one reward can never cover two scans.
+        if (!scanUnlock.tryConsume()) {
+            analyzer.pause()
+            return
+        }
 
         analyzer.pause()
         lastBarcode = barcode
@@ -232,7 +261,36 @@ class BarcodeScanViewModel @Inject constructor(
                 errorMessage = null
             )
         }
-        analyzer.resume()
+        updateAnalyzer() // CHANGED: stays off until the next scan is unlocked with another ad
+    }
+
+    // CHANGED: watch a rewarded ad to earn one scan
+    fun onWatchAdClicked(activity: Activity) {
+        val current = _state.value
+        if (current.isUnlocked || current.status !in SCAN_STAGE_STATUSES) return
+
+        rewardedAds.show(activity) { result ->
+            when (result) {
+                // the only path that unlocks: the SDK confirmed the reward and the ad was closed
+                RewardedAdResult.Earned -> scanUnlock.grant()
+
+                RewardedAdResult.DismissedWithoutReward ->
+                    _events.trySend(BarcodeScanEvent.ShowMessage("Watch the full ad to unlock a scan."))
+
+                RewardedAdResult.NotReady ->
+                    _events.trySend(BarcodeScanEvent.ShowMessage("The ad isn't ready yet. Please try again in a moment."))
+
+                is RewardedAdResult.FailedToShow ->
+                    _events.trySend(BarcodeScanEvent.ShowMessage(result.message))
+            }
+        }
+    }
+
+    fun onRetryAd() = rewardedAds.load()
+
+    // CHANGED: frames are analysed only while the camera is on a scan stage AND a scan is unlocked
+    private fun updateAnalyzer() {
+        analyzer.setEnabled(scanUnlock.isUnlocked.value && _state.value.status in SCAN_STAGE_STATUSES)
     }
 
     fun onNavigateBack() {
@@ -337,6 +395,7 @@ class BarcodeScanViewModel @Inject constructor(
         const val MAX_QUANTITY = 99f
         const val ZOOM_EPSILON = 0.05f
         val ZOOM_STEPS = listOf(1f, 2f, 3f, 5f)
+        val SCAN_STAGE_STATUSES = setOf(BarcodeScanStatus.INITIALIZING, BarcodeScanStatus.SCANNING) // CHANGED
         val RESCANNABLE_STATUSES = setOf(
             BarcodeScanStatus.PRODUCT_FOUND,
             BarcodeScanStatus.FOOD_DETAILS,
