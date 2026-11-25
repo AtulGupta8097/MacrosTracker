@@ -22,7 +22,7 @@ class LogFoodUseCase @Inject constructor(
             Resource.Error(
                 e.message ?: "Unable to log food."
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Resource.Error(
                 "Unable to log food. Please try again."
             )

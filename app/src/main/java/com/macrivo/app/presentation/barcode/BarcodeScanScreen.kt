@@ -54,10 +54,11 @@ fun BarcodeScanScreen(
             onScanAnother = viewModel::onScanAnother,
             onRetryLookup = viewModel::onRetryLookup,
             onServingSelected = viewModel::onServingSelected,
-            onQuantityIncrement = viewModel::onQuantityIncrement,
-            onQuantityDecrement = viewModel::onQuantityDecrement,
+            onQuantityChanged = viewModel::onQuantityChanged, // CHANGED
+            onSaveToggle = viewModel::onSaveToggleClicked, // CHANGED
             onLogFood = viewModel::onLogFood,
             onInfo = { isInfoVisible = true },
+            // CHANGED: the Activity is only handed to the ad for this call, never stored
             onWatchAd = { context.findActivity()?.let(viewModel::onWatchAdClicked) },
             onRetryAd = viewModel::onRetryAd,
         )

@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 @Immutable
 data class CaloriesUiModel(
+    // CHANGED: numeric target, the value the edit sheet starts from
+    val targetValue: Int = 0,
     val consumedText: String = "0",
     val targetText: String = "/ 0 kcal",
     val remainingText: String = "0 kcal left",
@@ -15,6 +17,7 @@ data class CaloriesUiModel(
 @Immutable
 data class MacroProgressUiModel(
     val key: String,
+    val targetValue: Int = 0,
     val icon: ImageVector,
     val label: String,
     val consumedText: String,
@@ -28,4 +31,6 @@ data class MacroProgressUiModel(
 data class NutritionUiState(
     val calories: CaloriesUiModel = CaloriesUiModel(),
     val macros: List<MacroProgressUiModel> = emptyList(),
+    // CHANGED: targets can only be edited while viewing today (past days keep the target they were lived with)
+    val canEdit: Boolean = false,
 )

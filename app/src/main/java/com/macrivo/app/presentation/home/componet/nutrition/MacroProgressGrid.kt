@@ -19,6 +19,7 @@ private val MinCardWidth = 156.dp
 fun MacroProgressGrid(
     macros: List<MacroProgressUiModel>,
     modifier: Modifier = Modifier,
+    onEditTarget: ((String) -> Unit)? = null,
 ) {
     BoxWithConstraints(
         modifier = modifier,
@@ -48,6 +49,7 @@ fun MacroProgressGrid(
                         rowMacros.forEach { macro ->
                             MacroProgressCard(
                                 macro = macro,
+                                onEditClick = onEditTarget?.let { edit -> { edit(macro.key) } },
                                 modifier = Modifier.weight(1f),
                             )
                         }

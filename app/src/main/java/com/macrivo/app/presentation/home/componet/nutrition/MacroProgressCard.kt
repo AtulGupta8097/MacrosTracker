@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -22,11 +24,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Grain
-import androidx.compose.ui.text.style.TextOverflow
 import com.macrivo.app.presentation.home.model.MacroProgressUiModel
 import com.macrivo.app.presentation.ui.theme.CarbsColor
 import com.macrivo.app.presentation.ui.theme.ResponsiveAppTheme
@@ -36,6 +36,7 @@ import com.macrivo.app.presentation.ui.theme.spacing
 fun MacroProgressCard(
     macro: MacroProgressUiModel,
     modifier: Modifier = Modifier,
+    onEditClick: (() -> Unit)? = null,
 ) {
 
     Card(
@@ -54,14 +55,25 @@ fun MacroProgressCard(
                 MaterialTheme.spacing.md,
             ),
             verticalArrangement = Arrangement.spacedBy(
-                MaterialTheme.spacing.md,
+                MaterialTheme.spacing.sm,
             ),
         ) {
 
             MacroHeader(
                 icon = macro.icon,
-                label = macro.label,
                 accentColor = macro.accentColor,
+                label = macro.label,
+                onEditClick = onEditClick,
+            )
+
+            Text(
+                text = macro.label,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.titleMedium
+                    .copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
 
             NutritionInfo(
@@ -73,6 +85,7 @@ fun MacroProgressCard(
             LinearProgress(
                 progress = macro.progress,
                 progressColor = macro.accentColor,
+                trackColor = macro.accentColor.copy(alpha = 0.14f),
             )
         }
     }
@@ -81,23 +94,23 @@ fun MacroProgressCard(
 @Composable
 private fun MacroHeader(
     icon: ImageVector,
-    label: String,
     accentColor: Color,
+    label: String,
+    onEditClick: (() -> Unit)?,
 ) {
 
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(
-            MaterialTheme.spacing.sm,
-        ),
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
 
         Box(
             modifier = Modifier
-                .size(34.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .background(
-                    accentColor.copy(alpha = 0.12f),
+                    accentColor.copy(alpha = 0.14f),
                 ),
             contentAlignment = Alignment.Center,
         ) {
@@ -106,17 +119,17 @@ private fun MacroHeader(
                 imageVector = icon,
                 contentDescription = null,
                 tint = accentColor,
+                modifier = Modifier.size(20.dp),
             )
         }
 
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f, fill = false),
-            style = MaterialTheme.typography.titleMedium
-                .copy(fontWeight = FontWeight.Bold),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        if (onEditClick != null) {
+            EditTargetButton(
+                contentDescription = "Edit $label target",
+                onClick = onEditClick,
+                tint = accentColor,
+            )
+        }
     }
 }
 
@@ -127,6 +140,7 @@ private fun MacroProgressCardPreview() {
         MacroProgressCard(
             macro = MacroProgressUiModel(
                 key = "carbs",
+                targetValue = 220,
                 icon = Icons.Default.Grain,
                 label = "Carbs",
                 consumedText = "145",
@@ -134,7 +148,8 @@ private fun MacroProgressCardPreview() {
                 remainingText = "75 g left",
                 progress = 0.66f,
                 accentColor = CarbsColor,
-            )
+            ),
+            onEditClick = {},
         )
     }
 }

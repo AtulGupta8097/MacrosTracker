@@ -1,7 +1,7 @@
 import java.util.Properties
 
 val releaseAdMobAppId = "ca-app-pub-7184499549176765~8974306533"
-val releaseBannerAdUnitId = "ca-app-pub-7184499549176765/2732331817"
+val releaseBannerAdUnitId = "ca-app-pub-7184499549176765/5638173084"
 val releaseRewardedAdUnitId = "ca-app-pub-7184499549176765/3605259895"
 
 plugins {

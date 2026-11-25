@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CHANGED: GoogleIdTokenProvider finds default_web_client_id with getIdentifier(), which the release resource
+     shrinker cannot see, so it deletes the string and Google sign-in reports "not set up" in release builds only.
+     This keeps it. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/default_web_client_id" />

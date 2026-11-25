@@ -24,6 +24,7 @@ fun CaloriesCard(
     modifier: Modifier = Modifier,
     calories: CaloriesUiModel,
     onLogFoodClick: () -> Unit,
+    onEditTarget: (() -> Unit)? = null,
 ) {
 
     Card(
@@ -45,7 +46,7 @@ fun CaloriesCard(
             ),
         ) {
 
-            CaloriesHeader()
+            CaloriesHeader(onEditClick = onEditTarget)
 
             BoxWithConstraints {
 

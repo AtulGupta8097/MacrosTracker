@@ -13,6 +13,8 @@ import com.macrivo.app.domain.session.SessionManager
 import com.macrivo.app.sync.SyncScheduler
 import com.macrivo.app.sync.SyncType
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,6 +30,12 @@ class MacroTargetRepositoryImpl @Inject constructor(
     override suspend fun saveTarget(target: MacroTarget) {
         dao.insert(target.toEntity())
         scheduler.schedule(SyncType.MACRO_TARGET)
+    }
+
+    override fun observeCurrentTarget(): Flow<MacroTarget?> {
+       return dao.observeCurrentTarget().map {
+            it?.toDomain()
+        }
     }
 
     override suspend fun getCurrentTarget(): MacroTarget? =

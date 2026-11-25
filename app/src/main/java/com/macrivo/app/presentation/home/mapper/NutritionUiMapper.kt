@@ -26,6 +26,7 @@ fun DailySummary?.toNutritionUiState(
     val consumed = this?.consumed ?: NutritionProgress()
 
     val calories = CaloriesUiModel(
+        targetValue = target.calories, // CHANGED
         consumedText = consumed.calories.roundToInt().toString(),
         targetText = " / ${target.calories} kcal",
         remainingText = remainingText(
@@ -92,6 +93,7 @@ private fun macroProgressOf(
         key = key,
         icon = icon,
         label = label,
+        targetValue = targetGrams,
         consumedText = formatMacroValue(consumedGrams),
         targetText = " / $targetGrams g",
         remainingText = remainingText(

@@ -15,7 +15,11 @@ import com.macrivo.app.domain.use_case.foodlog.GetFoodLogUseCase
 import com.macrivo.app.domain.use_case.foodlog.ObserveFoodLogsForDateUseCase
 import com.macrivo.app.domain.use_case.foodlog.UpdateFoodLogQuantityUseCase
 import com.macrivo.app.domain.use_case.foodlog.ObserveLoggedDatesUseCase
-import com.macrivo.app.domain.use_case.macrostarget.GetCurrentMacroTargetUseCase
+import com.macrivo.app.domain.model.SyncStatus
+import com.macrivo.app.domain.use_case.macrostarget.ObserveCurrentMacroTargetUseCase
+import com.macrivo.app.domain.use_case.macrostarget.SaveMacroTargetUseCase
+import com.macrivo.app.presentation.home.model.MacroTargetField
+import kotlinx.coroutines.flow.first
 import com.macrivo.app.domain.use_case.profile.GetUserNameUseCase
 import com.macrivo.app.domain.use_case.streak.ObserveStreakStatsUseCase
 import com.macrivo.app.presentation.home.mapper.buildStreakWeekUiState
@@ -57,7 +61,8 @@ private data class HomeCoreData(
 class HomeViewModel @Inject constructor(
     private val observeDailySummaryForDateUseCase: ObserveDailySummaryForDateUseCase,
     private val observeFoodLogsForDateUseCase: ObserveFoodLogsForDateUseCase,
-    private val getCurrentMacroTargetUseCase: GetCurrentMacroTargetUseCase,
+    private val observeCurrentMacroTargetUseCase: ObserveCurrentMacroTargetUseCase,
+    private val saveMacroTargetUseCase: SaveMacroTargetUseCase,
     private val observeStreakStatsUseCase: ObserveStreakStatsUseCase,
     private val observeLoggedDatesUseCase: ObserveLoggedDatesUseCase,
     private val getUserName: GetUserNameUseCase,
@@ -85,9 +90,7 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
-
     private val selectedFoodLogId = MutableStateFlow<String?>(null)
-    // a save or a delete is running
     private val isDeleting = MutableStateFlow(false)
     private val editedQuantity = MutableStateFlow<Float?>(null)
 
@@ -123,6 +126,7 @@ class HomeViewModel @Inject constructor(
     private val _messages = Channel<String>(Channel.BUFFERED)
     val messages = _messages.receiveAsFlow()
 
+    // messages for the list itself (the sheet has its own, see _messages)
     private val _listMessages = Channel<String>(Channel.BUFFERED)
     val listMessages = _listMessages.receiveAsFlow()
 
@@ -136,6 +140,43 @@ class HomeViewModel @Inject constructor(
             val result = deleteFoodLogUseCase(id)
             if (result is Resource.Error) {
                 _listMessages.send(result.message ?: "Unable to delete this food.")
+            }
+        }
+    }
+
+    /**
+     * saves ONE edited target. Reads the current MacroTarget, copies only the edited field
+     * (the other four are untouched) and stores it through SaveMacroTargetUseCase, which also refreshes
+     * today's summary and syncs. Home observes Room, so the card and progress update by themselves.
+     */
+    fun onSaveMacroTarget(key: String, value: Int) {
+        val field = MacroTargetField.fromKey(key) ?: return
+        val v = value.coerceIn(field.min, field.max)
+        viewModelScope.launch {
+            val current = runCatching { observeCurrentMacroTargetUseCase().first() }.getOrNull()
+            if (current == null) {
+                _listMessages.send("No daily target to edit yet.")
+                return@launch
+            }
+            val t = current.targets
+            val updated = when (field) {
+                MacroTargetField.Calories -> t.copy(calories = v)
+                MacroTargetField.Protein -> t.copy(protein = v)
+                MacroTargetField.Carbs -> t.copy(carbs = v)
+                MacroTargetField.Fats -> t.copy(fats = v)
+                MacroTargetField.Fiber -> t.copy(fiber = v)
+            }
+            runCatching {
+                saveMacroTargetUseCase(
+                    current.copy(
+                        targets = updated,
+                        updatedAt = System.currentTimeMillis(),
+                        syncStatus = SyncStatus.PENDING,
+                        retryCount = 0,
+                    )
+                )
+            }.onFailure {
+                _listMessages.send("Couldn't save the target. Please try again.")
             }
         }
     }
@@ -220,10 +261,7 @@ class HomeViewModel @Inject constructor(
     private val dailySummaryFlow =
         selectedDateFlow.flatMapLatest(observeDailySummaryForDateUseCase::invoke)
 
-    private val macroTargetFlow =
-        flow {
-            emit(getCurrentMacroTargetUseCase())
-        }
+    private val macroTargetFlow = observeCurrentMacroTargetUseCase()
 
     private val userNameFlow = flow {
         emit(
@@ -267,7 +305,8 @@ class HomeViewModel @Inject constructor(
                 datePicker = dateNav.toDatePickerUiState(),
                 nutrition = core.dailySummary.toNutritionUiState(
                     fallbackTarget = core.macroTarget?.targets,
-                ),
+                    // CHANGED: pencils only on today
+                ).copy(canEdit = DateUtils.isSameDay(dateNav.selectedDate, today)),
                 healthMetrics = core.macroTarget.toHealthMetricsUiState(),
                 recentMeals = core.foodLogs.toRecentMealsUiState(),
             )

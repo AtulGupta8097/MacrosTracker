@@ -24,6 +24,9 @@ data class BarcodeScanUiState(
     val quantity: Float = 1f,
     val errorMessage: String? = null,
 
+    // CHANGED: 1 scan = 1 rewarded ad. Scanning only works while [isUnlocked] is true.
+    // CHANGED: bookmark state for the shared FoodDetailScreen
+    val isFoodSaved: Boolean = false,
     val isUnlocked: Boolean = false,
     val ad: RewardedAdState = RewardedAdState.Idle,
 ) {

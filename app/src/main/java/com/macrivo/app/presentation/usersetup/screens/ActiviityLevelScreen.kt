@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Chair
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +62,14 @@ fun ActivityLevelScreen(
 
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                OptionButton(
+                    text = ActivityLevel.SEDENTARY.label,
+                    description = ActivityLevel.SEDENTARY.description,
+                    icon = Icons.Filled.Chair,
+                    selected = selectedActivityLevel == ActivityLevel.SEDENTARY,
+                    onClick = { onActivityLevelSelected(ActivityLevel.SEDENTARY) }
+                )
                 OptionButton(
                     text = ActivityLevel.LIGHT.label,
                     description = ActivityLevel.LIGHT.description,

@@ -21,6 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.macrivo.app.presentation.home.componet.nutrition.MacroTargetEditSheet
+import com.macrivo.app.presentation.home.model.MacroTargetField
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,6 +63,8 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val foodDetail by viewModel.foodDetail.collectAsStateWithLifecycle()
 
+
+    var editingTarget by rememberSaveable { mutableStateOf<String?>(null) }
     val listSnackbar = remember { SnackbarHostState() }
     LaunchedEffect(viewModel) {
         viewModel.listMessages.collect { listSnackbar.showSnackbar(it) }
@@ -69,6 +78,7 @@ fun HomeScreen(
             onLogFoodClick = onLogFoodClick,
             onFoodLogClick = viewModel::onFoodLogClick,
             onFoodLogDelete = viewModel::onDeleteFoodLogFromList,
+            onEditTarget = { editingTarget = it }, // CHANGED
             onDateSelected = viewModel::onDateSelected,
             onPreviousWeek = viewModel::onPreviousWeek,
             onNextWeek = viewModel::onNextWeek,
@@ -77,6 +87,27 @@ fun HomeScreen(
             hostState = listSnackbar,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
+    }
+
+    editingTarget?.let { key ->
+        val field = MacroTargetField.fromKey(key)
+        val current = when (key) {
+            MacroTargetField.Calories.key -> state.nutrition.calories.targetValue
+            else -> state.nutrition.macros.firstOrNull { it.key == key }?.targetValue
+        }
+        if (field != null && current != null) {
+            val macro = state.nutrition.macros.firstOrNull { it.key == key }
+            MacroTargetEditSheet(
+                field = field,
+                currentValue = current,
+                accentColor = macro?.accentColor ?: MaterialTheme.colorScheme.primary,
+                icon = macro?.icon ?: Icons.Default.LocalFireDepartment,
+                onSave = { viewModel.onSaveMacroTarget(key, it); editingTarget = null },
+                onDismiss = { editingTarget = null },
+            )
+        } else {
+            editingTarget = null
+        }
     }
 
     foodDetail?.let { detail ->
@@ -90,7 +121,6 @@ fun HomeScreen(
         )
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FoodDetailSheet(
@@ -141,6 +171,7 @@ private fun HomeContent(
     onLogFoodClick: () -> Unit,
     onFoodLogClick: (String) -> Unit,
     onFoodLogDelete: (String) -> Unit = {},
+    onEditTarget: (String) -> Unit = {}, // CHANGED
     onDateSelected: (Long) -> Unit,
     onPreviousWeek: () -> Unit,
     onNextWeek: () -> Unit,
@@ -173,12 +204,6 @@ private fun HomeContent(
                     )
                 }
 
-                if (!state.isLoading) {
-                    item {
-                        BannerAd(modifier = Modifier.fillMaxWidth())
-                    }
-                }
-
                 item(key = "datePicker") {
                     WeeklyDatePicker(
                         modifier = Modifier.fillMaxWidth(),
@@ -200,10 +225,16 @@ private fun HomeContent(
                             modifier = Modifier.fillMaxWidth(),
                             nutritionUiState = state.nutrition,
                             onLogFoodClick = onLogFoodClick,
+                            onEditTarget = onEditTarget,
                         )
                     }
                 }
 
+                if (!state.isLoading) {
+                    item(key = "bannerAd") {
+                        BannerAd(modifier = Modifier.fillMaxWidth())
+                    }
+                }
 
                 item(key = "foodLogs") {
                     LoadingContent(
@@ -220,12 +251,6 @@ private fun HomeContent(
                     }
                 }
 
-                if (!state.isLoading) {
-                    item {
-                        BannerAd(modifier = Modifier.fillMaxWidth())
-                    }
-                }
-
                 item(key = "healthMetrics") {
                     LoadingContent(
                         isLoading = state.isLoading,
@@ -239,6 +264,11 @@ private fun HomeContent(
                     }
                 }
 
+                if (!state.isLoading) {
+                    item(key = "bannerAd") {
+                        BannerAd(modifier = Modifier.fillMaxWidth())
+                    }
+                }
             }
         }
     }

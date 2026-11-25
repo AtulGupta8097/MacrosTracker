@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.macrivo.app.presentation.home.model.MacroTargetField
 import com.macrivo.app.presentation.home.model.NutritionUiState
 import com.macrivo.app.presentation.ui.theme.ResponsiveAppTheme
 import com.macrivo.app.presentation.ui.theme.spacing
@@ -17,6 +18,7 @@ fun NutritionProgressSection(
     nutritionUiState: NutritionUiState,
     onLogFoodClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onEditTarget: (String) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -32,10 +34,14 @@ fun NutritionProgressSection(
         CaloriesCard(
             calories = nutritionUiState.calories,
             onLogFoodClick = onLogFoodClick,
+            onEditTarget = if (nutritionUiState.canEdit) {
+                { onEditTarget(MacroTargetField.Calories.key) }
+            } else null,
         )
 
         MacroProgressGrid(
             macros = nutritionUiState.macros,
+            onEditTarget = if (nutritionUiState.canEdit) onEditTarget else null,
         )
     }
 }

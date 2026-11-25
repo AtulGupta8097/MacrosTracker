@@ -16,6 +16,9 @@ import com.macrivo.app.domain.model.FoodDetail
 import com.macrivo.app.domain.model.Serving
 import com.macrivo.app.domain.model.foodlog.LogFoodRequest
 import com.macrivo.app.domain.use_case.food.GetFoodDetailByBarcodeUseCase
+import com.macrivo.app.domain.use_case.food.ObserveIsFoodSavedUseCase
+import com.macrivo.app.domain.use_case.food.RemoveSavedFoodUseCase
+import com.macrivo.app.domain.use_case.food.SaveFoodUseCase
 import com.macrivo.app.domain.use_case.food.NO_BARCODE_MATCH_MESSAGE
 import com.macrivo.app.domain.use_case.foodlog.LogFoodUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +29,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -36,13 +41,17 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 import javax.inject.Inject
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class BarcodeScanViewModel @Inject constructor(
     private val getFoodDetailByBarcodeUseCase: GetFoodDetailByBarcodeUseCase,
     private val logFoodUseCase: LogFoodUseCase,
     private val cameraHelper: CameraHelper,
-    private val rewardedAds: RewardedAdManager,
-    private val scanUnlock: ScanUnlockStore,
+    private val rewardedAds: RewardedAdManager, // CHANGED
+    private val scanUnlock: ScanUnlockStore, // CHANGED
+    private val observeIsFoodSaved: ObserveIsFoodSavedUseCase, // CHANGED
+    private val saveFood: SaveFoodUseCase, // CHANGED
+    private val removeSavedFood: RemoveSavedFoodUseCase, // CHANGED
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BarcodeScanUiState())
@@ -71,6 +80,15 @@ class BarcodeScanViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
+        // CHANGED: bookmark state of the scanned food, for the shared detail screen
+        _state
+            .map { it.food?.id }
+            .distinctUntilChanged()
+            .flatMapLatest { id -> if (id == null) flowOf(false) else observeIsFoodSaved(id) }
+            .onEach { saved -> _state.update { it.copy(isFoodSaved = saved) } }
+            .launchIn(viewModelScope)
+
+        // CHANGED: mirror the unlock credit and the ad state into the UI, and keep the analyzer in step
         combine(scanUnlock.isUnlocked, rewardedAds.state) { unlocked, ad -> unlocked to ad }
             .onEach { (unlocked, ad) ->
                 _state.update { it.copy(isUnlocked = unlocked, ad = ad) }
@@ -80,7 +98,7 @@ class BarcodeScanViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        //  preload the ad; ask again when the consent flow later allows ads
+        // CHANGED: preload the ad; ask again when the consent flow later allows ads
         if (!scanUnlock.isUnlocked.value) rewardedAds.load()
 
     }
@@ -99,7 +117,7 @@ class BarcodeScanViewModel @Inject constructor(
         cameraHelper.initialize(controller, lifecycleOwner, ::onCameraError)
         cameraHelper.setCameraLens(_state.value.isFrontCamera)
         cameraHelper.setAnalyzer(analyzerExecutor, analyzer)
-        updateAnalyzer()
+        updateAnalyzer() // CHANGED: only analyse frames while a scan is unlocked
     }
 
     fun onCameraDisposed() {
@@ -208,9 +226,21 @@ class BarcodeScanViewModel @Inject constructor(
         }
     }
 
-    fun onQuantityIncrement() = changeQuantity(QUANTITY_STEP)
+    // CHANGED: the shared FoodDetailScreen reports the new quantity directly
+    fun onQuantityChanged(quantity: Float) {
+        updateIn(BarcodeScanStatus.FOOD_DETAILS) {
+            it.copy(quantity = quantity.coerceIn(MIN_QUANTITY, MAX_QUANTITY))
+        }
+    }
 
-    fun onQuantityDecrement() = changeQuantity(-QUANTITY_STEP)
+    // CHANGED: bookmark button of the shared detail screen
+    fun onSaveToggleClicked() {
+        val current = _state.value
+        val food = current.food ?: return
+        viewModelScope.launch {
+            if (current.isFoodSaved) removeSavedFood(food.id) else saveFood(food)
+        }
+    }
 
     fun onLogFood() {
         val current = _state.value
@@ -359,12 +389,6 @@ class BarcodeScanViewModel @Inject constructor(
         }
     }
 
-    private fun changeQuantity(delta: Float) {
-        updateIn(BarcodeScanStatus.FOOD_DETAILS) {
-            it.copy(quantity = (it.quantity + delta).coerceIn(MIN_QUANTITY, MAX_QUANTITY))
-        }
-    }
-
     private fun updateIn(
         vararg statuses: BarcodeScanStatus,
         transform: (BarcodeScanUiState) -> BarcodeScanUiState
@@ -390,7 +414,6 @@ class BarcodeScanViewModel @Inject constructor(
 
     private companion object {
         const val RESCAN_COOLDOWN_MS = 1_500L
-        const val QUANTITY_STEP = 0.5f
         const val MIN_QUANTITY = 0.5f
         const val MAX_QUANTITY = 99f
         const val ZOOM_EPSILON = 0.05f

@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,10 +27,12 @@ import com.macrivo.app.presentation.barcode.components.BarcodeScannerTopBar
 import com.macrivo.app.presentation.barcode.components.CameraControls
 import com.macrivo.app.presentation.barcode.components.CameraUnavailableContent
 import com.macrivo.app.presentation.barcode.components.ProductFoundContent
-import com.macrivo.app.presentation.barcode.components.ProductNutritionContent
 import com.macrivo.app.presentation.barcode.components.ScannerErrorContent
 import com.macrivo.app.presentation.barcode.components.ScanUnlockCard
 import com.macrivo.app.presentation.barcode.components.ScannerLoadingOverlay
+import com.macrivo.app.presentation.foodbrowse.FoodDetailScreen
+import com.macrivo.app.presentation.foodbrowse.FoodDetailUiEvent
+import com.macrivo.app.presentation.foodbrowse.FoodDetailUiState
 import com.macrivo.app.presentation.ui.theme.spacing
 
 @Immutable
@@ -48,12 +51,12 @@ class BarcodeScanActions(
     val onScanAnother: () -> Unit,
     val onRetryLookup: () -> Unit,
     val onServingSelected: (Serving) -> Unit,
-    val onQuantityIncrement: () -> Unit,
-    val onQuantityDecrement: () -> Unit,
+    val onQuantityChanged: (Float) -> Unit, // CHANGED: shared detail screen sets the quantity directly
+    val onSaveToggle: () -> Unit, // CHANGED
     val onLogFood: () -> Unit,
     val onInfo: () -> Unit,
-    val onWatchAd: () -> Unit,
-    val onRetryAd: () -> Unit,
+    val onWatchAd: () -> Unit, // CHANGED
+    val onRetryAd: () -> Unit, // CHANGED
 )
 
 @Composable
@@ -120,32 +123,37 @@ fun BarcodeScanContent(
             )
         }
 
+        // CHANGED: the shared FoodDetailScreen (same one as food browse) replaces the barcode-only detail UI
         if (isDetailsStage && food != null && serving != null && nutrition != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                BarcodeScannerTopBar(
-                    title = "Food Details",
-                    subtitle = null,
-                    onBack = actions.onBack
-                )
-
-                ProductNutritionContent(
-                    food = food,
+            val detailState = remember(food, serving, state.quantity, nutrition, state.isFoodSaved) {
+                FoodDetailUiState.Success(
+                    foodName = food.name,
+                    foodBrand = food.brand,
+                    servings = food.servings,
                     selectedServing = serving,
                     quantity = state.quantity,
-                    nutrition = nutrition,
-                    isLogging = state.status == BarcodeScanStatus.LOGGING,
-                    onServingSelected = actions.onServingSelected,
-                    onQuantityIncrement = actions.onQuantityIncrement,
-                    onQuantityDecrement = actions.onQuantityDecrement,
-                    onLogFood = actions.onLogFood,
-                    onScanAnother = actions.onScanAnother,
-                    modifier = Modifier.weight(1f)
+                    scaledNutrition = nutrition,
+                    isSaved = state.isFoodSaved,
                 )
             }
+
+            FoodDetailScreen(
+                uiState = detailState,
+                onEvent = { event ->
+                    when (event) {
+                        FoodDetailUiEvent.Back -> actions.onBack()
+                        is FoodDetailUiEvent.ServingSelected -> actions.onServingSelected(event.serving)
+                        is FoodDetailUiEvent.QuantityChanged -> actions.onQuantityChanged(event.quantity)
+                        FoodDetailUiEvent.SaveToggled -> actions.onSaveToggle()
+                        FoodDetailUiEvent.LogClicked -> actions.onLogFood()
+                        FoodDetailUiEvent.SaveChangesClicked,
+                        FoodDetailUiEvent.DeleteConfirmed -> Unit // only used for foods logged today
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            )
         }
     }
 }
@@ -177,6 +185,7 @@ private fun ScannerStage(
 
         BarcodeScannerOverlay(status = state.status, isUnlocked = state.isUnlocked) // CHANGED
 
+        // CHANGED: no scan without an earned reward: show the unlock card instead of letting the camera scan
         if (!state.isUnlocked &&
             (state.status == BarcodeScanStatus.INITIALIZING || state.status == BarcodeScanStatus.SCANNING)
         ) {

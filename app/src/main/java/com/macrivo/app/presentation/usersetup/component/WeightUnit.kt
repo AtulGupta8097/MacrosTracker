@@ -2,7 +2,10 @@ package com.macrivo.app.presentation.usersetup.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,19 +16,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.macrivo.app.presentation.ui.theme.spacing
 import kotlin.math.abs
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.math.roundToInt
 
 enum class WeightUnit {
@@ -153,15 +156,18 @@ fun WeightPicker(
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
-        RulerScale(
-            currentWeight = displayWeight,
-            minWeight = minWeight,
-            maxWeight = maxWeight,
-            onWeightChange = { newWeight ->
-                displayWeight = newWeight
-                onWeightChanged(newWeight)
-            }
-        )
+        // A new ruler (and scroll state) per unit, because kg and lbs have different ranges
+        key(minWeight, maxWeight) {
+            RulerScale(
+                currentWeight = displayWeight,
+                minWeight = minWeight,
+                maxWeight = maxWeight,
+                onWeightChange = { newWeight ->
+                    displayWeight = newWeight
+                    onWeightChanged(newWeight)
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.lg))
 
@@ -224,187 +230,177 @@ private fun RulerScale(
     maxWeight: Float,
     onWeightChange: (Float) -> Unit
 ) {
-    val density = LocalDensity.current
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val minTenths = (minWeight * 10).roundToInt()
+    val maxTenths = (maxWeight * 10).roundToInt()
+    val count = maxTenths - minTenths + 1
+    fun indexOf(weight: Float) = ((weight * 10).roundToInt() - minTenths).coerceIn(0, count - 1)
 
-    val scaleWidth = 320.dp
-    val scaleWidthPx = with(density) { scaleWidth.toPx() }
-    val pixelsPerUnit = scaleWidthPx / 20f
+    val itemWidth = 8.dp
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = indexOf(currentWeight))
+    val flingBehavior = rememberSnapFlingBehavior(listState)
+    val haptic = LocalHapticFeedback.current
 
     val latestWeight = rememberUpdatedState(currentWeight)
-    val latestMin = rememberUpdatedState(minWeight)
-    val latestMax = rememberUpdatedState(maxWeight)
     val latestOnChange = rememberUpdatedState(onWeightChange)
+    var isProgrammaticScroll by remember { mutableStateOf(false) }
 
-    Box(
+    // the tick that is closest to the middle of the ruler
+    val centerIndex by remember {
+        derivedStateOf {
+            val info = listState.layoutInfo
+            val middle = (info.viewportStartOffset + info.viewportEndOffset) / 2
+            info.visibleItemsInfo
+                .minByOrNull { abs(it.offset + it.size / 2 - middle) }
+                ?.index
+                ?: indexOf(latestWeight.value)
+        }
+    }
+
+    // ruler -> value
+    LaunchedEffect(listState) {
+        snapshotFlow { centerIndex }
+            .distinctUntilChanged()
+            .collect { index ->
+                if (isProgrammaticScroll) return@collect
+                val tenths = minTenths + index
+                if ((latestWeight.value * 10).roundToInt() != tenths) {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    latestOnChange.value(tenths / 10f)
+                }
+            }
+    }
+
+    // value -> ruler (the +/- buttons, or a unit switch)
+    LaunchedEffect(currentWeight) {
+        val target = indexOf(currentWeight)
+        if (!listState.isScrollInProgress && target != centerIndex) {
+            isProgrammaticScroll = true
+            try {
+                listState.animateScrollToItem(target)
+            } finally {
+                isProgrammaticScroll = false
+            }
+        }
+    }
+
+    val primary = MaterialTheme.colorScheme.primary
+    val tickColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val surfaceColor = MaterialTheme.colorScheme.surface
+
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(130.dp),
-        contentAlignment = Alignment.Center
+            .height(RULER_HEIGHT)
     ) {
-        Box(
-            modifier = Modifier
-                .width(scaleWidth)
-                .height(130.dp)
-                .pointerInput(Unit) {
-                    var totalDrag = 0f
-                    detectHorizontalDragGestures(
-                        onDragStart = { totalDrag = 0f },
-                        onDragEnd = { totalDrag = 0f },
-                        onDragCancel = { totalDrag = 0f }
-                    ) { change, dragAmount ->
-                        change.consume()
-                        totalDrag += dragAmount
+        val sidePadding = (maxWidth - itemWidth) / 2
 
-                        val weightChange = -(totalDrag / pixelsPerUnit)
-                        val newWeight = latestWeight.value + weightChange
-
-                        val roundedWeight = ((newWeight * 10).roundToInt() / 10f)
-                            .coerceIn(latestMin.value, latestMax.value)
-
-                        if (roundedWeight != latestWeight.value) {
-                            latestOnChange.value(roundedWeight)
-                            totalDrag = 0f
-                        }
-                    }
-                }
+        LazyRow(
+            state = listState,
+            flingBehavior = flingBehavior,
+            contentPadding = PaddingValues(horizontal = sidePadding),
+            modifier = Modifier.fillMaxSize()
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val centerX = size.width / 2
-                val centerY = size.height / 2
+            items(count = count, key = { it }) { index ->
+                val tenths = minTenths + index
+                val isWhole = tenths % 10 == 0
+                val isHalf = tenths % 5 == 0
+                val isCenter = index == centerIndex
 
-                val range = 10f
-                var weight = (currentWeight - range).coerceAtLeast(minWeight)
-                val endWeight = (currentWeight + range).coerceAtMost(maxWeight)
-
-                while (weight <= endWeight) {
-                    val offsetFromCenter = (weight - currentWeight) * pixelsPerUnit
-                    val x = centerX + offsetFromCenter
-
-                    if (x >= 0f && x <= size.width) {
-                        val isMajorMark = (weight * 10).roundToInt() % 10 == 0
-                        val isHalfMark = (weight * 10).roundToInt() % 5 == 0
-
-                        val lineHeight = when {
-                            isMajorMark -> 60f
-                            isHalfMark -> 42f
-                            else -> 26f
-                        }
-                        val lineWidth = when {
-                            isMajorMark -> 3.5f
-                            isHalfMark -> 2.5f
-                            else -> 2f
-                        }
-
-                        val distance = abs(offsetFromCenter)
-                        val distanceAlpha = when {
-                            distance < 50 -> 1f
-                            distance < 100 -> 0.7f
-                            distance < 150 -> 0.4f
-                            else -> 0.15f
+                Box(
+                    modifier = Modifier
+                        .width(itemWidth)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val baseY = RULER_BASELINE.toPx()
+                        val tickHeight = when {
+                            isWhole -> 44.dp
+                            isHalf -> 30.dp
+                            else -> 18.dp
+                        }.toPx()
+                        val tickWidth = when {
+                            isWhole -> 2.5.dp
+                            isHalf -> 2.dp
+                            else -> 1.5.dp
+                        }.toPx()
+                        val alpha = when {
+                            isWhole -> 0.9f
+                            isHalf -> 0.6f
+                            else -> 0.35f
                         }
 
-                        val isCenter = abs(weight - currentWeight) < 0.15f
-                        val color = if (isCenter) {
-                            primaryColor
-                        } else {
-                            onBackgroundColor.copy(alpha = distanceAlpha * 0.4f)
-                        }
-
+                        // baseline, continuous across ticks
                         drawLine(
-                            color = color,
-                            start = Offset(x, centerY - lineHeight / 2),
-                            end = Offset(x, centerY + lineHeight / 2),
-                            strokeWidth = if (isCenter) lineWidth * 1.3f else lineWidth,
+                            color = tickColor.copy(alpha = 0.35f),
+                            start = Offset(0f, baseY),
+                            end = Offset(size.width, baseY),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                        drawLine(
+                            color = tickColor.copy(alpha = alpha),
+                            start = Offset(size.width / 2, baseY - tickHeight),
+                            end = Offset(size.width / 2, baseY),
+                            strokeWidth = tickWidth,
                             cap = StrokeCap.Round
                         )
                     }
-                    weight += 0.1f
-                }
-            }
 
-            run {
-                val range = 10f
-                var weight = (currentWeight - range).coerceAtLeast(minWeight)
-                val endWeight = (currentWeight + range).coerceAtMost(maxWeight)
-
-                while (weight <= endWeight) {
-                    val isMajorMark = (weight * 10).roundToInt() % 10 == 0
-                    if (isMajorMark) {
-                        val offsetFromCenter = (weight - currentWeight) * pixelsPerUnit
-                        val distance = abs(offsetFromCenter)
-
-                        if (distance < 150f) {
-                            val distanceAlpha = when {
-                                distance < 50 -> 1f
-                                distance < 100 -> 0.7f
-                                else -> 0.4f
-                            }
-                            val xDp = with(density) { (scaleWidthPx / 2 + offsetFromCenter).toDp() }
-                            val isCenter = abs(weight - currentWeight) < 0.6f
-
-                            Box(
-                                modifier = Modifier
-                                    .offset(x = xDp - 24.dp, y = 78.dp)
-                                    .width(48.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = weight.roundToInt().toString(),
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = if (isCenter) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            MaterialTheme.colorScheme.onBackground.copy(alpha = distanceAlpha)
-                                        },
-                                        fontWeight = if (isCenter) FontWeight.Bold else FontWeight.Medium,
-                                        fontSize = if (isCenter) 15.sp else 13.sp
-                                    ),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.alpha(1f)
-                                )
-                            }
-                        }
+                    if (isWhole) {
+                        Text(
+                            text = (tenths / 10).toString(),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = if (isCenter) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isCenter) primary else tickColor
+                            ),
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier
+                                .padding(top = RULER_BASELINE + 8.dp)
+                                .wrapContentWidth(unbounded = true)
+                        )
                     }
-                    weight += 0.1f
                 }
             }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterStart)
-                    .width(48.dp)
-                    .height(130.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(surfaceColor, surfaceColor.copy(alpha = 0f))
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .width(48.dp)
-                    .height(130.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(surfaceColor.copy(alpha = 0f), surfaceColor)
-                        )
-                    )
-            )
         }
 
+        // soft fade at both ends
         Box(
             modifier = Modifier
-                .width(3.dp)
-                .height(74.dp)
-                .background(
-                    color = primaryColor,
-                    shape = RoundedCornerShape(2.dp)
-                )
+                .align(Alignment.CenterStart)
+                .width(48.dp)
+                .fillMaxHeight()
+                .background(Brush.horizontalGradient(listOf(surfaceColor, surfaceColor.copy(alpha = 0f))))
         )
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(48.dp)
+                .fillMaxHeight()
+                .background(Brush.horizontalGradient(listOf(surfaceColor.copy(alpha = 0f), surfaceColor)))
+        )
+
+        // fixed needle with a pointer on top
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val x = size.width / 2
+            val baseY = RULER_BASELINE.toPx()
+            val pointer = Path().apply {
+                moveTo(x - 7.dp.toPx(), 0f)
+                lineTo(x + 7.dp.toPx(), 0f)
+                lineTo(x, 10.dp.toPx())
+                close()
+            }
+            drawPath(pointer, primary)
+            drawLine(
+                color = primary,
+                start = Offset(x, 10.dp.toPx()),
+                end = Offset(x, baseY),
+                strokeWidth = 3.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
     }
 }
+
+private val RULER_HEIGHT = 104.dp
+private val RULER_BASELINE = 66.dp
